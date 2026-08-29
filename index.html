@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 SYSTEMS - 5D MULTIVERSE WAR SIMULATION</title>
+    <title>3-DIMENSIONS MULTIVERSE WAR (1920x1080 60FPS)</title>
     <style>
         * {
             margin: 0;
@@ -16,7 +16,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #000205;
+            background-color: #000103;
             color: #00ffcc;
         }
         #game-container {
@@ -25,8 +25,8 @@
             height: 100vh;
         }
         #sidebar {
-            width: 180px;
-            background: rgba(1, 8, 15, 0.95);
+            width: 200px;
+            background: rgba(1, 5, 12, 0.95);
             border-right: 1px solid #00ffcc33;
             display: flex;
             flex-direction: column;
@@ -51,11 +51,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 6px;
+            padding: 3px 6px;
             margin-bottom: 2px;
             background: rgba(0, 255, 204, 0.02);
             border-left: 3px solid transparent;
-            font-size: 9px;
+            font-size: 8.5px;
             cursor: pointer;
         }
         #main-area {
@@ -66,7 +66,7 @@
         }
         #top-bar {
             height: 35px;
-            background: rgba(1, 8, 15, 0.95);
+            background: rgba(1, 5, 12, 0.95);
             border-bottom: 1px solid #00ffcc33;
             display: flex;
             justify-content: space-between;
@@ -86,7 +86,7 @@
         }
         #bottom-bar {
             height: 80px;
-            background: rgba(1, 8, 15, 0.95);
+            background: rgba(1, 5, 12, 0.95);
             border-top: 1px solid #00ffcc33;
             display: flex;
             padding: 4px;
@@ -103,7 +103,7 @@
             color: #00ffcc;
         }
         #stats-panel {
-            width: 160px;
+            width: 170px;
             border-left: 1px dashed #00ffcc33;
             padding-left: 6px;
             display: flex;
@@ -115,13 +115,13 @@
 <body>
     <div id="game-container">
         <div id="sidebar">
-            <div class="sidebar-title">5D MULTIVERSE (500K)</div>
+            <div class="sidebar-title">RANG LISTA (19 FRAKCIJA)</div>
             <ul id="leaderboard"></ul>
         </div>
 
         <div id="main-area">
             <div id="top-bar">
-                <div id="boss-status" style="color:#ff0055; font-weight:bold;">BOSS: NEAKTIAN</div>
+                <div id="boss-status" style="color:#ff0055; font-weight:bold;">3-DIM TITANI: CEKANJE</div>
                 <div id="factor-display" style="color: #00ffff; font-weight: bold;">FAKTOR: Inicijalizacija...</div>
                 <div id="timer-display" style="color: #00ffcc;">06:30</div>
             </div>
@@ -134,9 +134,9 @@
                 <div id="console-log"></div>
                 <div id="stats-panel">
                     <div style="font-weight:bold; color:#fff;" id="stat-name">Baza</div>
+                    <div>Dimenzija: <span id="stat-dim">1</span></div>
                     <div>HP: <span id="stat-hp">500000</span></div>
                     <div>Solarni Efekat: <span id="stat-sun">-</span></div>
-                    <div>Status: <span id="stat-meta">Stabilno</span></div>
                 </div>
             </div>
         </div>
@@ -149,182 +149,138 @@
         const consoleLog = document.getElementById('console-log');
         const timerDisplay = document.getElementById('timer-display');
         const factorDisplay = document.getElementById('factor-display');
-        const bossStatusDisplay = document.getElementById('boss-status');
 
-        const droneImg = new Image();
-        droneImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,0 32,16 16,32 0,16" fill="%2300ffcc" opacity="0.3"/><polygon points="16,4 28,16 16,28 4,16" fill="%23000510" stroke="%2300ffcc" stroke-width="2"/><circle cx="16" cy="16" r="3" fill="%23ff0055"/></svg>';
+        // Target Rezolucija 1920x1080 pri 60 FPS
+        const V_WIDTH = 1920;
+        const V_HEIGHT = 1080;
 
         function fitCanvas() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
+            canvas.width = V_WIDTH;
+            canvas.height = V_HEIGHT;
         }
+        fitCanvas();
 
-        const attackFactors = [
-            { name: '5D Vremenski Rascep', dmg: 2500, msg: 'Vremenski procep iz 5D dimenzije razara baze!' },
-            { name: 'Meteorit Udari', dmg: 2000, msg: '5D Meteorski pljusak drobi strukture!' },
-            { name: 'Kvantni Blesak', dmg: 1500, msg: 'Kvantni blesak spali energetsku mrežu!' },
-            { name: 'Antimatrijski Talas', dmg: 2800, msg: 'Antimatrija dezintegriše komandne komponente!' },
-            { name: 'Void Oluja', dmg: 3200, msg: 'Void portal usisava HP struktura!' },
-            { name: 'Grafitna Kiša', dmg: 1800, msg: 'Grafitni talas izaziva masovne kratke spojeve!' },
-            { name: 'Pulsar Udar', dmg: 2200, msg: 'Kosmički pulsar pretvara štitove u prah!' },
-            { name: 'Plazma Nepogoda', dmg: 2700, msg: 'Plazma sprži eksterne senzore!' },
-            { name: 'Tektonski Rascep', dmg: 1900, msg: '5D Tektonski šok lomi prostornu osnovu!' },
-            { name: 'Seizmički Šok', dmg: 1400, msg: 'Seizmički udar destabilizuje baze!' }
-        ];
-        let currentFactor = attackFactors[0];
+        const droneImg = new Image();
+        droneImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,0 32,16 16,32 0,16" fill="%2300ffcc" opacity="0.4"/><polygon points="16,4 28,16 16,28 4,16" fill="%23000510" stroke="%2300ffcc" stroke-width="2"/><circle cx="16" cy="16" r="3" fill="%23ff0055"/></svg>';
 
-        // 10 Frakcija - TAČNO 500.000 HP
         const STARTING_HP = 500000;
+
+        // UKUPNO 19 FRAKCIJA U 3 DIMENZIJE
         const factions = [
-            { id: 0, name: 'ARES', color: '#ff3344', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 1, name: 'ORION', color: '#00ccff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 2, name: 'ZEPHYR', color: '#00ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 5, name: 'VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 8, name: 'TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
-            { id: 9, name: 'NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' }
+            // Dimenzija 1 (10 Frakcija)
+            { id: 0, dim: 1, name: 'D1-ARES', color: '#ff3344', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 1, dim: 1, name: 'D1-ORION', color: '#00ccff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 2, dim: 1, name: 'D1-ZEPHYR', color: '#00ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 3, dim: 1, name: 'D1-NEXUS', color: '#cc33ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 4, dim: 1, name: 'D1-SOLARIS', color: '#ffcc00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 5, dim: 1, name: 'D1-VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 6, dim: 1, name: 'D1-ECLIPSE', color: '#ff6633', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 7, dim: 1, name: 'D1-PHOENIX', color: '#ff3399', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 8, dim: 1, name: 'D1-TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 9, dim: 1, name: 'D1-NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+
+            // Dimenzija 2 (6 Frakcija)
+            { id: 10, dim: 2, name: 'D2-KRONOS', color: '#ff00aa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 11, dim: 2, name: 'D2-HYPERION', color: '#aaff00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 12, dim: 2, name: 'D2-CYBERUS', color: '#00aaff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 13, dim: 2, name: 'D2-VALKYRIE', color: '#ffaa00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 14, dim: 2, name: 'D2-SPECTRA', color: '#aa00ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 15, dim: 2, name: 'D2-OMEGA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+
+            // Dimenzija 3 (3 Frakcije)
+            { id: 16, dim: 3, name: 'D3-CELESTIAL', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 17, dim: 3, name: 'D3-VOIDKING', color: '#ff0055', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 18, dim: 3, name: 'D3-ABYSS', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 }
         ];
 
         function initPositions() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            const w = rect.width;
-            const h = rect.height;
-            factions.forEach((f, i) => {
-                const angle = (i / factions.length) * Math.PI * 2;
-                f.x = w / 2 + Math.cos(angle) * (Math.min(w, h) / 3.2);
-                f.y = h / 2 + Math.sin(angle) * (Math.min(w, h) / 3.2);
+            const cx = V_WIDTH / 2;
+            const cy = V_HEIGHT / 2;
+
+            // D1 Pos (Unutrašnji krug)
+            const d1 = factions.filter(f => f.dim === 1);
+            d1.forEach((f, i) => {
+                const a = (i / d1.length) * Math.PI * 2;
+                f.x = cx + Math.cos(a) * 220;
+                f.y = cy + Math.sin(a) * 220;
+            });
+
+            // D2 Pos (Srednji krug)
+            const d2 = factions.filter(f => f.dim === 2);
+            d2.forEach((f, i) => {
+                const a = (i / d2.length) * Math.PI * 2;
+                f.x = cx + Math.cos(a) * 380;
+                f.y = cy + Math.sin(a) * 380;
+            });
+
+            // D3 Pos (Spoljašnji krug)
+            const d3 = factions.filter(f => f.dim === 3);
+            d3.forEach((f, i) => {
+                const a = (i / d3.length) * Math.PI * 2;
+                f.x = cx + Math.cos(a) * 510;
+                f.y = cy + Math.sin(a) * 510;
             });
         }
-
-        window.addEventListener('resize', () => { fitCanvas(); initPositions(); });
-        fitCanvas();
         initPositions();
 
-        // 5D PROSTOR I DRUGA DIMENZIJA (Spoljašnji Prsten + Efekti)
-        let warpAngle = 0;
-        function draw5DMultiverseEnvironment() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            const w = rect.width;
-            const h = rect.height;
-            warpAngle += 0.008;
+        // 3 Sunca za 3 Dimenzije
+        const suns = [
+            { dim: 1, x: 0, y: 0, r: 220, angle: 0, radius: 45, color: '#00ffff' },
+            { dim: 2, x: 0, y: 0, r: 380, angle: Math.PI / 3, radius: 55, color: '#ff00aa' },
+            { dim: 3, x: 0, y: 0, r: 510, angle: Math.PI / 1.5, radius: 65, color: '#ffffff' }
+        ];
 
-            // 5D Deep Void Gradient
-            const bgGrad = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, Math.max(w, h));
-            bgGrad.addColorStop(0, '#020b14');
-            bgGrad.addColorStop(0.5, '#01050a');
-            bgGrad.addColorStop(1, '#000103');
-            ctx.fillStyle = bgGrad;
-            ctx.fillRect(0, 0, w, h);
+        function updateSuns() {
+            const cx = V_WIDTH / 2;
+            const cy = V_HEIGHT / 2;
+            suns.forEach(s => {
+                s.angle += 0.008 * (4 - s.dim);
+                s.x = cx + Math.cos(s.angle) * s.r;
+                s.y = cy + Math.sin(s.angle * 0.8) * s.r;
 
-            // DRUGA DIMENZIJA - Spoljašnji Prsten
-            ctx.save();
-            ctx.translate(w/2, h/2);
-            const outerRadius = Math.min(w, h) * 0.44;
-            
-            ctx.strokeStyle = 'rgba(0, 255, 204, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 15]);
-            ctx.beginPath();
-            ctx.arc(0, 0, outerRadius, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Sfere u Drugoj Dimenziji
-            const outerNodes = 6;
-            for(let i=0; i<outerNodes; i++) {
-                const a = warpAngle + (i / outerNodes) * Math.PI * 2;
-                const ox = Math.cos(a) * outerRadius;
-                const oy = Math.sin(a) * outerRadius;
-
-                ctx.fillStyle = '#ff00aa';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#ff00aa';
-                ctx.beginPath();
-                ctx.arc(ox, oy, 6, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Snopovi iz Druge Dimenzije ka Centru
-                if(Math.random() < 0.05) {
-                    beams.push({ sx: w/2 + ox, sy: h/2 + oy, tx: w/2, ty: h/2, color: '#ff00aa', alpha: 0.8, width: 1 });
-                }
-            }
-            ctx.restore();
-
-            // 5D Hyper-Grid Distortion
-            ctx.save();
-            ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)';
-            ctx.lineWidth = 1;
-            for (let r = 40; r < Math.max(w, h); r += 45) {
-                ctx.beginPath();
-                ctx.arc(w/2, h/2, r + Math.sin(warpAngle + r) * 8, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        // VEĆI OSCILATORNI KRUG ZA SUNCE
-        const solarSun = { x: 0, y: 0, radius: 75, pulse: 0, angle: 0 };
-        function updateSolarSun() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            solarSun.pulse += 0.04;
-            solarSun.angle += 0.012;
-
-            // Znatno veći oscilatorni krug prečnika 0.42 dimenzije ekrana
-            solarSun.x = rect.width / 2 + Math.cos(solarSun.angle) * (rect.width * 0.42);
-            solarSun.y = rect.height / 2 + Math.sin(solarSun.angle * 0.8) * (rect.height * 0.38);
-
-            factions.forEach(f => {
-                if (f.hp <= 0) return;
-                const dist = Math.hypot(f.x - solarSun.x, f.y - solarSun.y);
-                if (dist < solarSun.radius + 70) {
-                    const heal = Math.floor(Math.random() * 120 + 50);
-                    f.hp = Math.min(f.maxHp, f.hp + heal);
-                    f.sunBonus += heal;
-                }
+                factions.filter(f => f.dim === s.dim && f.hp > 0).forEach(f => {
+                    const dist = Math.hypot(f.x - s.x, f.y - s.y);
+                    if (dist < s.radius + 60) {
+                        const heal = Math.floor(Math.random() * 90 + 30);
+                        f.hp = Math.min(f.maxHp, f.hp + heal);
+                        f.sunBonus += heal;
+                    }
+                });
             });
         }
 
-        function drawSolarSun() {
-            ctx.save();
-            const r = solarSun.radius + Math.sin(solarSun.pulse) * 12;
-            const sunGlow = ctx.createRadialGradient(solarSun.x, solarSun.y, 5, solarSun.x, solarSun.y, r + 110);
-            sunGlow.addColorStop(0, '#ffffff');
-            sunGlow.addColorStop(0.2, '#00ffff');
-            sunGlow.addColorStop(0.5, 'rgba(0, 255, 204, 0.5)');
-            sunGlow.addColorStop(1, 'transparent');
+        function drawSuns() {
+            suns.forEach(s => {
+                ctx.save();
+                const glow = ctx.createRadialGradient(s.x, s.y, 5, s.x, s.y, s.radius + 70);
+                glow.addColorStop(0, '#ffffff');
+                glow.addColorStop(0.3, s.color);
+                glow.addColorStop(1, 'transparent');
 
-            ctx.fillStyle = sunGlow;
-            ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, r + 110, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(solarSun.x, solarSun.y, r + 25, (r + 25) * 0.35, solarSun.pulse, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius + 70, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
         }
 
-        // USPORENI MONSTRUMI SA -25% DAMAGE-A
-        class SlowDrone {
-            constructor() { this.reset(); }
+        // Monstrumi/Dronovi za sve 3 dimenzije (Slow Speed, -25% Dmg)
+        class MultiDimDrone {
+            constructor(dim) {
+                this.dim = dim;
+                this.reset();
+            }
             reset() {
-                const rect = canvas.parentElement.getBoundingClientRect();
-                this.x = rect.width / 2 + (Math.random() - 0.5) * 80;
-                this.y = rect.height / 2 + (Math.random() - 0.5) * 80;
-                // Usporavanje kretanja
-                this.speed = Math.random() * 1.0 + 0.6;
-                this.angle = Math.random() * Math.PI * 2;
+                const cx = V_WIDTH / 2;
+                const cy = V_HEIGHT / 2;
+                this.x = cx + (Math.random() - 0.5) * 100;
+                this.y = cy + (Math.random() - 0.5) * 100;
+                this.speed = Math.random() * 0.9 + 0.5;
                 this.pickTarget();
             }
             pickTarget() {
-                const alive = factions.filter(f => f.hp > 0);
+                const alive = factions.filter(f => f.dim === this.dim && f.hp > 0);
                 if (alive.length > 0) this.target = alive[Math.floor(Math.random() * alive.length)];
             }
             update() {
@@ -333,117 +289,117 @@
                     const dx = this.target.x - this.x;
                     const dy = this.target.y - this.y;
                     const dist = Math.hypot(dx, dy);
-                    this.angle = Math.atan2(dy, dx);
                     this.x += (dx / dist) * this.speed;
                     this.y += (dy / dist) * this.speed;
 
-                    if (dist < 20) {
-                        // Smanjen damage za 25% (ranije 200-800, sada 150-525)
-                        const dmg = Math.floor((Math.random() * 500 + 150) * 0.75);
+                    if (dist < 18) {
+                        const dmg = Math.floor((Math.random() * 450 + 150) * 0.75);
                         this.target.hp = Math.max(0, this.target.hp - dmg);
                         this.reset();
                     }
                 }
             }
             draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.drawImage(droneImg, -14, -14, 28, 28);
-                ctx.restore();
+                ctx.drawImage(droneImg, this.x - 10, this.y - 10, 20, 20);
             }
         }
-        const drones = Array.from({ length: 10 }, () => new SlowDrone());
 
-        // 3D BOSS TITAN (Izlazi na 60 sec)
-        const boss = { active: false, x: 0, y: 0, hp: 1000000, maxHp: 1000000, angle: 0 };
-        function spawnBoss() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            boss.x = rect.width / 2;
-            boss.y = rect.height / 2;
-            boss.hp = 1000000;
-            boss.active = true;
-            bossStatusDisplay.innerText = 'BOSS: 5D SAJBER TITAN';
-            bossStatusDisplay.style.color = '#ff0055';
-            logMessage('[5D PROCEP] 5D Sajber Titan sa 1M HP ušao je u bitku!');
-        }
+        const drones = [
+            ...Array.from({ length: 8 }, () => new MultiDimDrone(1)),
+            ...Array.from({ length: 6 }, () => new MultiDimDrone(2)),
+            ...Array.from({ length: 4 }, () => new MultiDimDrone(3))
+        ];
 
-        function updateBoss() {
-            if (!boss.active) return;
-            boss.angle += 0.03;
+        // Boss Titani u 3 Dimenzije (na svakih 60 sec)
+        const bosses = [
+            { dim: 1, active: false, x: 0, y: 0, hp: 600000, maxHp: 600000, color: '#ff0055' },
+            { dim: 2, active: false, x: 0, y: 0, hp: 600000, maxHp: 600000, color: '#ffaa00' },
+            { dim: 3, active: false, x: 0, y: 0, hp: 600000, maxHp: 600000, color: '#ffffff' }
+        ];
 
-            factions.forEach(f => {
-                if (f.hp > 0 && Math.random() < 0.35) {
-                    const dmg = Math.floor(Math.random() * 1200 + 500);
-                    f.hp = Math.max(0, f.hp - dmg);
-                    beams.push({ sx: boss.x, sy: boss.y, tx: f.x, ty: f.y, color: '#ff0055', alpha: 1, width: 3 });
-                }
-                if (f.hp > 0 && Math.random() < 0.25) {
-                    const counterDmg = Math.floor(Math.random() * 2500 + 800);
-                    boss.hp -= counterDmg;
-                    beams.push({ sx: f.x, sy: f.y, tx: boss.x, ty: boss.y, color: f.color, alpha: 1, width: 2 });
-                }
+        function spawnBosses() {
+            const cx = V_WIDTH / 2;
+            const cy = V_HEIGHT / 2;
+            bosses.forEach((b, idx) => {
+                b.x = cx + Math.cos((idx / 3) * Math.PI * 2) * (idx * 150);
+                b.y = cy + Math.sin((idx / 3) * Math.PI * 2) * (idx * 150);
+                b.hp = 600000;
+                b.active = true;
             });
-
-            if (boss.hp <= 0) {
-                boss.active = false;
-                bossStatusDisplay.innerText = 'BOSS: DESTRUISAN';
-                bossStatusDisplay.style.color = '#00ffcc';
-                logMessage('[BOSS UNIŠTEN] 5D Sajber Titan je eliminisan!');
-            }
+            logMessage('[MULTIVERSE RUPTURA] Boss Titani su napali sve 3 dimenzije!');
         }
 
-        function drawBoss() {
-            if (!boss.active) return;
-            ctx.save();
-            ctx.translate(boss.x, boss.y);
-            const size = 28;
-            const a = boss.angle;
-
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = '#ff0055';
-            ctx.strokeStyle = '#ff0055';
-            ctx.lineWidth = 2.5;
-
-            ctx.beginPath();
-            ctx.strokeRect(-size * Math.cos(a), -size * Math.sin(a), size * 2, size * 2);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(0, 0, 12, 0, Math.PI * 2);
-            ctx.fill();
-
-            // HP Bar
-            ctx.fillStyle = '#ff0055';
-            ctx.fillRect(-40, -50, (boss.hp / boss.maxHp) * 80, 6);
-            ctx.strokeStyle = '#fff';
-            ctx.strokeRect(-40, -50, 80, 6);
-            ctx.restore();
+        function updateBosses() {
+            bosses.forEach(b => {
+                if (!b.active) return;
+                const alive = factions.filter(f => f.dim === b.dim && f.hp > 0);
+                alive.forEach(f => {
+                    if (Math.random() < 0.3) {
+                        const dmg = Math.floor(Math.random() * 1000 + 400);
+                        f.hp = Math.max(0, f.hp - dmg);
+                        beams.push({ sx: b.x, sy: b.y, tx: f.x, ty: f.y, color: b.color, alpha: 1, width: 2 });
+                    }
+                    if (Math.random() < 0.2) {
+                        const cDmg = Math.floor(Math.random() * 2000 + 500);
+                        b.hp -= cDmg;
+                        beams.push({ sx: f.x, sy: f.y, tx: b.x, ty: b.y, color: f.color, alpha: 1, width: 2 });
+                    }
+                });
+                if (b.hp <= 0) b.active = false;
+            });
         }
 
-        // Ratni Engine
+        function drawBosses() {
+            bosses.forEach(b => {
+                if (!b.active) return;
+                ctx.save();
+                ctx.translate(b.x, b.y);
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = b.color;
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(-20, -20, 40, 40);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-6, -6, 12, 12);
+                ctx.restore();
+            });
+        }
+
         let beams = [];
         function runWarEngine() {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 0.3) {
                 const alive = factions.filter(f => f.hp > 0);
                 if (alive.length < 2) return;
                 const src = alive[Math.floor(Math.random() * alive.length)];
                 const tgt = alive[Math.floor(Math.random() * alive.length)];
 
                 if (src.id !== tgt.id) {
-                    const dmg = Math.floor(Math.random() * 1800 + 400);
+                    const dmg = Math.floor(Math.random() * 1600 + 400);
                     tgt.hp = Math.max(0, tgt.hp - dmg);
                     beams.push({ sx: src.x, sy: src.y, tx: tgt.x, ty: tgt.y, color: src.color, alpha: 1, width: 2 });
                 }
             }
         }
 
-        function logMessage(msg) {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            const div = document.createElement('div');
-            div.innerText = `[${time}] ${msg}`;
-            consoleLog.prepend(div);
-            if (consoleLog.children.length > 8) consoleLog.removeChild(consoleLog.lastChild);
+        function drawEnvironment() {
+            const cx = V_WIDTH / 2;
+            const cy = V_HEIGHT / 2;
+
+            ctx.fillStyle = '#000206';
+            ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+            // 3 Dimenzionalna Prstena na Mapi (+350% Prostora)
+            const rings = [220, 380, 510];
+            rings.forEach((r, idx) => {
+                ctx.save();
+                ctx.strokeStyle = `rgba(0, 255, 204, ${0.15 - idx * 0.03})`;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 12]);
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            });
         }
 
         function drawBases() {
@@ -451,8 +407,7 @@
                 if (f.hp <= 0) return;
                 ctx.save();
                 ctx.translate(f.x, f.y);
-
-                ctx.shadowBlur = 18;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = f.color;
                 ctx.strokeStyle = f.color;
                 ctx.lineWidth = 2;
@@ -460,9 +415,9 @@
 
                 ctx.globalAlpha = 0.4;
                 ctx.beginPath();
-                ctx.moveTo(0, -18);
-                ctx.lineTo(-14, 8);
-                ctx.lineTo(14, 8);
+                ctx.moveTo(0, -14);
+                ctx.lineTo(-10, 6);
+                ctx.lineTo(10, 6);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
@@ -471,9 +426,17 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 9px Courier New';
                 ctx.textAlign = 'center';
-                ctx.fillText(f.name, 0, -24);
+                ctx.fillText(f.name, 0, -18);
                 ctx.restore();
             });
+        }
+
+        function logMessage(msg) {
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.innerText = `[${time}] ${msg}`;
+            consoleLog.prepend(div);
+            if (consoleLog.children.length > 8) consoleLog.removeChild(consoleLog.lastChild);
         }
 
         let selectedFaction = factions[0];
@@ -492,29 +455,26 @@
             if (selectedFaction) {
                 document.getElementById('stat-name').innerText = selectedFaction.name;
                 document.getElementById('stat-name').style.color = selectedFaction.color;
+                document.getElementById('stat-dim').innerText = selectedFaction.dim;
                 document.getElementById('stat-hp').innerText = `${Math.floor(selectedFaction.hp)}`;
                 document.getElementById('stat-sun').innerText = `+${Math.floor(selectedFaction.sunBonus)} HP`;
-                document.getElementById('stat-meta').innerText = selectedFaction.hp > 0 ? 'Aktivno' : 'Uništeno';
             }
         }
 
         function loop() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            ctx.clearRect(0, 0, rect.width, rect.height);
+            ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
 
-            draw5DMultiverseEnvironment();
-            updateSolarSun();
-            drawSolarSun();
-            updateBoss();
-            drawBoss();
+            drawEnvironment();
+            updateSuns();
+            drawSuns();
+            updateBosses();
+            drawBosses();
             runWarEngine();
 
             beams.forEach((b, i) => {
                 ctx.save();
                 ctx.strokeStyle = b.color;
-                ctx.lineWidth = b.width || 2;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = b.color;
+                ctx.lineWidth = b.width;
                 ctx.globalAlpha = b.alpha;
                 ctx.beginPath(); ctx.moveTo(b.sx, b.sy); ctx.lineTo(b.tx, b.ty); ctx.stroke();
                 ctx.restore();
@@ -528,21 +488,7 @@
             requestAnimationFrame(loop);
         }
 
-        // Smena Napadačkih Faktora na 4 sec
-        setInterval(() => {
-            currentFactor = attackFactors[Math.floor(Math.random() * attackFactors.length)];
-            factorDisplay.innerText = `FAKTOR: ${currentFactor.name}`;
-            
-            factions.forEach(f => {
-                if (f.hp > 0) {
-                    const dmg = Math.floor((Math.random() * currentFactor.dmg) + 400);
-                    f.hp = Math.max(0, f.hp - dmg);
-                }
-            });
-            logMessage(`[SPOLJAŠNJI NAPAD] ${currentFactor.msg}`);
-        }, 4000);
-
-        // Tajmer 06:30
+        // Tajmer (06:30) & Boss Spawning na svakih 60 sec
         let matchTime = 390;
         const timerInterval = setInterval(() => {
             matchTime--;
@@ -551,12 +497,12 @@
             timerDisplay.innerText = `${m}:${s}`;
 
             if (matchTime % 60 === 0 && matchTime > 0) {
-                spawnBoss();
+                spawnBosses();
             }
 
             if (matchTime <= 0) {
                 clearInterval(timerInterval);
-                logMessage('[KRAJ SIMULACIJE] 5D Multiverzum partija je završena!');
+                logMessage('[KRAJ SIMULACIJE] Vreme je isteklo! 3D Multiverse pobednik proglašen.');
             }
         }, 1000);
 

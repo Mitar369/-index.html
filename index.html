@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+            <!DOCTYPE html>
 <html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 SYSTEMS - DEEP JUNGLE WAR (DEBUGGED)</title>
+    <title>10 SYSTEMS - TOTAL WAR SIMULATION</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #020b05;
+            background-color: #010804;
             color: #00ff66;
         }
         #game-container {
@@ -27,8 +27,8 @@
             position: relative;
         }
         #sidebar {
-            width: 220px;
-            background: rgba(4, 18, 10, 0.95);
+            width: 230px;
+            background: rgba(3, 14, 8, 0.95);
             border-right: 1px solid #00ff6633;
             display: flex;
             flex-direction: column;
@@ -37,14 +37,15 @@
         .sidebar-title {
             font-size: 11px;
             font-weight: bold;
-            padding: 12px 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid #00ff6633;
             color: #00ff66;
             text-align: center;
+            background: rgba(0, 255, 102, 0.05);
         }
         #leaderboard {
             list-style: none;
-            padding: 5px;
+            padding: 4px;
             overflow-y: auto;
             flex-grow: 1;
         }
@@ -53,14 +54,14 @@
             align-items: center;
             justify-content: space-between;
             padding: 6px 8px;
-            margin-bottom: 4px;
-            background: rgba(0, 255, 102, 0.03);
+            margin-bottom: 3px;
+            background: rgba(0, 255, 102, 0.02);
             border-left: 3px solid transparent;
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
         }
         .faction-row:hover {
-            background: rgba(0, 255, 102, 0.15);
+            background: rgba(0, 255, 102, 0.12);
         }
         #main-area {
             flex-grow: 1;
@@ -70,23 +71,18 @@
         }
         #top-bar {
             height: 35px;
-            background: rgba(4, 18, 10, 0.9);
+            background: rgba(3, 14, 8, 0.9);
             border-bottom: 1px solid #00ff6633;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 15px;
-            font-size: 12px;
+            font-size: 11px;
             z-index: 5;
-        }
-        .active-event {
-            color: #ff3344;
-            font-weight: bold;
         }
         #canvas-wrapper {
             flex-grow: 1;
             position: relative;
-            background-color: #051d0d;
         }
         canvas {
             display: block;
@@ -94,11 +90,11 @@
             height: 100%;
         }
         #bottom-bar {
-            height: 90px;
-            background: rgba(4, 18, 10, 0.95);
+            height: 95px;
+            background: rgba(3, 14, 8, 0.95);
             border-top: 1px solid #00ff6633;
             display: flex;
-            padding: 8px;
+            padding: 6px 10px;
             gap: 10px;
             font-size: 10px;
             z-index: 5;
@@ -112,7 +108,7 @@
             color: #00dd55;
         }
         #stats-panel {
-            width: 240px;
+            width: 250px;
             border-left: 1px dashed #00ff6633;
             padding-left: 10px;
             display: flex;
@@ -124,14 +120,14 @@
 <body>
     <div id="game-container">
         <div id="sidebar">
-            <div class="sidebar-title">10 SYSTEMS - LEADERBOARD</div>
+            <div class="sidebar-title">10 SYSTEMS - WAR MAP</div>
             <ul id="leaderboard"></ul>
         </div>
 
         <div id="main-area">
             <div id="top-bar">
-                <div>10 SYSTEMS - DEEP JUNGLE WAR</div>
-                <div id="event-display" class="active-event">Faktor: Crvene Opasnosti</div>
+                <div>10 SYSTEMS - DEEP JUNGLE SIMULATION</div>
+                <div id="event-display" style="color: #00ccff; font-weight: bold;">Faktor: Tropska Oluja</div>
                 <div id="timer-display" style="color: #00ff66; font-weight: bold;">00:00 / 06:00</div>
             </div>
 
@@ -142,11 +138,11 @@
             <div id="bottom-bar">
                 <div id="console-log"></div>
                 <div id="stats-panel">
-                    <div style="font-weight:bold; margin-bottom: 3px; color:#fff;" id="stat-name">Izaberite sistem</div>
+                    <div style="font-weight:bold; margin-bottom: 2px; color:#fff;" id="stat-name">Izaberite bazu</div>
                     <div>HP: <span id="stat-hp">-</span></div>
+                    <div>Teritorija: <span id="stat-territory">-</span></div>
                     <div>Taktika: <span id="stat-taktika">-</span></div>
                     <div>Meta: <span id="stat-target">-</span></div>
-                    <div>Sunce Bonus: <span id="stat-sun">-</span></div>
                 </div>
             </div>
         </div>
@@ -169,18 +165,18 @@
             initPositions();
         });
 
-        // Frakcije sa adaptivnom logikom
+        // Frakcije i Hi-Tech Baze
         const factions = [
-            { id: 0, name: 'ARES', color: '#ff3344', hp: 85000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Agresivno', target: null },
-            { id: 1, name: 'ORION', color: '#3399ff', hp: 74000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: 63000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: 58000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: 51000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 5, name: 'VORTEX', color: '#00ffff', hp: 45000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: 36000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: 31000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 8, name: 'TITAN', color: '#ffffff', hp: 25000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null },
-            { id: 9, name: 'NOVA', color: '#00ffaa', hp: 18000, maxHp: 100000, x: 0, y: 0, lastAttacker: null, sunBonus: 0, tactic: 'Miran', target: null }
+            { id: 0, name: 'ARES', color: '#ff3344', hp: 85240, maxHp: 100000, x: 0, y: 0, territory: 12, tactic: 'Agresivno', target: null },
+            { id: 1, name: 'ORION', color: '#3399ff', hp: 74560, maxHp: 100000, x: 0, y: 0, territory: 10, tactic: 'Miran', target: null },
+            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: 63180, maxHp: 100000, x: 0, y: 0, territory: 9, tactic: 'Miran', target: null },
+            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: 58730, maxHp: 100000, x: 0, y: 0, territory: 8, tactic: 'Miran', target: null },
+            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: 51260, maxHp: 100000, x: 0, y: 0, territory: 7, tactic: 'Miran', target: null },
+            { id: 5, name: 'VORTEX', color: '#00ffff', hp: 45900, maxHp: 100000, x: 0, y: 0, territory: 6, tactic: 'Miran', target: null },
+            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: 36800, maxHp: 100000, x: 0, y: 0, territory: 5, tactic: 'Miran', target: null },
+            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: 31240, maxHp: 100000, x: 0, y: 0, territory: 5, tactic: 'Miran', target: null },
+            { id: 8, name: 'TITAN', color: '#ffffff', hp: 25680, maxHp: 100000, x: 0, y: 0, territory: 4, tactic: 'Miran', target: null },
+            { id: 9, name: 'NOVA', color: '#00ffaa', hp: 18930, maxHp: 100000, x: 0, y: 0, territory: 3, tactic: 'Miran', target: null }
         ];
 
         function initPositions() {
@@ -188,19 +184,36 @@
             const h = canvas.height;
             factions.forEach((f, i) => {
                 const angle = (i / factions.length) * Math.PI * 2;
-                f.x = w / 2 + Math.cos(angle) * (Math.min(w, h) / 3);
-                f.y = h / 2 + Math.sin(angle) * (Math.min(w, h) / 3);
+                f.x = w / 2 + Math.cos(angle) * (Math.min(w, h) / 2.8);
+                f.y = h / 2 + Math.sin(angle) * (Math.min(w, h) / 2.8);
             });
         }
         initPositions();
 
-        // 1. Spoljašnji Faktor: Crvene opasne tačkice koje napadaju
-        class RedHazard {
+        // 1. Oluja i Kiša (Storm)
+        let rainDrops = [];
+        for (let i = 0; i < 120; i++) {
+            rainDrops.push({
+                x: Math.random() * 2000,
+                y: Math.random() * 1000,
+                l: Math.random() * 15 + 10,
+                speed: Math.random() * 10 + 12
+            });
+        }
+
+        // 2. Neutralna Čudovišta iz Džungle
+        class JungleMonster {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.speed = 1.8;
-                this.target = null;
+                this.reset();
+            }
+            reset() {
+                // Nastaju u samom centru mape u džungli
+                const w = canvas.width;
+                const h = canvas.height;
+                this.x = w / 2 + (Math.random() - 0.5) * 80;
+                this.y = h / 2 + (Math.random() - 0.5) * 80;
+                this.speed = Math.random() * 1.2 + 0.8;
+                this.size = Math.random() * 4 + 3;
                 this.findTarget();
             }
             findTarget() {
@@ -215,137 +228,165 @@
                     const dx = this.target.x - this.x;
                     const dy = this.target.y - this.y;
                     const dist = Math.hypot(dx, dy);
-                    
+
                     this.x += (dx / dist) * this.speed;
                     this.y += (dy / dist) * this.speed;
 
-                    // Napad na frakciju
-                    if (dist < 15) {
-                        const dmg = Math.floor(Math.random() * 500 + 300);
+                    if (dist < 20) {
+                        const dmg = Math.floor(Math.random() * 400 + 150);
                         this.target.hp = Math.max(0, this.target.hp - dmg);
-                        logMessage(`[OPASNOST] Crvena tačka je pogodila ${this.target.name} (-${dmg} HP)`);
-                        this.x = Math.random() * canvas.width;
-                        this.y = Math.random() * canvas.height;
-                        this.findTarget();
+                        logMessage(`[ČUDOVIŠTE] Zver iz džungle napada ${this.target.name} (-${dmg} HP)`);
+                        this.reset();
                     }
                 }
             }
             draw() {
                 ctx.save();
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ff0000';
-                ctx.fillStyle = '#ff0000';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ff2200';
+                ctx.fillStyle = '#ff2200';
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             }
         }
 
-        const hazards = Array.from({ length: 6 }, () => new RedHazard());
+        const monsters = Array.from({ length: 8 }, () => new JungleMonster());
 
-        // 2. Sunce i Ciklus Dana/Noći
-        let sunAngle = 0;
-        let sunState = { x: 0, y: 0, isDay: true };
-
-        function updateSun() {
-            sunAngle += 0.003;
+        // 3. Crtanje Mapa Pozadine (Kao na slici 2)
+        function drawRealisticTerrain() {
             const w = canvas.width;
             const h = canvas.height;
-            sunState.x = w / 2 + Math.cos(sunAngle) * (w * 0.45);
-            sunState.y = h / 2 + Math.sin(sunAngle) * (h * 0.45);
-            sunState.isDay = sunState.y < h / 2 + 50;
 
-            // Daje nasumično život frakcijama na suncu
-            if (sunState.isDay && Math.random() < 0.05) {
-                const alive = factions.filter(f => f.hp > 0);
-                const lucky = alive[Math.floor(Math.random() * alive.length)];
-                const heal = Math.floor(Math.random() * 600 + 200);
-                lucky.hp = Math.min(lucky.maxHp, lucky.hp + heal);
-                lucky.sunBonus += heal;
-                logMessage(`[SUNCE] ${lucky.name} upija sunčevu energiju (+${heal} HP)`);
-            }
+            // Osnovni pejzaž
+            let grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w);
+            grad.addColorStop(0, '#06200d'); // Gusta centralna džungla
+            grad.addColorStop(0.6, '#0d2d16');
+            grad.addColorStop(1, '#020b05');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Planinski masivi i Reke
+            ctx.strokeStyle = '#00ff6615';
+            ctx.lineWidth = 1;
+
+            // Teritorije (Heksagonalni efekat ispod baza)
+            factions.forEach(f => {
+                if (f.hp <= 0) return;
+                ctx.save();
+                ctx.fillStyle = f.color + '12';
+                ctx.strokeStyle = f.color + '44';
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            // Centralna Džungla Oznaka
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 255, 102, 0.2)';
+            ctx.fillStyle = 'rgba(0, 40, 15, 0.4)';
+            ctx.beginPath();
+            ctx.arc(w/2, h/2, 90, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0, 255, 102, 0.4)';
+            ctx.font = '9px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText("OPASNA DŽUNGLA", w/2, h/2);
+            ctx.restore();
         }
 
-        // 3. Adaptivna Logika Napada
+        // 4. Crtanje Hi-Tech Baze (Zgrade umesto krugova)
+        function drawHiTechBase(f) {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+
+            // Baza građe (Izometrijska kocka / Zgrada)
+            const size = 14;
+            
+            // Senka / Svetlo
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = f.color;
+
+            // Osnova objekta
+            ctx.fillStyle = '#0a1a10';
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = 1.5;
+
+            // Zgrada telo
+            ctx.beginPath();
+            ctx.moveTo(0, -size);
+            ctx.lineTo(size, -size / 2);
+            ctx.lineTo(size, size / 2);
+            ctx.lineTo(0, size);
+            ctx.lineTo(-size, size / 2);
+            ctx.lineTo(-size, -size / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Neonska Kula / Jezgro u sredini
+            ctx.fillStyle = f.color;
+            ctx.beginPath();
+            ctx.arc(0, -2, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ime i HP Baze
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 9px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText(f.name, 0, -size - 6);
+
+            ctx.restore();
+        }
+
+        // 5. Crtanje Oluje i Kiše
+        function drawStorm() {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(150, 200, 255, 0.3)';
+            ctx.lineWidth = 1;
+            rainDrops.forEach(r => {
+                ctx.beginPath();
+                ctx.moveTo(r.x, r.y);
+                ctx.lineTo(r.x - 2, r.y + r.l);
+                ctx.stroke();
+
+                r.y += r.speed;
+                r.x -= 0.5;
+                if (r.y > canvas.height) {
+                    r.y = -20;
+                    r.x = Math.random() * canvas.width;
+                }
+            });
+            ctx.restore();
+        }
+
+        // Adaptivni Napadi
         let beams = [];
-        function adaptativeBattleLogic() {
-            if (Math.random() < 0.07) {
+        function runBattles() {
+            if (Math.random() < 0.08) {
                 const alive = factions.filter(f => f.hp > 0);
                 if (alive.length < 2) return;
 
-                const attacker = alive[Math.floor(Math.random() * alive.length)];
-                let defender = null;
+                const src = alive[Math.floor(Math.random() * alive.length)];
+                const tgt = alive[Math.floor(Math.random() * alive.length)];
 
-                // Pravilo 1: Ako je napadnut, ima 60% šanse da uzvrati napadaču (Osveta)
-                if (attacker.lastAttacker && attacker.lastAttacker.hp > 0 && Math.random() < 0.6) {
-                    defender = attacker.lastAttacker;
-                    attacker.tactic = 'Osveta';
-                } 
-                // Pravilo 2: Ako ima malo HP-a, brani se i napada najslabijeg
-                else if (attacker.hp < 30000) {
-                    defender = alive.reduce((min, f) => f.hp < min.hp ? f : min, alive[0]);
-                    attacker.tactic = 'Defanzivno';
-                } 
-                // Pravilo 3: Najjači napada trenutno vodećeg
-                else {
-                    const sorted = [...alive].sort((a, b) => b.hp - a.hp);
-                    defender = (sorted[0].id !== attacker.id) ? sorted[0] : sorted[1];
-                    attacker.tactic = 'Napad na Vođu';
-                }
-
-                if (defender && defender.id !== attacker.id) {
-                    attacker.target = defender.name;
-                    defender.lastAttacker = attacker;
-
-                    const dmg = Math.floor(Math.random() * 900 + 300);
-                    defender.hp = Math.max(0, defender.hp - dmg);
+                if (src.id !== tgt.id) {
+                    const dmg = Math.floor(Math.random() * 800 + 200);
+                    tgt.hp = Math.max(0, tgt.hp - dmg);
+                    src.target = tgt.name;
 
                     beams.push({
-                        sx: attacker.x, sy: attacker.y,
-                        tx: defender.x, ty: defender.y,
-                        color: attacker.color, alpha: 1
+                        sx: src.x, sy: src.y,
+                        tx: tgt.x, ty: tgt.y,
+                        color: src.color, alpha: 1
                     });
 
-                    logMessage(`[BORBA] ${attacker.name} (${attacker.tactic}) $\rightarrow$ ${defender.name} (-${dmg} HP)`);
+                    logMessage(`[NAPAD] ${src.name} lansira projektil na ${tgt.name} (-${dmg} HP)`);
                 }
-            }
-        }
-
-        // 4. Crtanje Šumske Mape
-        function drawJungle() {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Zelena podloga
-            const bgGrad = ctx.createLinearGradient(0, 0, w, h);
-            bgGrad.addColorStop(0, '#041f0d');
-            bgGrad.addColorStop(0.5, '#0a3818');
-            bgGrad.addColorStop(1, '#021207');
-            ctx.fillStyle = bgGrad;
-            ctx.fillRect(0, 0, w, h);
-
-            // Šumske strukture / tekstura
-            ctx.fillStyle = 'rgba(0, 255, 102, 0.03)';
-            for (let i = 0; i < 40; i++) {
-                ctx.beginPath();
-                ctx.arc((i * 97) % w, (i * 53) % h, 30 + (i % 20), 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Sunce
-            if (sunState.isDay) {
-                ctx.save();
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = '#ffcc00';
-                ctx.fillStyle = '#ffee88';
-                ctx.beginPath();
-                ctx.arc(sunState.x, sunState.y, 14, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            } else {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.fillRect(0, 0, w, h);
             }
         }
 
@@ -354,7 +395,7 @@
             const div = document.createElement('div');
             div.innerText = `[${time}] ${msg}`;
             consoleLog.prepend(div);
-            if (consoleLog.children.length > 12) consoleLog.removeChild(consoleLog.lastChild);
+            if (consoleLog.children.length > 10) consoleLog.removeChild(consoleLog.lastChild);
         }
 
         let selectedFaction = factions[0];
@@ -369,7 +410,7 @@
                 li.onclick = () => selectedFaction = f;
                 li.innerHTML = `
                     <span><b>${rank + 1}</b> ${f.name}</span>
-                    <span style="color:${f.color}">${Math.floor(f.hp)} HP</span>
+                    <span style="color:${f.color}">${Math.floor(f.hp)}</span>
                 `;
                 leaderboard.appendChild(li);
             });
@@ -378,25 +419,18 @@
                 document.getElementById('stat-name').innerText = selectedFaction.name;
                 document.getElementById('stat-name').style.color = selectedFaction.color;
                 document.getElementById('stat-hp').innerText = `${selectedFaction.hp} / ${selectedFaction.maxHp}`;
+                document.getElementById('stat-territory').innerText = `${selectedFaction.territory} ZONA`;
                 document.getElementById('stat-taktika').innerText = selectedFaction.tactic;
                 document.getElementById('stat-target').innerText = selectedFaction.target || 'Nema';
-                document.getElementById('stat-sun').innerText = `+${selectedFaction.sunBonus} HP`;
             }
         }
 
-        // Glavna Animaciona Petlja
+        // Glavna Petlja Renderovanja
         function loop() {
-            drawJungle();
-            updateSun();
-            adaptativeBattleLogic();
+            drawRealisticTerrain();
+            runBattles();
 
-            // Crvene opasnosti
-            hazards.forEach(h => {
-                h.update();
-                h.draw();
-            });
-
-            // Linije napada
+            // Mreža Lasera
             beams.forEach((b, i) => {
                 ctx.save();
                 ctx.strokeStyle = b.color;
@@ -411,51 +445,31 @@
                 if (b.alpha <= 0) beams.splice(i, 1);
             });
 
-            // Frakcije
-            factions.forEach(f => {
-                if (f.hp <= 0) return;
-                ctx.save();
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = f.color;
-
-                ctx.strokeStyle = f.color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(f.x, f.y, 12, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ctx.fillStyle = f.color;
-                ctx.beginPath();
-                ctx.arc(f.x, f.y, 6, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '10px Courier New';
-                ctx.textAlign = 'center';
-                ctx.fillText(f.name, f.x, f.y - 16);
-                ctx.restore();
+            // Čudovišta
+            monsters.forEach(m => {
+                m.update();
+                m.draw();
             });
+
+            // Baze
+            factions.forEach(f => {
+                if (f.hp > 0) drawHiTechBase(f);
+            });
+
+            // Kiša / Oluja preko svega
+            drawStorm();
 
             updateUI();
             requestAnimationFrame(loop);
         }
 
-        // 5. Debagovan Tajmer (Tačno 6 minuta)
+        // Tajmer 6 minuta
         let totalSeconds = 0;
-        const maxSeconds = 360; // 6 minuta * 60s
-
-        const timerInterval = setInterval(() => {
+        setInterval(() => {
             totalSeconds++;
-            const currentM = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const currentS = String(totalSeconds % 60).padStart(2, '0');
-            
-            timerDisplay.innerText = `${currentM}:${currentS} / 06:00`;
-
-            if (totalSeconds >= maxSeconds) {
-                clearInterval(timerInterval);
-                logMessage("[KRAJ] Simulacija od 6 minuta je završena!");
-                alert("Simulacija je završena! Pobednik je frakcija sa najviše HP-a.");
-            }
+            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const s = String(totalSeconds % 60).padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s} / 06:00`;
         }, 1000);
 
         loop();

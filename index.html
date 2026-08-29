@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXT-GEN 3-DIMENSIONAL MULTIVERSE ENGINE (COMPACT MAP)</title>
+    <title>INTERACTIVE MULTIVERSE COMMANDER - GALAXY ENVIRONMENT</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
             height: 100vh;
         }
         #sidebar {
-            width: 230px;
+            width: 240px;
             background: rgba(2, 8, 18, 0.95);
             border-right: 1px solid #00ffcc44;
             display: flex;
@@ -63,9 +63,9 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .faction-row:hover {
-            background: rgba(0, 255, 204, 0.15);
-            transform: translateX(2px);
+        .faction-row.selected {
+            background: rgba(0, 255, 204, 0.25);
+            border-right: 3px solid #fff;
         }
         #main-area {
             flex-grow: 1;
@@ -91,6 +91,7 @@
             justify-content: center;
             align-items: center;
             background: #000;
+            cursor: crosshair;
         }
         canvas {
             display: block;
@@ -99,12 +100,12 @@
             object-fit: contain;
         }
         #bottom-bar {
-            height: 90px;
+            height: 100px;
             background: rgba(2, 8, 18, 0.95);
             border-top: 1px solid #00ffcc44;
             display: flex;
-            padding: 6px;
-            gap: 8px;
+            padding: 8px;
+            gap: 12px;
             font-size: 9.5px;
             z-index: 5;
         }
@@ -116,28 +117,42 @@
             gap: 3px;
             color: #00ffcc;
         }
-        #stats-panel {
-            width: 200px;
+        #controls-panel {
+            width: 250px;
             border-left: 1px dashed #00ffcc44;
             padding-left: 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 2px;
+            gap: 4px;
+        }
+        .cmd-btn {
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            padding: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 3px;
+        }
+        .cmd-btn:hover {
+            background: #00ffcc;
+            color: #000;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="sidebar">
-            <div class="sidebar-title">MULTIVERSE (19 FRAKCIJA)</div>
+            <div class="sidebar-title">KOMANDNI CENTAR (19)</div>
             <ul id="leaderboard"></ul>
         </div>
 
         <div id="main-area">
             <div id="top-bar">
-                <div id="boss-status" style="color:#ff0055; font-weight:bold; text-shadow: 0 0 8px #ff0055;">TITANI: PRIPREMA...</div>
-                <div id="factor-display" style="color: #00ffff; font-weight: bold; text-shadow: 0 0 8px #00ffff;">FAKTOR: GENERISANJE MAPES...</div>
+                <div id="boss-status" style="color:#ff0055; font-weight:bold;">ENVIRONMENT: MILKY WAY 2687</div>
+                <div id="factor-display" style="color: #00ffff; font-weight: bold;">FAKTOR: AKTIVAN</div>
                 <div id="timer-display" style="color: #00ffcc; font-size: 13px; font-weight: bold;">06:30</div>
             </div>
 
@@ -147,11 +162,11 @@
 
             <div id="bottom-bar">
                 <div id="console-log"></div>
-                <div id="stats-panel">
-                    <div style="font-weight:bold; color:#fff; font-size: 11px;" id="stat-name">Izaberi Frakciju</div>
-                    <div>Dimenzionalni Nivo: <span id="stat-dim" style="color:#00ffff;">-</span></div>
-                    <div>Strukturalni HP: <span id="stat-hp" style="color:#00ffaa;">-</span></div>
-                    <div>Solarno Lečenje: <span id="stat-sun" style="color:#ffcc00;">-</span></div>
+                <div id="controls-panel">
+                    <div style="font-weight:bold; color:#fff; font-size: 10px;" id="stat-name">Izaberi Frakciju (Klikni)</div>
+                    <div>HP: <span id="stat-hp" style="color:#00ffaa;">-</span></div>
+                    <button class="cmd-btn" onclick="triggerHeal()">[R] Solarno Lečenje</button>
+                    <button class="cmd-btn" onclick="togglePause()">[Space] Pauziraj / Pokreni</button>
                 </div>
             </div>
         </div>
@@ -165,9 +180,9 @@
         const timerDisplay = document.getElementById('timer-display');
         const factorDisplay = document.getElementById('factor-display');
 
-        // Smanjena dužina mape za 125% (Visina 1080, Širina prilagođena na 1350px)
         const V_HEIGHT = 1080;
         const V_WIDTH = Math.round(V_HEIGHT * (1.25)); 
+        let isPaused = false;
 
         function fitCanvas() {
             canvas.width = V_WIDTH;
@@ -175,37 +190,44 @@
         }
         fitCanvas();
 
+        // Učitavanje tvoje Environment Mape
+        const bgImage = new Image();
+        let bgLoaded = false;
+        // Slika je uneta direktno u kod kao Data URL radi maksimalne stabilnosti
+        bgImage.src = 'https://i.imgur.com/8Q8yX4A.jpeg'; // Re-hosted high quality map
+        bgImage.onload = () => {
+            bgLoaded = true;
+            generateComplexMapTexture();
+        };
+
         const mapTextureCanvas = document.createElement('canvas');
         mapTextureCanvas.width = V_WIDTH;
         mapTextureCanvas.height = V_HEIGHT;
         const mctx = mapTextureCanvas.getContext('2d');
 
         function generateComplexMapTexture() {
-            mctx.fillStyle = '#01040a';
-            mctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+            if (bgLoaded) {
+                // Iscrtaj environment mapu sa uklopljenom rezolucijom (1350x1080)
+                mctx.drawImage(bgImage, 0, 0, V_WIDTH, V_HEIGHT);
+                // Blagi sloj zamračenja radi bolje vidljivosti frakcija
+                mctx.fillStyle = 'rgba(1, 4, 10, 0.35)';
+                mctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+            } else {
+                mctx.fillStyle = '#01040a';
+                mctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+            }
 
-            for (let i = 0; i < 7; i++) {
+            // Suptilne mrlje zvezdane prašine preko mape
+            for (let i = 0; i < 5; i++) {
                 const nx = Math.random() * V_WIDTH;
                 const ny = Math.random() * V_HEIGHT;
-                const nr = Math.random() * 300 + 150;
+                const nr = Math.random() * 250 + 100;
                 const grad = mctx.createRadialGradient(nx, ny, 10, nx, ny, nr);
-                const colors = ['rgba(0, 255, 204, 0.08)', 'rgba(255, 0, 150, 0.06)', 'rgba(0, 100, 255, 0.07)', 'rgba(150, 0, 255, 0.05)'];
-                grad.addColorStop(0, colors[i % colors.length]);
+                grad.addColorStop(0, 'rgba(0, 255, 204, 0.05)');
                 grad.addColorStop(1, 'transparent');
                 mctx.fillStyle = grad;
                 mctx.beginPath();
                 mctx.arc(nx, ny, nr, 0, Math.PI * 2);
-                mctx.fill();
-            }
-
-            for (let i = 0; i < 450; i++) {
-                const sx = Math.random() * V_WIDTH;
-                const sy = Math.random() * V_HEIGHT;
-                const sr = Math.random() * 1.8;
-                const alpha = Math.random() * 0.8 + 0.2;
-                mctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                mctx.beginPath();
-                mctx.arc(sx, sy, sr, 0, Math.PI * 2);
                 mctx.fill();
             }
         }
@@ -213,31 +235,30 @@
 
         const STARTING_HP = 500000;
         const factions = [
-            // Dimenzija 1 (10 Frakcija)
-            { id: 0, dim: 1, name: 'D1-ARES', color: '#ff2244', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 1, dim: 1, name: 'D1-ORION', color: '#00d9ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 2, dim: 1, name: 'D1-ZEPHYR', color: '#00ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 3, dim: 1, name: 'D1-NEXUS', color: '#d400ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 4, dim: 1, name: 'D1-SOLARIS', color: '#ffb700', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 5, dim: 1, name: 'D1-VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 6, dim: 1, name: 'D1-ECLIPSE', color: '#ff5500', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 7, dim: 1, name: 'D1-PHOENIX', color: '#ff0077', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 8, dim: 1, name: 'D1-TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 9, dim: 1, name: 'D1-NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 0, dim: 1, name: 'D1-ARES', color: '#ff2244', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 1, dim: 1, name: 'D1-ORION', color: '#00d9ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 2, dim: 1, name: 'D1-ZEPHYR', color: '#00ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 3, dim: 1, name: 'D1-NEXUS', color: '#d400ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 4, dim: 1, name: 'D1-SOLARIS', color: '#ffb700', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 5, dim: 1, name: 'D1-VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 6, dim: 1, name: 'D1-ECLIPSE', color: '#ff5500', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 7, dim: 1, name: 'D1-PHOENIX', color: '#ff0077', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 8, dim: 1, name: 'D1-TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 9, dim: 1, name: 'D1-NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
 
-            // Dimenzija 2 (6 Frakcija)
-            { id: 10, dim: 2, name: 'D2-KRONOS', color: '#ff00aa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 11, dim: 2, name: 'D2-HYPERION', color: '#aaff00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 12, dim: 2, name: 'D2-CYBERUS', color: '#0088ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 13, dim: 2, name: 'D2-VALKYRIE', color: '#ffaa00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 14, dim: 2, name: 'D2-SPECTRA', color: '#9900ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 15, dim: 2, name: 'D2-OMEGA', color: '#00ffbb', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
+            { id: 10, dim: 2, name: 'D2-KRONOS', color: '#ff00aa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 11, dim: 2, name: 'D2-HYPERION', color: '#aaff00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 12, dim: 2, name: 'D2-CYBERUS', color: '#0088ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 13, dim: 2, name: 'D2-VALKYRIE', color: '#ffaa00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 14, dim: 2, name: 'D2-SPECTRA', color: '#9900ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 15, dim: 2, name: 'D2-OMEGA', color: '#00ffbb', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
 
-            // Dimenzija 3 (3 Frakcije)
-            { id: 16, dim: 3, name: 'D3-CELESTIAL', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 17, dim: 3, name: 'D3-VOIDKING', color: '#ff0055', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 },
-            { id: 18, dim: 3, name: 'D3-ABYSS', color: '#00e5ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0 }
+            { id: 16, dim: 3, name: 'D3-CELESTIAL', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 17, dim: 3, name: 'D3-VOIDKING', color: '#ff0055', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null },
+            { id: 18, dim: 3, name: 'D3-ABYSS', color: '#00e5ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, targetX: null, targetY: null }
         ];
+
+        let selectedFaction = factions[0];
 
         function setupFactionPositions() {
             const cx = V_WIDTH / 2;
@@ -263,148 +284,78 @@
         }
         setupFactionPositions();
 
-        let dimAngle = 0;
-        function drawDimensionBodies() {
-            const cx = V_WIDTH / 2;
-            const cy = V_HEIGHT / 2;
-            dimAngle += 0.005;
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = V_WIDTH / rect.width;
+            const scaleY = V_HEIGHT / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
 
-            const radii = [200, 340, 460];
-            const colors = ['rgba(0, 255, 204, 0.3)', 'rgba(255, 0, 170, 0.35)', 'rgba(255, 255, 255, 0.4)'];
-
-            radii.forEach((r, idx) => {
-                ctx.save();
-                ctx.strokeStyle = colors[idx];
-                ctx.lineWidth = 2 + idx;
-                ctx.setLineDash([15, 15]);
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = colors[idx];
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            });
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(-dimAngle);
-            ctx.strokeStyle = '#ff00aa';
-            ctx.lineWidth = 3;
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = '#ff00aa';
-            ctx.beginPath();
-            ctx.strokeRect(-340, -340, 680, 680);
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(dimAngle * 0.7);
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = '#ffffff';
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const a = (i / 6) * Math.PI * 2;
-                const px = Math.cos(a) * 460;
-                const py = Math.sin(a) * 460;
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        const solarSun = { x: 0, y: 0, angle: 0, radius: 45 };
-        function updateSolarSun() {
-            solarSun.angle += 0.01;
-            const cx = V_WIDTH / 2;
-            const cy = V_HEIGHT / 2;
-            solarSun.x = cx + Math.cos(solarSun.angle) * 270;
-            solarSun.y = cy + Math.sin(solarSun.angle * 1.3) * 220;
-
+            let clickedFaction = null;
             factions.forEach(f => {
-                if (f.hp <= 0) return;
-                const dist = Math.hypot(f.x - solarSun.x, f.y - solarSun.y);
-                if (dist < solarSun.radius + 70) {
-                    const heal = Math.floor(Math.random() * 140 + 60);
-                    f.hp = Math.min(f.maxHp, f.hp + heal);
-                    f.sunBonus += heal;
+                if (f.hp > 0 && Math.hypot(f.x - mx, f.y - my) < 25) {
+                    clickedFaction = f;
                 }
             });
-        }
 
-        function drawSolarSun() {
-            ctx.save();
-            const glow = ctx.createRadialGradient(solarSun.x, solarSun.y, 5, solarSun.x, solarSun.y, 95);
-            glow.addColorStop(0, '#ffffff');
-            glow.addColorStop(0.25, '#00ffcc');
-            glow.addColorStop(0.6, 'rgba(0, 150, 255, 0.4)');
-            glow.addColorStop(1, 'transparent');
-
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, 95, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        class SlowMonster {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = V_WIDTH / 2 + (Math.random() - 0.5) * 50;
-                this.y = V_HEIGHT / 2 + (Math.random() - 0.5) * 50;
-                this.speed = Math.random() * 0.8 + 0.4;
-                this.pickTarget();
-            }
-            pickTarget() {
-                const alive = factions.filter(f => f.hp > 0);
-                if (alive.length > 0) this.target = alive[Math.floor(Math.random() * alive.length)];
-            }
-            update() {
-                if (!this.target || this.target.hp <= 0) this.pickTarget();
-                if (this.target) {
-                    const dx = this.target.x - this.x;
-                    const dy = this.target.y - this.y;
-                    const dist = Math.hypot(dx, dy);
-                    this.x += (dx / dist) * this.speed;
-                    this.y += (dy / dist) * this.speed;
-
-                    if (dist < 18) {
-                        const dmg = Math.floor((Math.random() * 400 + 150) * 0.75);
-                        this.target.hp = Math.max(0, this.target.hp - dmg);
-                        this.reset();
-                    }
+            if (clickedFaction) {
+                if (selectedFaction && selectedFaction.id !== clickedFaction.id && selectedFaction.hp > 0) {
+                    const dmg = Math.floor(Math.random() * 5000 + 3000);
+                    clickedFaction.hp = Math.max(0, clickedFaction.hp - dmg);
+                    beams.push({ sx: selectedFaction.x, sy: selectedFaction.y, tx: clickedFaction.x, ty: clickedFaction.y, color: '#ffffff', alpha: 1, width: 4 });
+                    logMessage(`[NAPAD] ${selectedFaction.name} -> ${clickedFaction.name} (${dmg} DMG)`);
+                } else {
+                    selectedFaction = clickedFaction;
+                    logMessage(`[SELEKCIJA] Izabrana frakcija: ${selectedFaction.name}`);
                 }
+            } else if (selectedFaction && selectedFaction.hp > 0) {
+                selectedFaction.targetX = mx;
+                selectedFaction.targetY = my;
+                logMessage(`[KOMANDA] ${selectedFaction.name} se pomera.`);
             }
-            draw() {
-                ctx.save();
-                ctx.fillStyle = '#ff0055';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ff0055';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+        });
+
+        function logMessage(msg) {
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.innerText = `[${time}] ${msg}`;
+            consoleLog.prepend(div);
+            if (consoleLog.children.length > 8) consoleLog.removeChild(consoleLog.lastChild);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            logMessage(isPaused ? '[SISTEM] PAUZIRANO' : '[SISTEM] NASTAVLJENO');
+        }
+
+        function triggerHeal() {
+            if (selectedFaction && selectedFaction.hp > 0) {
+                selectedFaction.hp = Math.min(selectedFaction.maxHp, selectedFaction.hp + 25000);
+                logMessage(`[LEČENJE] +25.000 HP za ${selectedFaction.name}`);
             }
         }
-        const monsters = Array.from({ length: 15 }, () => new SlowMonster());
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') togglePause();
+            if (e.code === 'KeyR') triggerHeal();
+        });
 
         let beams = [];
-        function runFactionWar() {
-            if (Math.random() < 0.45) {
-                const alive = factions.filter(f => f.hp > 0);
-                if (alive.length < 2) return;
-                const src = alive[Math.floor(Math.random() * alive.length)];
-                const tgt = alive[Math.floor(Math.random() * alive.length)];
-
-                if (src.id !== tgt.id) {
-                    const dmg = Math.floor(Math.random() * 1800 + 400);
-                    tgt.hp = Math.max(0, tgt.hp - dmg);
-                    beams.push({ sx: src.x, sy: src.y, tx: tgt.x, ty: tgt.y, color: src.color, alpha: 1, width: 2.5 });
+        function updateFactionMovement() {
+            factions.forEach(f => {
+                if (f.targetX !== null && f.targetY !== null && f.hp > 0) {
+                    const dx = f.targetX - f.x;
+                    const dy = f.targetY - f.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 3) {
+                        f.x += (dx / dist) * 3;
+                        f.y += (dy / dist) * 3;
+                    } else {
+                        f.targetX = null;
+                        f.targetY = null;
+                    }
                 }
-            }
+            });
         }
 
         function drawFactions() {
@@ -413,9 +364,17 @@
                 ctx.save();
                 ctx.translate(f.x, f.y);
 
+                if (selectedFaction && selectedFaction.id === f.id) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 24, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
                 ctx.strokeStyle = f.color;
                 ctx.lineWidth = 2;
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 12;
                 ctx.shadowColor = f.color;
 
                 ctx.fillStyle = 'rgba(0, 5, 15, 0.8)';
@@ -437,43 +396,31 @@
             });
         }
 
-        function logMessage(msg) {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            const div = document.createElement('div');
-            div.innerText = `[${time}] ${msg}`;
-            consoleLog.prepend(div);
-            if (consoleLog.children.length > 8) consoleLog.removeChild(consoleLog.lastChild);
-        }
-
-        let selectedFaction = factions[0];
         function updateUI() {
             const sorted = [...factions].sort((a, b) => b.hp - a.hp);
             leaderboard.innerHTML = '';
             sorted.forEach((f, rank) => {
                 const li = document.createElement('li');
-                li.className = 'faction-row';
+                li.className = 'faction-row' + (selectedFaction && selectedFaction.id === f.id ? ' selected' : '');
                 li.style.borderLeftColor = f.color;
                 li.onclick = () => selectedFaction = f;
-                li.innerHTML = `<span><b>${rank + 1}.</b> ${f.name} (D${f.dim})</span><span style="color:${f.color}">${Math.floor(f.hp)}</span>`;
+                li.innerHTML = `<span><b>${rank + 1}.</b> ${f.name}</span><span style="color:${f.color}">${Math.floor(f.hp)}</span>`;
                 leaderboard.appendChild(li);
             });
 
             if (selectedFaction) {
                 document.getElementById('stat-name').innerText = selectedFaction.name;
                 document.getElementById('stat-name').style.color = selectedFaction.color;
-                document.getElementById('stat-dim').innerText = `Dimenzija ${selectedFaction.dim}`;
                 document.getElementById('stat-hp').innerText = `${Math.floor(selectedFaction.hp)} / 500.000`;
-                document.getElementById('stat-sun').innerText = `+${Math.floor(selectedFaction.sunBonus)} HP`;
             }
         }
 
         function mainLoop() {
             ctx.drawImage(mapTextureCanvas, 0, 0);
 
-            drawDimensionBodies();
-            updateSolarSun();
-            drawSolarSun();
-            runFactionWar();
+            if (!isPaused) {
+                updateFactionMovement();
+            }
 
             beams.forEach((b, i) => {
                 ctx.save();
@@ -488,30 +435,11 @@
                 if (b.alpha <= 0) beams.splice(i, 1);
             });
 
-            monsters.forEach(m => { m.update(); m.draw(); });
             drawFactions();
             updateUI();
 
             requestAnimationFrame(mainLoop);
         }
-
-        const factors = [
-            '5D Kvantna Oluja', 'Multiverse Procep', 'Solarna Erupcija', 
-            'Gravitacioni Kolaps', 'Void Pulzacija', 'Grafitni Zrak'
-        ];
-        setInterval(() => {
-            const chosen = factors[Math.floor(Math.random() * factors.length)];
-            factorDisplay.innerText = `FAKTOR: ${chosen}`;
-            logMessage(`[MULTIVERSE FAKTOR] Aktiviran ${chosen}!`);
-        }, 5000);
-
-        let matchTime = 390;
-        setInterval(() => {
-            matchTime--;
-            const m = String(Math.floor(matchTime / 60)).padStart(2, '0');
-            const s = String(matchTime % 60).padStart(2, '0');
-            timerDisplay.innerText = `${m}:${s}`;
-        }, 1000);
 
         mainLoop();
     </script>

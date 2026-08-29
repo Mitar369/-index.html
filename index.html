@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 SYSTEMS - UNPREDICTABLE WAR SIMULATION</title>
+    <title>10 SYSTEMS - CHAOS WAR SIMULATION</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
             height: 100vh;
         }
         #sidebar {
-            width: 170px;
+            width: 180px;
             background: rgba(3, 14, 8, 0.95);
             border-right: 1px solid #00ff6633;
             display: flex;
@@ -114,14 +114,14 @@
 <body>
     <div id="game-container">
         <div id="sidebar">
-            <div class="sidebar-title">RANG-LISTA</div>
+            <div class="sidebar-title">RANG-LISTA (EQUAL START)</div>
             <ul id="leaderboard"></ul>
         </div>
 
         <div id="main-area">
             <div id="top-bar">
-                <div style="color:#ffcc00; font-weight:bold;">SOLAR SUN: IZLAZAK</div>
-                <div id="factor-display" style="color: #00ffff; font-weight: bold;">FAKTOR: Tropska Oluja</div>
+                <div style="color:#ffcc00; font-weight:bold;">SOLAR SUN: AKTIVAN</div>
+                <div id="factor-display" style="color: #00ffff; font-weight: bold;">FAKTOR: Inicijalizacija...</div>
                 <div id="timer-display" style="color: #00ff66;">00:00</div>
             </div>
 
@@ -133,9 +133,9 @@
                 <div id="console-log"></div>
                 <div id="stats-panel">
                     <div style="font-weight:bold; color:#fff;" id="stat-name">Baza</div>
-                    <div>HP: <span id="stat-hp">-</span></div>
+                    <div>HP: <span id="stat-hp">100000</span></div>
                     <div>Solarni Efekat: <span id="stat-sun">-</span></div>
-                    <div>Taktika: <span id="stat-meta">-</span></div>
+                    <div>Status: <span id="stat-meta">Stabilno</span></div>
                 </div>
             </div>
         </div>
@@ -161,33 +161,32 @@
             ctx.scale(dpr, dpr);
         }
 
-        // 33 Dinamička Spoljašnja Faktora
+        // Dynamic Dynamic Factor Engine
         const factors = [
-            { name: 'Tropska Oluja', heal: 0.2, dmg: 1.5, chaos: 0.8 },
-            { name: 'Solarni Izbijaj', heal: 3.0, dmg: 0.2, chaos: 1.5 },
-            { name: 'Kisele Kiše', heal: -0.5, dmg: 2.0, chaos: 1.1 },
-            { name: 'Kvantni Preokret', heal: 1.0, dmg: 1.0, chaos: 3.0 },
-            { name: 'Mutacija Zveri', heal: 0.0, dmg: 2.5, chaos: 2.0 },
-            { name: 'Ekološki Štit', heal: 2.0, dmg: 0.1, chaos: 0.2 },
-            { name: 'Mesečeva Senca', heal: 0.5, dmg: 1.2, chaos: 1.2 },
-            { name: 'Hiper-Kondenzacija', heal: 1.5, heal: 1.5, chaos: 0.5 },
-            { name: 'Anarhija U Džungli', heal: 0.1, dmg: 3.0, chaos: 2.5 },
-            { name: 'Kozmički Zrak', heal: 4.0, dmg: 0.0, chaos: 1.8 }
+            { name: 'Kvantni Preokret', heal: 2.5, dmg: 0.5, chaos: 3.0 },
+            { name: 'Solarni Super-Izbijaj', heal: 4.0, dmg: 0.1, chaos: 2.0 },
+            { name: 'Kisele Kiše', heal: -1.0, dmg: 2.5, chaos: 1.5 },
+            { name: 'Mutacija Neutrala', heal: 0.0, dmg: 3.0, chaos: 2.5 },
+            { name: 'Anarhija U Džungli', heal: 0.5, dmg: 3.5, chaos: 4.0 },
+            { name: 'Kozmičko Poravnanje', heal: 3.0, dmg: 1.0, chaos: 1.0 },
+            { name: 'Mesečeva Senca', heal: 0.2, dmg: 1.8, chaos: 2.0 },
+            { name: 'Kolektivni Reset', heal: 1.5, dmg: 1.5, chaos: 5.0 }
         ];
         let currentFactor = factors[0];
 
-        // Frakcije
+        // 10 Frakcija - POTPUNO JEDNAK POČETAK (100.000 HP)
+        const STARTING_HP = 100000;
         const factions = [
-            { id: 0, name: 'ARES', color: '#ff3344', hp: 85000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Agresivno' },
-            { id: 1, name: 'ORION', color: '#3399ff', hp: 74000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Odbrana' },
-            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: 63000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Kamuflaža' },
-            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: 58000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Sakupljanje' },
-            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: 51000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Apsorpcija' },
-            { id: 5, name: 'VORTEX', color: '#00ffff', hp: 45000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Reakcija' },
-            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: 36000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Zaseda' },
-            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: 31000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Regeneracija' },
-            { id: 8, name: 'TITAN', color: '#ffffff', hp: 25000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Tvđava' },
-            { id: 9, name: 'NOVA', color: '#00ffaa', hp: 18000, maxHp: 100000, x: 0, y: 0, sunBonus: 0, meta: 'Evolucija' }
+            { id: 0, name: 'ARES', color: '#ff3344', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 1, name: 'ORION', color: '#3399ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 5, name: 'VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 8, name: 'TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
+            { id: 9, name: 'NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' }
         ];
 
         function initPositions() {
@@ -205,75 +204,78 @@
         fitCanvas();
         initPositions();
 
-        // Gigantsko Sunce Koji Izlazi (Solar Sun Entity)
+        // Gigantsko Sunce sa Solarnim Radijusom Lečenja
         const solarSun = {
             x: 0,
             y: 0,
-            radius: 70,
+            radius: 80,
             pulse: 0,
-            riseProgress: 0
+            angle: 0
         };
 
         function updateSolarSun() {
             const rect = canvas.parentElement.getBoundingClientRect();
-            solarSun.pulse += 0.03;
-            solarSun.riseProgress += 0.002;
-            
-            // Putanja sunca: Izlazi sa dna, kruži preko centra i zalazi
-            solarSun.x = rect.width * 0.2 + (Math.sin(solarSun.riseProgress) * rect.width * 0.6);
-            solarSun.y = rect.height - (Math.sin(solarSun.riseProgress * 0.8) * rect.height * 0.7);
+            solarSun.pulse += 0.04;
+            solarSun.angle += 0.015;
 
-            const dynamicRadius = solarSun.radius + Math.sin(solarSun.pulse) * 8;
+            // Sunce kruži po mapi i stalno menja fokus
+            solarSun.x = rect.width / 2 + Math.cos(solarSun.angle) * (rect.width * 0.35);
+            solarSun.y = rect.height / 2 + Math.sin(solarSun.angle * 0.7) * (rect.height * 0.35);
 
-            // Efekat lečenja i uticaja na frakcije
+            const dynamicRadius = solarSun.radius + Math.sin(solarSun.pulse) * 12;
+
             factions.forEach(f => {
                 if (f.hp <= 0) return;
                 const dist = Math.hypot(f.x - solarSun.x, f.y - solarSun.y);
-                if (dist < dynamicRadius + 60) {
-                    const heal = Math.floor(40 * currentFactor.heal);
-                    f.hp = Math.min(f.maxHp, f.hp + Math.max(5, heal));
-                    f.sunBonus += 1;
+                if (dist < dynamicRadius + 50) {
+                    // Ako frakcija ima malo HP, Sunce je leči duplo brže (Rubberbanding)
+                    const lowHpMultiplier = f.hp < (STARTING_HP * 0.3) ? 2.5 : 1.0;
+                    const heal = Math.floor((Math.random() * 80 + 30) * currentFactor.heal * lowHpMultiplier);
+                    f.hp = Math.min(f.maxHp, f.hp + heal);
+                    f.sunBonus += heal;
                 }
             });
         }
 
         function drawSolarSun() {
             ctx.save();
-            const r = solarSun.radius + Math.sin(solarSun.pulse) * 8;
+            const r = solarSun.radius + Math.sin(solarSun.pulse) * 10;
 
-            // Ogromni solarni zraci
-            const sunGlow = ctx.createRadialGradient(solarSun.x, solarSun.y, 10, solarSun.x, solarSun.y, r + 80);
-            sunGlow.addColorStop(0, 'rgba(255, 230, 100, 1)');
-            sunGlow.addColorStop(0.3, 'rgba(255, 140, 0, 0.6)');
-            sunGlow.addColorStop(0.7, 'rgba(255, 50, 0, 0.2)');
+            const sunGlow = ctx.createRadialGradient(solarSun.x, solarSun.y, 10, solarSun.x, solarSun.y, r + 90);
+            sunGlow.addColorStop(0, 'rgba(255, 240, 150, 1)');
+            sunGlow.addColorStop(0.3, 'rgba(255, 120, 0, 0.7)');
+            sunGlow.addColorStop(0.8, 'rgba(255, 30, 0, 0.15)');
             sunGlow.addColorStop(1, 'transparent');
 
             ctx.fillStyle = sunGlow;
             ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, r + 80, 0, Math.PI * 2);
+            ctx.arc(solarSun.x, solarSun.y, r + 90, 0, Math.PI * 2);
             ctx.fill();
 
-            // Središte Sunca
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, r * 0.6, 0, Math.PI * 2);
+            ctx.arc(solarSun.x, solarSun.y, r * 0.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
-        // Monstrumi sa JPG sličicama
+        // JPG Monstrumi - Napadaju najjaču frakciju i balansiraju igru
         class Monster {
             constructor() { this.reset(); }
             reset() {
                 const rect = canvas.parentElement.getBoundingClientRect();
-                this.x = rect.width / 2 + (Math.random() - 0.5) * 40;
-                this.y = rect.height / 2 + (Math.random() - 0.5) * 40;
-                this.speed = Math.random() * 1.8 + 0.8;
+                this.x = rect.width / 2 + (Math.random() - 0.5) * 60;
+                this.y = rect.height / 2 + (Math.random() - 0.5) * 60;
+                this.speed = Math.random() * 2.0 + 1.0;
                 this.pickTarget();
             }
             pickTarget() {
-                const alive = factions.filter(f => f.hp > 0);
-                if (alive.length > 0) this.target = alive[Math.floor(Math.random() * alive.length)];
+                // Monstrumi biraju najjaču frakciju da spreče rani beg u bodovima
+                const alive = factions.filter(f => f.hp > 0).sort((a, b) => b.hp - a.hp);
+                if (alive.length > 0) {
+                    // 70% šanse da napadnu vodeću frakciju
+                    this.target = (Math.random() < 0.7) ? alive[0] : alive[Math.floor(Math.random() * alive.length)];
+                }
             }
             update() {
                 if (!this.target || this.target.hp <= 0) this.pickTarget();
@@ -284,25 +286,25 @@
                     this.x += (dx / dist) * this.speed;
                     this.y += (dy / dist) * this.speed;
 
-                    if (dist < 16) {
-                        const dmg = Math.floor((Math.random() * 500 + 100) * currentFactor.dmg);
+                    if (dist < 18) {
+                        const dmg = Math.floor((Math.random() * 800 + 300) * currentFactor.dmg);
                         this.target.hp = Math.max(0, this.target.hp - dmg);
-                        logMessage(`[NAPAD ZVERI] Monstrum pogodio ${this.target.name} (-${dmg} HP)`);
+                        logMessage(`[BALANS ZVERI] Monstrum oslabio lidera ${this.target.name} (-${dmg} HP)`);
                         this.reset();
                     }
                 }
             }
             draw() {
-                ctx.drawImage(monsterImg, this.x - 12, this.y - 12, 24, 24);
+                ctx.drawImage(monsterImg, this.x - 14, this.y - 14, 28, 28);
             }
         }
 
-        const monsters = Array.from({ length: 10 }, () => new Monster());
+        const monsters = Array.from({ length: 12 }, () => new Monster());
 
-        // Haotični Neizvesni Napadi Frakcija
+        // Nepredvidiva Borbena Logika
         let beams = [];
         function runWarEngine() {
-            if (Math.random() < 0.12 * currentFactor.chaos) {
+            if (Math.random() < 0.25 * currentFactor.chaos) {
                 const alive = factions.filter(f => f.hp > 0);
                 if (alive.length < 2) return;
 
@@ -310,13 +312,21 @@
                 const tgt = alive[Math.floor(Math.random() * alive.length)];
 
                 if (src.id !== tgt.id) {
-                    // Mogućnost kritičnog preokreta (Nepredvidivost)
-                    const isCrit = Math.random() < 0.2;
-                    const dmg = Math.floor((Math.random() * 800 + 200) * (isCrit ? 2.5 : 1.0));
+                    // Iznenadni masivni udarci ili preusmeravanja napada
+                    const isChaosStrike = Math.random() < 0.15;
+                    const dmg = Math.floor((Math.random() * 1200 + 300) * (isChaosStrike ? 3.0 : 1.0));
+                    
                     tgt.hp = Math.max(0, tgt.hp - dmg);
 
+                    // Ažuriranje statusa
+                    src.meta = isChaosStrike ? 'HAOS UDAR' : 'Napad';
+                    tgt.meta = tgt.hp < (STARTING_HP * 0.25) ? 'Očajnički Otpor' : 'Odbrambeni';
+
                     beams.push({ sx: src.x, sy: src.y, tx: tgt.x, ty: tgt.y, color: src.color, alpha: 1 });
-                    if (isCrit) logMessage(`[KRITIČAN PREOKRET] ${src.name} razara ${tgt.name} (-${dmg} HP)`);
+
+                    if (isChaosStrike) {
+                        logMessage(`[NEPREDVIDIV PREOKRET] ${src.name} lansira HAOS UDAR na ${tgt.name} (-${dmg} HP)`);
+                    }
                 }
             }
         }
@@ -335,12 +345,11 @@
                 ctx.save();
                 ctx.translate(f.x, f.y);
 
-                // Zgrada
-                ctx.shadowBlur = 12;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = f.color;
                 ctx.fillStyle = '#061a0c';
                 ctx.strokeStyle = f.color;
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2.5;
 
                 ctx.beginPath();
                 ctx.arc(0, 0, 14, 0, Math.PI * 2);
@@ -372,7 +381,7 @@
                 document.getElementById('stat-name').innerText = selectedFaction.name;
                 document.getElementById('stat-name').style.color = selectedFaction.color;
                 document.getElementById('stat-hp').innerText = `${Math.floor(selectedFaction.hp)}`;
-                document.getElementById('stat-sun').innerText = `+${selectedFaction.sunBonus} HP`;
+                document.getElementById('stat-sun').innerText = `+${Math.floor(selectedFaction.sunBonus)} HP`;
                 document.getElementById('stat-meta').innerText = selectedFaction.meta;
             }
         }
@@ -381,7 +390,7 @@
             const rect = canvas.parentElement.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
 
-            // Pozadina Džungle
+            // Mračna Džungla
             ctx.fillStyle = '#020b05';
             ctx.fillRect(0, 0, rect.width, rect.height);
 
@@ -389,7 +398,7 @@
             drawSolarSun();
             runWarEngine();
 
-            // Laseri
+            // Laserski projektili
             beams.forEach((b, i) => {
                 ctx.save();
                 ctx.strokeStyle = b.color;
@@ -397,7 +406,7 @@
                 ctx.globalAlpha = b.alpha;
                 ctx.beginPath(); ctx.moveTo(b.sx, b.sy); ctx.lineTo(b.tx, b.ty); ctx.stroke();
                 ctx.restore();
-                b.alpha -= 0.05;
+                b.alpha -= 0.06;
                 if (b.alpha <= 0) beams.splice(i, 1);
             });
 
@@ -409,12 +418,12 @@
             requestAnimationFrame(loop);
         }
 
-        // Rotacija Spoljašnjih Faktora
+        // Smena Spoljašnjih Faktora na svakih 3.5 sekunde radi maksimalnog dinamičkog haosa
         setInterval(() => {
             currentFactor = factors[Math.floor(Math.random() * factors.length)];
             factorDisplay.innerText = `FAKTOR: ${currentFactor.name}`;
-            logMessage(`[SPOLJAŠNJI EVENT] ${currentFactor.name} je aktiviran!`);
-        }, 4000);
+            logMessage(`[SPOLJAŠNJI DOGAĐAJ] ${currentFactor.name}`);
+        }, 3500);
 
         // Tajmer
         let totalSeconds = 0;

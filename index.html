@@ -3,266 +3,499 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 SYSTEMS - TOTAL WAR SIMULATION</title>
+    <title>10 SYSTEMS - DEEP JUNGLE WAR</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Share+Tech+Mono&display=swap');
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #020504;
-            color: #b5c4cb;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 11px;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Courier New', Courier, monospace;
         }
-
-        /* Top Header */
-        header {
-            height: 35px;
-            background: #050d0a;
-            border-bottom: 1px solid #102a20;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px;
-            font-family: 'Share Tech Mono', monospace;
-            z-index: 10;
-        }
-        .title { color: #00ffaa; font-weight: bold; font-size: 13px; letter-spacing: 1px; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
-        .timer { color: #00d2ff; }
-
-        /* Main Warzone Layout */
-        #warzone {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 160px 1fr;
-            position: relative;
-            background: #000;
-        }
-
-        /* Factions Sidebar */
-        #factions-side {
-            background: rgba(3, 10, 7, 0.92);
-            border-right: 1px solid #102a20;
-            padding: 5px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            z-index: 5;
-        }
-        .f-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 6px;
-            background: #06140e;
-            border-left: 4px solid #555;
-            font-size: 11px;
-            border-radius: 2px;
-        }
-        .f-name { font-weight: bold; color: #fff; }
-        .f-val { font-family: 'Share Tech Mono', monospace; color: #a0c0b0; }
-
-        /* Map Canvas Container - DEEP JUNGLE BACKGROUND */
-        #map-area {
-            position: relative;
+        body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-image: url('https://images.unsplash.com/photo-1511497584788-876761c11969?q=80&w=1200&auto=format&fit=crop'); /* Deep Jungle Texture */
-            background-size: cover;
-            background-position: center;
+            background-color: #020b05;
+            color: #00ff66;
         }
-        canvas { display: block; width: 100%; height: 100%; }
-
-        /* Bottom Control Panel */
-        footer {
-            height: 100px;
-            background: #040a08;
-            border-top: 1px solid #102a20;
-            display: grid;
-            grid-template-columns: 1fr 120px;
-            padding: 5px 10px;
-            gap: 10px;
-            z-index: 10;
-        }
-        #log { 
-            font-family: 'Share Tech Mono', monospace; 
-            font-size: 10px; 
-            color: #39ff14; 
-            overflow-y: auto;
-            line-height: 1.3;
-        }
-
-        .minimap-box {
-            border: 1px solid #102a20;
-            background: #020504;
+        #game-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #00ffaa;
-            font-size: 9px;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        /* Sidebar sa rang listom */
+        #sidebar {
+            width: 220px;
+            background: rgba(4, 18, 10, 0.92);
+            border-right: 1px solid #00ff6633;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 12px 8px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #00ff6633;
+            color: #00ff66;
             text-align: center;
         }
+        #leaderboard {
+            list-style: none;
+            padding: 5px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .faction-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: rgba(0, 255, 102, 0.03);
+            border-left: 3px solid transparent;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .faction-row:hover {
+            background: rgba(0, 255, 102, 0.15);
+        }
+        .faction-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .faction-rank {
+            font-weight: bold;
+            width: 14px;
+        }
+        .faction-name {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .faction-score {
+            color: #a0ffa0;
+            font-size: 10px;
+        }
 
-        @media (max-width: 600px) {
-            #warzone { grid-template-columns: 110px 1fr; }
+        /* Glavni ekranski deo */
+        #main-area {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        #top-bar {
+            height: 35px;
+            background: rgba(4, 18, 10, 0.85);
+            border-bottom: 1px solid #00ff6633;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 12px;
+            z-index: 5;
+        }
+        .active-event {
+            color: #ffcc00;
+            font-weight: bold;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        #canvas-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Dno sa konzolom i statistikom */
+        #bottom-bar {
+            height: 80px;
+            background: rgba(4, 18, 10, 0.95);
+            border-top: 1px solid #00ff6633;
+            display: flex;
+            padding: 8px;
+            gap: 10px;
+            font-size: 10px;
+            z-index: 5;
+        }
+        #console-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 2px;
+            color: #00dd55;
+        }
+        #stats-panel {
+            width: 220px;
+            border-left: 1px dashed #00ff6633;
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Popup Modali / Tooltip */
+        #faction-modal {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            width: 200px;
+            background: rgba(2, 15, 8, 0.95);
+            border: 1px solid #00ff66;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            z-index: 20;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+        #faction-modal h4 {
+            border-bottom: 1px solid #00ff66;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="title">10 SYSTEMS - DEEP JUNGLE WAR</div>
-        <div class="timer" id="time-display">00:28 / 10:00</div>
-    </header>
-
-    <div id="warzone">
-        <div id="factions-side">
-            <div class="f-card" style="border-color:#ff3333;"><span class="f-name">1 ARES</span><span class="f-val" id="v-0">85k</span></div>
-            <div class="f-card" style="border-color:#008cff;"><span class="f-name">2 ORION</span><span class="f-val" id="v-1">74k</span></div>
-            <div class="f-card" style="border-color:#33ff33;"><span class="f-name">3 ZEPHYR</span><span class="f-val" id="v-2">63k</span></div>
-            <div class="f-card" style="border-color:#a54cff;"><span class="f-name">4 NEXUS</span><span class="f-val" id="v-3">58k</span></div>
-            <div class="f-card" style="border-color:#ffcc00;"><span class="f-name">5 SOLARIS</span><span class="f-val" id="v-4">51k</span></div>
-            <div class="f-card" style="border-color:#00ffff;"><span class="f-name">6 VORTEX</span><span class="f-val" id="v-5">45k</span></div>
-            <div class="f-card" style="border-color:#ff8c4c;"><span class="f-name">7 ECLIPSE</span><span class="f-val" id="v-6">36k</span></div>
-            <div class="f-card" style="border-color:#ff4c8c;"><span class="f-name">8 PHOENIX</span><span class="f-val" id="v-7">31k</span></div>
-            <div class="f-card" style="border-color:#e0e0e0;"><span class="f-name">9 TITAN</span><span class="f-val" id="v-8">25k</span></div>
-            <div class="f-card" style="border-color:#00ffaa;"><span class="f-name">10 NOVA</span><span class="f-val" id="v-9">18k</span></div>
+    <div id="game-container">
+        <!-- Sidebar sa Frakcijama -->
+        <div id="sidebar">
+            <div class="sidebar-title">10 SYSTEMS - LEADERBOARD</div>
+            <ul id="leaderboard"></ul>
         </div>
 
-        <div id="map-area">
-            <canvas id="canvas"></canvas>
+        <!-- Glavna Mapa -->
+        <div id="main-area">
+            <div id="top-bar">
+                <div>10 SYSTEMS - DEEP JUNGLE WAR</div>
+                <div id="event-display" class="active-event">Faktor: Stabilno</div>
+                <div id="timer-display">00:00 / 10:00</div>
+            </div>
+
+            <div id="canvas-wrapper">
+                <canvas id="warCanvas"></canvas>
+            </div>
+
+            <!-- Dno sa logom i pojedinačnom statistikom -->
+            <div id="bottom-bar">
+                <div id="console-log"></div>
+                <div id="stats-panel">
+                    <div style="font-weight:bold; margin-bottom: 3px; color:#fff;" id="stat-name">Izaberite sistem</div>
+                    <div>HP: <span id="stat-hp">-</span></div>
+                    <div>Status borbe: <span id="stat-status">-</span></div>
+                    <div>Dobitak od sunca: <span id="stat-sun">-</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tooltip/Modal za detalje -->
+        <div id="faction-modal">
+            <h4 id="modal-title">FRAKCIJA</h4>
+            <div id="modal-body" style="font-size: 10px;"></div>
         </div>
     </div>
 
-    <footer>
-        <div id="log">
-            [00:01] INICIJALIZACIJA JUNGLE TOTAL WAR SIMULACIJE...<br>
-            [00:05] 10 SISTEMA ZAUZIMAJU BAZNI SEKTOR.<br>
-            [00:12] ARES šalje patrolu ka centru džungle.
-        </div>
-        <div class="minimap-box">
-            MINI MAPA<br>DEEP JUNGLE
-        </div>
-    </footer>
-
     <script>
-        const canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('warCanvas');
         const ctx = canvas.getContext('2d');
+        const leaderboard = document.getElementById('leaderboard');
+        const consoleLog = document.getElementById('console-log');
+        const eventDisplay = document.getElementById('event-display');
+        const timerDisplay = document.getElementById('timer-display');
 
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        // Dimenzije
+        let width = canvas.width = canvas.parentElement.clientWidth;
+        let height = canvas.height = canvas.parentElement.clientHeight;
 
-        // 10 Frakcija sa pozicijama u džungli
-        const factions = [
-            { name: "ARES", color: "#ff3333", x: 0.15, y: 0.2, units: 85 },
-            { name: "ORION", color: "#008cff", x: 0.5, y: 0.15, units: 74 },
-            { name: "ZEPHYR", color: "#33ff33", x: 0.85, y: 0.2, units: 63 },
-            { name: "NEXUS", color: "#a54cff", x: 0.2, y: 0.5, units: 58 },
-            { name: "SOLARIS", color: "#ffcc00", x: 0.8, y: 0.5, units: 51 },
-            { name: "VORTEX", color: "#00ffff", x: 0.15, y: 0.8, units: 45 },
-            { name: "ECLIPSE", color: "#ff8c4c", x: 0.5, y: 0.85, units: 36 },
-            { name: "PHOENIX", color: "#ff4c8c", x: 0.85, y: 0.8, units: 31 },
-            { name: "TITAN", color: "#e0e0e0", x: 0.35, y: 0.35, units: 25 },
-            { name: "NOVA", color: "#00ffaa", x: 0.65, y: 0.65, units: 18 }
+        window.addEventListener('resize', () => {
+            width = canvas.width = canvas.parentElement.clientWidth;
+            height = canvas.height = canvas.parentElement.clientHeight;
+            initSystemPositions();
+        });
+
+        // Konfiguracija Frakcija
+        const factionData = [
+            { id: 0, name: 'ARES', color: '#ff3344', hp: 85000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 1, name: 'ORION', color: '#3399ff', hp: 74000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: 63000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: 58000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: 51000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 5, name: 'VORTEX', color: '#00ffff', hp: 45000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: 36000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: 31000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 8, name: 'TITAN', color: '#ffffff', hp: 25000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 },
+            { id: 9, name: 'NOVA', color: '#00ffaa', hp: 18000, maxHp: 100000, x: 0, y: 0, status: 'Miran', sunBonus: 0 }
         ];
 
-        let troops = [];
+        // 1. Pozicije u Džungli
+        function initSystemPositions() {
+            const padding = 60;
+            factionData.forEach((f, i) => {
+                const angle = (i / factionData.length) * Math.PI * 2;
+                f.x = width / 2 + Math.cos(angle) * (width / 3.5);
+                f.y = height / 2 + Math.sin(angle) * (height / 3.5);
+            });
+        }
 
-        // Generisanje jedinica koje se kreću
-        function spawnTroop() {
-            let from = factions[Math.floor(Math.random() * factions.length)];
-            let to = factions[Math.floor(Math.random() * factions.length)];
-            if (from !== to) {
-                troops.push({
-                    x: from.x,
-                    y: from.y,
-                    targetX: to.x,
-                    targetY: to.y,
-                    color: from.color,
-                    progress: 0,
-                    speed: 0.005 + Math.random() * 0.005
-                });
+        // 2. Sunce i Ciklus Dana/Noći
+        let sunAngle = 0; // Od 0 do 2PI
+        let sunState = { x: 0, y: 0, isDay: true, intensity: 1 };
+
+        function updateSun() {
+            sunAngle += 0.002;
+            if (sunAngle > Math.PI * 2) sunAngle = 0;
+
+            // Putanja sunca po dijagonali ekrana
+            sunState.x = width / 2 + Math.cos(sunAngle) * (width * 0.6);
+            sunState.y = height / 2 + Math.sin(sunAngle) * (height * 0.6);
+            sunState.isDay = sunState.y < height / 2 + 100;
+            sunState.intensity = Math.max(0.1, Math.sin(sunAngle));
+
+            // Regeneracija Života (HP) zavisno od pokreta/borbe
+            if (sunState.isDay && Math.random() < 0.3) {
+                const activeFaction = factionData[Math.floor(Math.random() * factionData.length)];
+                if (activeFaction.status === 'U Borbi' || Math.random() < 0.5) {
+                    const hpGain = Math.floor(Math.random() * 400 + 100);
+                    activeFaction.hp = Math.min(activeFaction.maxHp, activeFaction.hp + hpGain);
+                    activeFaction.sunBonus += hpGain;
+                    logMessage(`[SUNCE] ${activeFaction.name} dobija +${hpGain} HP od sunčeve energije!`);
+                }
             }
         }
 
-        setInterval(spawnTroop, 800);
+        // 3. Spoljašnji Faktori (Džungla Događaji)
+        const externalFactors = [
+            { name: 'Stabilno', effect: 'Nema uticaja', color: '#00ff66' },
+            { name: 'Tropska Oluja', effect: 'Smanjena brzina napada (-30%)', color: '#00ccff' },
+            { name: 'Gusta Magla', effect: 'Napad na slepo (Kritične štete)', color: '#aaaaaa' },
+            { name: 'Solarna Baklja', effect: 'Dupliran HP regenerativni efekat', color: '#ff9900' }
+        ];
+        let currentFactor = externalFactors[0];
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setInterval(() => {
+            currentFactor = externalFactors[Math.floor(Math.random() * externalFactors.length)];
+            eventDisplay.innerText = `Faktor: ${currentFactor.name}`;
+            eventDisplay.style.color = currentFactor.color;
+            logMessage(`[FAKTOR] Aktiviran spoljašnji faktor: ${currentFactor.name}`);
+        }, 12000);
 
-            const w = canvas.width;
-            const h = canvas.height;
+        // Simulacija Borbe i Snopa svetlosti
+        let beams = [];
+        function simulateBattle() {
+            if (Math.random() < 0.08) {
+                const source = factionData[Math.floor(Math.random() * factionData.length)];
+                const target = factionData[Math.floor(Math.random() * factionData.length)];
 
-            // Crtanje linija veza (mreža borbe)
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < factions.length; i++) {
-                for (let j = i + 1; j < factions.length; j++) {
-                    ctx.strokeStyle = "rgba(0, 255, 170, 0.08)";
+                if (source.id !== target.id) {
+                    source.status = 'U Borbi';
+                    target.status = 'U Borbi';
+
+                    let dmg = Math.floor(Math.random() * 800 + 200);
+                    if (currentFactor.name === 'Gusta Magla') dmg *= 1.5;
+
+                    target.hp = Math.max(0, target.hp - dmg);
+
+                    beams.push({
+                        sx: source.x, sy: source.y,
+                        tx: target.x, ty: target.y,
+                        color: source.color,
+                        alpha: 1
+                    });
+
+                    logMessage(`[BORBA] ${source.name} napada ${target.name} (-${dmg} HP)`);
+
+                    setTimeout(() => {
+                        source.status = 'Miran';
+                        target.status = 'Miran';
+                    }, 2000);
+                }
+            }
+        }
+
+        function logMessage(text) {
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.innerText = `[${time}] ${text}`;
+            consoleLog.prepend(div);
+            if (consoleLog.children.length > 15) consoleLog.removeChild(consoleLog.lastChild);
+        }
+
+        // Crtanje Šumske Mape (Džungle)
+        function drawJungleMap() {
+            // Osnovna tamno-zelena tekstura
+            const grad = ctx.createLinearGradient(0, 0, width, height);
+            grad.addColorStop(0, '#020f06');
+            grad.addColorStop(0.5, '#051d0d');
+            grad.addColorStop(1, '#010a04');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Crtanje šumskih drveća/krošnji (Generisani krugovi u pozadini)
+            ctx.fillStyle = 'rgba(0, 40, 15, 0.2)';
+            for (let i = 0; i < 60; i++) {
+                const x = (Math.sin(i * 99) * 0.5 + 0.5) * width;
+                const y = (Math.cos(i * 33) * 0.5 + 0.5) * height;
+                ctx.beginPath();
+                ctx.arc(x, y, 40 + (i % 30), 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Izlazak/Zalazak Sunca (Svetlosni efekat na mapi)
+            if (sunState.isDay) {
+                const sunGlow = ctx.createRadialGradient(
+                    sunState.x, sunState.y, 10,
+                    sunState.x, sunState.y, width * 0.5
+                );
+                sunGlow.addColorStop(0, 'rgba(255, 200, 50, 0.25)');
+                sunGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = sunGlow;
+                ctx.fillRect(0, 0, width, height);
+
+                // Crtanje samog Sunca
+                ctx.save();
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = '#ffcc00';
+                ctx.fillStyle = '#ffeeaa';
+                ctx.beginPath();
+                ctx.arc(sunState.x, sunState.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            } else {
+                // Noćni filter
+                ctx.fillStyle = 'rgba(0, 5, 20, 0.4)';
+                ctx.fillRect(0, 0, width, height);
+            }
+        }
+
+        // Glavna Render Petlja
+        function render() {
+            drawJungleMap();
+            updateSun();
+            simulateBattle();
+
+            // Crtanje Linija Povezanosti Sistemâ
+            ctx.strokeStyle = 'rgba(0, 255, 102, 0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < factionData.length; i++) {
+                for (let j = i + 1; j < factionData.length; j++) {
                     ctx.beginPath();
-                    ctx.moveTo(factions[i].x * w, factions[i].y * h);
-                    ctx.lineTo(factions[j].x * w, factions[j].y * h);
+                    ctx.moveTo(factionData[i].x, factionData[i].y);
+                    ctx.lineTo(factionData[j].x, factionData[j].y);
                     ctx.stroke();
                 }
             }
 
-            // Crtanje jedinica u pokretu
-            for (let i = troops.length - 1; i >= 0; i--) {
-                let t = troops[i];
-                t.progress += t.speed;
-
-                let curX = (t.x + (t.targetX - t.x) * t.progress) * w;
-                let curY = (t.y + (t.targetY - t.y) * t.progress) * h;
-
-                ctx.fillStyle = t.color;
+            // Crtanje Laserskih Napada
+            beams.forEach((b, index) => {
+                ctx.save();
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = b.alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = b.color;
                 ctx.beginPath();
-                ctx.arc(curX, curY, 3, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.moveTo(b.sx, b.sy);
+                ctx.lineTo(b.tx, b.ty);
+                ctx.stroke();
+                ctx.restore();
 
-                if (t.progress >= 1) {
-                    troops.splice(i, 1);
-                }
-            }
-
-            // Crtanje 10 baza
-            factions.forEach((f, idx) => {
-                let bx = f.x * w;
-                let by = f.y * h;
-
-                // Svetleći efekat baze
-                let gradient = ctx.createRadialGradient(bx, by, 2, bx, by, 18);
-                gradient.addColorStop(0, f.color);
-                gradient.addColorStop(1, 'transparent');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(bx, by, 18, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Centar baze
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(bx, by, 5, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Naziv baze
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '10px Roboto Condensed';
-                ctx.fillText(f.name, bx - 15, by - 12);
+                b.alpha -= 0.03;
+                if (b.alpha <= 0) beams.splice(index, 1);
             });
 
-            requestAnimationFrame(draw);
+            // Crtanje Frakcijskih Čvorova
+            factionData.forEach(f => {
+                ctx.save();
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = f.color;
+
+                // Spoljašnji Prsten (HP indikator)
+                ctx.strokeStyle = f.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, 14, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Unutrašnje Jezgro
+                ctx.fillStyle = f.color;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ime Frakcije
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText(f.name, f.x, f.y - 20);
+
+                ctx.restore();
+            });
+
+            updateLeaderboardUI();
+            requestAnimationFrame(render);
         }
 
-        draw();
+        // Ažuriranje Sidebara
+        let selectedFaction = factionData[0];
+        function updateLeaderboardUI() {
+            const sorted = [...factionData].sort((a, b) => b.hp - a.hp);
+            leaderboard.innerHTML = '';
+
+            sorted.forEach((f, rank) => {
+                const li = document.createElement('li');
+                li.className = 'faction-row';
+                li.style.borderLeftColor = f.color;
+                li.onclick = () => selectFaction(f);
+                li.innerHTML = `
+                    <div class="faction-info">
+                        <span class="faction-rank">${rank + 1}</span>
+                        <span class="faction-name" style="color:${f.color}">${f.name}</span>
+                    </div>
+                    <span class="faction-score">${Math.floor(f.hp / 1000)}k</span>
+                `;
+                leaderboard.appendChild(li);
+            });
+
+            // Stat Panel Ažuriranje
+            if (selectedFaction) {
+                document.getElementById('stat-name').innerText = selectedFaction.name;
+                document.getElementById('stat-name').style.color = selectedFaction.color;
+                document.getElementById('stat-hp').innerText = `${selectedFaction.hp} / ${selectedFaction.maxHp}`;
+                document.getElementById('stat-status').innerText = selectedFaction.status;
+                document.getElementById('stat-sun').innerText = `+${selectedFaction.sunBonus} HP`;
+            }
+        }
+
+        function selectFaction(f) {
+            selectedFaction = f;
+        }
+
+        // Pokretanje
+        initSystemPositions();
+        render();
+
+        // Timer
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s} / 10:00`;
+        }, 1000);
     </script>
 </body>
 </html>

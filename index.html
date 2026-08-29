@@ -9,7 +9,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #04080a;
+            background-color: #020504;
             color: #b5c4cb;
             font-family: 'Roboto Condensed', sans-serif;
             font-size: 11px;
@@ -23,125 +23,131 @@
         /* Top Header */
         header {
             height: 35px;
-            background: #081014;
-            border-bottom: 1px solid #1a2c35;
+            background: #050d0a;
+            border-bottom: 1px solid #102a20;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 10px;
             font-family: 'Share Tech Mono', monospace;
+            z-index: 10;
         }
-        .title { color: #fff; font-weight: bold; font-size: 13px; letter-spacing: 1px; }
+        .title { color: #00ffaa; font-weight: bold; font-size: 13px; letter-spacing: 1px; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
         .timer { color: #00d2ff; }
 
         /* Main Warzone Layout */
         #warzone {
             flex: 1;
             display: grid;
-            grid-template-columns: 160px 1fr 140px;
+            grid-template-columns: 160px 1fr;
             position: relative;
             background: #000;
         }
 
         /* Factions Sidebar */
         #factions-side {
-            background: rgba(6, 12, 16, 0.95);
-            border-right: 1px solid #1a2c35;
+            background: rgba(3, 10, 7, 0.92);
+            border-right: 1px solid #102a20;
             padding: 5px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
+            z-index: 5;
         }
         .f-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 4px 6px;
-            background: #0a141a;
-            border-left: 3px solid #555;
+            background: #06140e;
+            border-left: 4px solid #555;
             font-size: 11px;
+            border-radius: 2px;
         }
         .f-name { font-weight: bold; color: #fff; }
-        .f-val { font-family: 'Share Tech Mono', monospace; color: #888; }
+        .f-val { font-family: 'Share Tech Mono', monospace; color: #a0c0b0; }
 
-        /* Map Canvas Container */
+        /* Map Canvas Container - DEEP JUNGLE BACKGROUND */
         #map-area {
             position: relative;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-image: url('https://images.unsplash.com/photo-1524654458049-e36be0721fa2?q=80&w=1000&auto=format&fit=crop'); /* Map Background */
+            background-image: url('https://images.unsplash.com/photo-1511497584788-876761c11969?q=80&w=1200&auto=format&fit=crop'); /* Deep Jungle Texture */
             background-size: cover;
             background-position: center;
         }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* Stats Sidebar */
-        #stats-side {
-            background: rgba(6, 12, 16, 0.95);
-            border-left: 1px solid #1a2c35;
-            padding: 5px;
-            font-size: 10px;
-        }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid #11222d; padding-bottom: 2px; }
-
-        /* Bottom Log & MiniMap */
+        /* Bottom Control Panel */
         footer {
-            height: 90px;
-            background: #060c10;
-            border-top: 1px solid #1a2c35;
+            height: 100px;
+            background: #040a08;
+            border-top: 1px solid #102a20;
             display: grid;
-            grid-template-columns: 1fr 100px;
-            padding: 5px;
+            grid-template-columns: 1fr 120px;
+            padding: 5px 10px;
+            gap: 10px;
+            z-index: 10;
         }
-        #log { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #4cff4c; overflow-y: hidden; }
+        #log { 
+            font-family: 'Share Tech Mono', monospace; 
+            font-size: 10px; 
+            color: #39ff14; 
+            overflow-y: auto;
+            line-height: 1.3;
+        }
 
-        /* Mobile Responsive */
-        @media (max-width: 700px) {
-            #warzone { grid-template-columns: 90px 1fr; }
-            #stats-side { display: none; }
+        .minimap-box {
+            border: 1px solid #102a20;
+            background: #020504;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffaa;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            #warzone { grid-template-columns: 110px 1fr; }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="title">10 SYSTEMS - TOTAL WAR</div>
-        <div class="timer">00:28 / 01:00</div>
+        <div class="title">10 SYSTEMS - DEEP JUNGLE WAR</div>
+        <div class="timer" id="time-display">00:28 / 10:00</div>
     </header>
 
     <div id="warzone">
         <div id="factions-side">
-            <div class="f-card" style="border-color:#ff4c4c;"><span class="f-name">1 ARES</span><span class="f-val">85k</span></div>
-            <div class="f-card" style="border-color:#008cff;"><span class="f-name">2 ORION</span><span class="f-val">74k</span></div>
-            <div class="f-card" style="border-color:#4cff4c;"><span class="f-name">3 ZEPHYR</span><span class="f-val">63k</span></div>
-            <div class="f-card" style="border-color:#a54cff;"><span class="f-name">4 NEXUS</span><span class="f-val">58k</span></div>
-            <div class="f-card" style="border-color:#ffcc00;"><span class="f-name">5 SOLARIS</span><span class="f-val">51k</span></div>
-            <div class="f-card" style="border-color:#00ffff;"><span class="f-name">6 VORTEX</span><span class="f-val">45k</span></div>
-            <div class="f-card" style="border-color:#ff8c4c;"><span class="f-name">7 ECLIPSE</span><span class="f-val">36k</span></div>
-            <div class="f-card" style="border-color:#ff4c8c;"><span class="f-name">8 PHOENIX</span><span class="f-val">31k</span></div>
-            <div class="f-card" style="border-color:#cccccc;"><span class="f-name">9 TITAN</span><span class="f-val">25k</span></div>
-            <div class="f-card" style="border-color:#ffffff;"><span class="f-name">10 NOVA</span><span class="f-val">18k</span></div>
+            <div class="f-card" style="border-color:#ff3333;"><span class="f-name">1 ARES</span><span class="f-val" id="v-0">85k</span></div>
+            <div class="f-card" style="border-color:#008cff;"><span class="f-name">2 ORION</span><span class="f-val" id="v-1">74k</span></div>
+            <div class="f-card" style="border-color:#33ff33;"><span class="f-name">3 ZEPHYR</span><span class="f-val" id="v-2">63k</span></div>
+            <div class="f-card" style="border-color:#a54cff;"><span class="f-name">4 NEXUS</span><span class="f-val" id="v-3">58k</span></div>
+            <div class="f-card" style="border-color:#ffcc00;"><span class="f-name">5 SOLARIS</span><span class="f-val" id="v-4">51k</span></div>
+            <div class="f-card" style="border-color:#00ffff;"><span class="f-name">6 VORTEX</span><span class="f-val" id="v-5">45k</span></div>
+            <div class="f-card" style="border-color:#ff8c4c;"><span class="f-name">7 ECLIPSE</span><span class="f-val" id="v-6">36k</span></div>
+            <div class="f-card" style="border-color:#ff4c8c;"><span class="f-name">8 PHOENIX</span><span class="f-val" id="v-7">31k</span></div>
+            <div class="f-card" style="border-color:#e0e0e0;"><span class="f-name">9 TITAN</span><span class="f-val" id="v-8">25k</span></div>
+            <div class="f-card" style="border-color:#00ffaa;"><span class="f-name">10 NOVA</span><span class="f-val" id="v-9">18k</span></div>
         </div>
 
         <div id="map-area">
             <canvas id="canvas"></canvas>
         </div>
-
-        <div id="stats-side">
-            <div style="color:#00d2ff; font-weight:bold; margin-bottom:5px;">STATISTIKA</div>
-            <div class="stat-row"><span>VOJNA SNAGA</span><span>94%</span></div>
-            <div class="stat-row"><span>JEDINICE</span><span>452k</span></div>
-            <div class="stat-row"><span>RESURSI</span><span>MAX</span></div>
-            <div class="stat-row"><span>TERITORIJA</span><span>10/10</span></div>
-        </div>
     </div>
 
     <footer>
         <div id="log">
-            [00:07] ORION je zauzeo rudnik Kristala<br>
-            [00:12] ARES napada bazu ECLIPSE<br>
-            [00:18] ZEPHYR je zauzeo skladište
+            [00:01] INICIJALIZACIJA JUNGLE TOTAL WAR SIMULACIJE...<br>
+            [00:05] 10 SISTEMA ZAUZIMAJU BAZNI SEKTOR.<br>
+            [00:12] ARES šalje patrolu ka centru džungle.
+        </div>
+        <div class="minimap-box">
+            MINI MAPA<br>DEEP JUNGLE
         </div>
     </footer>
 
@@ -156,33 +162,107 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Crtanje efekata na mapi
+        // 10 Frakcija sa pozicijama u džungli
+        const factions = [
+            { name: "ARES", color: "#ff3333", x: 0.15, y: 0.2, units: 85 },
+            { name: "ORION", color: "#008cff", x: 0.5, y: 0.15, units: 74 },
+            { name: "ZEPHYR", color: "#33ff33", x: 0.85, y: 0.2, units: 63 },
+            { name: "NEXUS", color: "#a54cff", x: 0.2, y: 0.5, units: 58 },
+            { name: "SOLARIS", color: "#ffcc00", x: 0.8, y: 0.5, units: 51 },
+            { name: "VORTEX", color: "#00ffff", x: 0.15, y: 0.8, units: 45 },
+            { name: "ECLIPSE", color: "#ff8c4c", x: 0.5, y: 0.85, units: 36 },
+            { name: "PHOENIX", color: "#ff4c8c", x: 0.85, y: 0.8, units: 31 },
+            { name: "TITAN", color: "#e0e0e0", x: 0.35, y: 0.35, units: 25 },
+            { name: "NOVA", color: "#00ffaa", x: 0.65, y: 0.65, units: 18 }
+        ];
+
+        let troops = [];
+
+        // Generisanje jedinica koje se kreću
+        function spawnTroop() {
+            let from = factions[Math.floor(Math.random() * factions.length)];
+            let to = factions[Math.floor(Math.random() * factions.length)];
+            if (from !== to) {
+                troops.push({
+                    x: from.x,
+                    y: from.y,
+                    targetX: to.x,
+                    targetY: to.y,
+                    color: from.color,
+                    progress: 0,
+                    speed: 0.005 + Math.random() * 0.005
+                });
+            }
+        }
+
+        setInterval(spawnTroop, 800);
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Crtanje svetlećih baza
-            const bases = [
-                {x: 50, y: 50, color: '#ff4c4c'},
-                {x: 200, y: 80, color: '#008cff'},
-                {x: 120, y: 220, color: '#4cff4c'},
-                {x: 250, y: 280, color: '#ffcc00'}
-            ];
 
-            bases.forEach(b => {
-                ctx.fillStyle = b.color;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Crtanje linija veza (mreža borbe)
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < factions.length; i++) {
+                for (let j = i + 1; j < factions.length; j++) {
+                    ctx.strokeStyle = "rgba(0, 255, 170, 0.08)";
+                    ctx.beginPath();
+                    ctx.moveTo(factions[i].x * w, factions[i].y * h);
+                    ctx.lineTo(factions[j].x * w, factions[j].y * h);
+                    ctx.stroke();
+                }
+            }
+
+            // Crtanje jedinica u pokretu
+            for (let i = troops.length - 1; i >= 0; i--) {
+                let t = troops[i];
+                t.progress += t.speed;
+
+                let curX = (t.x + (t.targetX - t.x) * t.progress) * w;
+                let curY = (t.y + (t.targetY - t.y) * t.progress) * h;
+
+                ctx.fillStyle = t.color;
                 ctx.beginPath();
-                ctx.arc(b.x, b.y, 8, 0, Math.PI * 2);
+                ctx.arc(curX, curY, 3, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1;
-                ctx.stroke();
+
+                if (t.progress >= 1) {
+                    troops.splice(i, 1);
+                }
+            }
+
+            // Crtanje 10 baza
+            factions.forEach((f, idx) => {
+                let bx = f.x * w;
+                let by = f.y * h;
+
+                // Svetleći efekat baze
+                let gradient = ctx.createRadialGradient(bx, by, 2, bx, by, 18);
+                gradient.addColorStop(0, f.color);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(bx, by, 18, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Centar baze
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(bx, by, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Naziv baze
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Roboto Condensed';
+                ctx.fillText(f.name, bx - 15, by - 12);
             });
 
             requestAnimationFrame(draw);
         }
+
         draw();
     </script>
 </body>
 </html>
-
-            

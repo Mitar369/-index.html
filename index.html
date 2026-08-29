@@ -1,212 +1,205 @@
-<!DOCTYPE html>
-<html lang="sr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>GLITCH.EXE — MULTIVERSE WAR ENGINE</title>
+const canvas = document.getElementById("warCanvas");
+const ctx = canvas.getContext("2d", {
+    alpha: false,
+    desynchronized: true
+});
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    user-select:none;
-    font-family:"Courier New",monospace;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-    color:#00ffcc;
-}
-
-#game{
-    width:100vw;
-    height:100vh;
-    display:flex;
-    background:#000;
-}
-
-/* SIDEBAR */
-#sidebar{
-    width:230px;
-    flex-shrink:0;
-    background:rgba(2,8,18,.97);
-    border-right:1px solid #00ffcc55;
-    z-index:20;
-    display:flex;
-    flex-direction:column;
-}
-
-.title{
-    height:45px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    font-size:11px;
-    color:#fff;
-    border-bottom:1px solid #00ffcc44;
-    text-shadow:0 0 8px #00ffcc;
-}
-
-#leaderboard{
-    list-style:none;
-    padding:6px;
-    overflow-y:auto;
-    flex:1;
-}
-
-.faction{
-    position:relative;
-    padding:7px;
-    margin-bottom:4px;
-    border-left:4px solid;
-    background:rgba(0,255,204,.035);
-    font-size:9px;
-    transition:.15s;
-}
-
-.faction:hover{
-    background:rgba(0,255,204,.15);
-}
-
-.faction-top{
-    display:flex;
-    justify-content:space-between;
-    color:#fff;
-}
-
-.hpbar{
-    height:4px;
-    margin-top:4px;
-    background:#111;
-}
-
-.hpfill{
-    height:100%;
-    transition:width .2s;
-}
-
-/* MAIN */
-#main{
-    flex:1;
-    min-width:0;
-    display:flex;
-    flex-direction:column;
-}
-
-#top{
-    height:45px;
-    flex-shrink:0;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 12px;
-    background:rgba(2,8,18,.97);
-    border-bottom:1px solid #00ffcc55;
-    font-size:11px;
-    z-index:10;
-}
-
-#timer{
-    color:#00ffcc;
-    font-size:14px;
-    font-weight:bold;
-}
-
-#speed{
-    color:#fff;
-}
-
-#canvasArea{
-    position:relative;
-    flex:1;
-    min-height:0;
-    overflow:hidden;
-    background:#000;
-}
+const canvasArea = document.getElementById("canvasArea");
 
 /*
-  KLJUČNI FIX:
-  Canvas više NE koristi width:100%;height:100%.
-  Zadržava 16:9 odnos i samo se proporcionalno smanjuje
-  na mobilnom telefonu.
+============================================================
+HONOR 90 — ADAPTIVE MAX RESOLUTION
+============================================================
+
+Honor 90 fizička rezolucija:
+2664 × 1200
+
+Ne koristimo fiksnih 3840×2160.
+Canvas se automatski prilagođava stvarnom ekranu.
+
+devicePixelRatio omogućava maksimalnu oštrinu.
 */
-#warCanvas{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    display:block;
-    background:#000;
-}
 
-/* BOTTOM */
-#bottom{
-    height:100px;
-    flex-shrink:0;
-    display:flex;
-    gap:10px;
-    padding:7px;
-    background:rgba(2,8,18,.97);
-    border-top:1px solid #00ffcc55;
-    font-size:9px;
-    z-index:10;
-}
+const HONOR90_WIDTH = 2664;
+const HONOR90_HEIGHT = 1200;
 
-#console{
-    flex:1;
-    overflow:hidden;
-    color:#00ffcc;
-}
+let WORLD_WIDTH = HONOR90_WIDTH;
+let WORLD_HEIGHT = HONOR90_HEIGHT;
 
-.log{
-    margin-bottom:3px;
-}
+let renderScale = 1;
 
-#stats{
-    width:230px;
-    border-left:1px dashed #00ffcc44;
-    padding-left:10px;
-    line-height:15px;
-}
+function getMaxResolution() {
 
-#selectedName{
-    font-size:12px;
-    font-weight:bold;
-    color:#fff;
-}
+    const dpr = window.devicePixelRatio || 1;
 
-/* MOBILE */
-@media(max-width:700px){
+    /*
+    Na Honor 90 browser viewport može biti manji
+    od fizičke rezolucije zbog navigacije/status bara.
 
-    #sidebar{
-        width:125px;
+    Uzimamo stvarnu dostupnu veličinu.
+    */
+
+    const screenW = Math.max(
+        window.innerWidth,
+        window.screen.width
+    );
+
+    const screenH = Math.max(
+        window.innerHeight,
+        window.screen.height
+    );
+
+    /*
+    Ako je telefon u portrait modu,
+    širina/visina se automatski menjaju.
+    */
+
+    const physicalW = Math.max(
+        screenW * dpr,
+        1
+    );
+
+    const physicalH = Math.max(
+        screenH * dpr,
+        1
+    );
+
+    /*
+    Ne dozvoljavamo ekstremno veliki canvas
+    koji bi ubio FPS na telefonu.
+    */
+
+    const MAX_PIXELS = 2664 * 1200;
+
+    let w = physicalW;
+    let h = physicalH;
+
+    const pixels = w * h;
+
+    if (pixels > MAX_PIXELS) {
+
+        const scale = Math.sqrt(
+            MAX_PIXELS / pixels
+        );
+
+        w *= scale;
+        h *= scale;
+
     }
 
-    .title{
-        font-size:8px;
-        height:38px;
+    return {
+        width: Math.floor(w),
+        height: Math.floor(h)
+    };
+}
+
+
+/*
+============================================================
+CANVAS RESIZE
+============================================================
+*/
+
+function resizeCanvas() {
+
+    const areaW = canvasArea.clientWidth;
+    const areaH = canvasArea.clientHeight;
+
+    if (areaW <= 0 || areaH <= 0) return;
+
+    /*
+    Čuvamo odnos 16:9.
+    */
+
+    const aspect = 16 / 9;
+
+    let displayW = areaW;
+    let displayH = displayW / aspect;
+
+    if (displayH > areaH) {
+
+        displayH = areaH;
+        displayW = displayH * aspect;
+
     }
 
-    .faction{
-        font-size:7px;
-        padding:5px;
-    }
+    /*
+    Maksimalni fizički render.
+    */
 
-    #top{
-        height:38px;
-        font-size:8px;
-    }
+    const maxRes = getMaxResolution();
 
-    #timer{
-        font-size:10px;
-    }
+    WORLD_WIDTH = maxRes.width;
+    WORLD_HEIGHT = maxRes.height;
 
-    #bottom{
-        height:80px;
-        font-size:7px;
+    /*
+    Canvas fizička rezolucija.
+    */
+
+    canvas.width = WORLD_WIDTH;
+    canvas.height = WORLD_HEIGHT;
+
+    /*
+    CSS veličina.
+    */
+
+    canvas.style.width =
+        Math.floor(displayW) + "px";
+
+    canvas.style.height =
+        Math.floor(displayH) + "px";
+
+    canvas.style.position = "absolute";
+
+    canvas.style.left = "50%";
+
+    canvas.style.top = "50%";
+
+    canvas.style.transform =
+        "translate(-50%, -50%)";
+
+    /*
+    Informacija za debug.
+    */
+
+    console.log(
+        "HONOR 90 RENDER:",
+        WORLD_WIDTH,
+        "×",
+        WORLD_HEIGHT,
+        "DPR:",
+        window.devicePixelRatio
+    );
+}
+
+
+/*
+============================================================
+ROTACIJA TELEFONA
+============================================================
+*/
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+window.addEventListener(
+    "orientationchange",
+    () => {
+
+        setTimeout(() => {
+            resizeCanvas();
+        }, 300);
+
     }
+);
+
+
+/*
+============================================================
+POČETNO PODEŠAVANJE
+============================================================
+*/
+
+resizeCanvas();

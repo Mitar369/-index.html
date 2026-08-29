@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 SYSTEMS - CHAOS WAR SIMULATION</title>
+    <title>10 SYSTEMS - BOSS & CHAOS SIMULATION</title>
     <style>
         * {
             margin: 0;
@@ -114,15 +114,15 @@
 <body>
     <div id="game-container">
         <div id="sidebar">
-            <div class="sidebar-title">RANG-LISTA (EQUAL START)</div>
+            <div class="sidebar-title">RANG-LISTA (100K HP)</div>
             <ul id="leaderboard"></ul>
         </div>
 
         <div id="main-area">
             <div id="top-bar">
-                <div style="color:#ffcc00; font-weight:bold;">SOLAR SUN: AKTIVAN</div>
+                <div id="boss-status" style="color:#ff0055; font-weight:bold;">BOSS: NEAKTIAN</div>
                 <div id="factor-display" style="color: #00ffff; font-weight: bold;">FAKTOR: Inicijalizacija...</div>
-                <div id="timer-display" style="color: #00ff66;">00:00</div>
+                <div id="timer-display" style="color: #00ff66;">06:30</div>
             </div>
 
             <div id="canvas-wrapper">
@@ -148,8 +148,8 @@
         const consoleLog = document.getElementById('console-log');
         const timerDisplay = document.getElementById('timer-display');
         const factorDisplay = document.getElementById('factor-display');
+        const bossStatusDisplay = document.getElementById('boss-status');
 
-        // Generisanje JPG Teksture za Monstrume (Base64)
         const monsterImg = new Image();
         monsterImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="%23110000"/><polygon points="16,2 6,30 26,30" fill="%23ff0033"/><circle cx="12" cy="14" r="3" fill="%23ffff00"/><circle cx="20" cy="14" r="3" fill="%23ffff00"/><path d="M10 22 Q16 28 22 22" stroke="%23ffffff" stroke-width="2" fill="none"/></svg>';
 
@@ -161,32 +161,34 @@
             ctx.scale(dpr, dpr);
         }
 
-        // Dynamic Dynamic Factor Engine
-        const factors = [
-            { name: 'Kvantni Preokret', heal: 2.5, dmg: 0.5, chaos: 3.0 },
-            { name: 'Solarni Super-Izbijaj', heal: 4.0, dmg: 0.1, chaos: 2.0 },
-            { name: 'Kisele Kiše', heal: -1.0, dmg: 2.5, chaos: 1.5 },
-            { name: 'Mutacija Neutrala', heal: 0.0, dmg: 3.0, chaos: 2.5 },
-            { name: 'Anarhija U Džungli', heal: 0.5, dmg: 3.5, chaos: 4.0 },
-            { name: 'Kozmičko Poravnanje', heal: 3.0, dmg: 1.0, chaos: 1.0 },
-            { name: 'Mesečeva Senca', heal: 0.2, dmg: 1.8, chaos: 2.0 },
-            { name: 'Kolektivni Reset', heal: 1.5, dmg: 1.5, chaos: 5.0 }
+        // 10 Nasumičnih Destruktivnih Faktora koji direktno napadaju
+        const attackFactors = [
+            { name: 'Meteorit Udari', dmg: 2000, chaos: 3.5, msg: 'Meteori padaju na sve baze!' },
+            { name: 'Kvantni Blesak', dmg: 1500, chaos: 2.5, msg: 'Energetski udar spali štiteve!' },
+            { name: 'Antimatrijski Talas', dmg: 2500, chaos: 4.0, msg: 'Antimatrija razara infrastrukturu!' },
+            { name: 'Kiselinski Oblak', dmg: 1200, chaos: 2.0, msg: 'Kiselina oštećuje vitalne sisteme!' },
+            { name: 'Void Oluja', dmg: 3000, chaos: 5.0, msg: 'Oluja iz druge dimenzije usisava HP!' },
+            { name: 'Grafitna Kiša', dmg: 1800, chaos: 3.0, msg: 'Grafit izaziva kratke spojeve!' },
+            { name: 'Pulsar Udar', dmg: 2200, chaos: 3.8, msg: 'Zračenje pulsara pogađa sve sisteme!' },
+            { name: 'Plazma Nepogoda', dmg: 2700, chaos: 4.2, msg: 'Plazma sprži komandne centre!' },
+            { name: 'Tektonski Rascep', dmg: 1900, chaos: 2.8, msg: 'Zemljotres uništava baze!' },
+            { name: 'Seizmički Šok', dmg: 1400, chaos: 2.2, msg: 'Šok-talas destabilizuje objekte!' }
         ];
-        let currentFactor = factors[0];
+        let currentFactor = attackFactors[0];
 
-        // 10 Frakcija - POTPUNO JEDNAK POČETAK (100.000 HP)
+        // 10 Frakcija - REVIZIONISANO: Tačno 100.000 HP na startu
         const STARTING_HP = 100000;
         const factions = [
-            { id: 0, name: 'ARES', color: '#ff3344', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 1, name: 'ORION', color: '#3399ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 5, name: 'VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 8, name: 'TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' },
-            { id: 9, name: 'NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Balans' }
+            { id: 0, name: 'ARES', color: '#ff3344', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 1, name: 'ORION', color: '#3399ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 2, name: 'ZEPHYR', color: '#33ff66', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 3, name: 'NEXUS', color: '#cc33ff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 4, name: 'SOLARIS', color: '#ffcc00', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 5, name: 'VORTEX', color: '#00ffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 6, name: 'ECLIPSE', color: '#ff6633', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 7, name: 'PHOENIX', color: '#ff3399', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 8, name: 'TITAN', color: '#ffffff', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' },
+            { id: 9, name: 'NOVA', color: '#00ffaa', hp: STARTING_HP, maxHp: STARTING_HP, x: 0, y: 0, sunBonus: 0, meta: 'Stabilno' }
         ];
 
         function initPositions() {
@@ -204,33 +206,98 @@
         fitCanvas();
         initPositions();
 
-        // Gigantsko Sunce sa Solarnim Radijusom Lečenja
-        const solarSun = {
+        // DIMENZIJA 2: INTERDIMENZIONALNI BOSS (Svakih 60 sec)
+        const boss = {
+            active: false,
             x: 0,
             y: 0,
-            radius: 80,
-            pulse: 0,
-            angle: 0
+            hp: 500000,
+            maxHp: 500000,
+            timer: 0
         };
 
+        function spawnBoss() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            boss.x = rect.width / 2;
+            boss.y = rect.height / 2;
+            boss.hp = 500000;
+            boss.active = true;
+            bossStatusDisplay.innerText = 'BOSS: DIMENZIONALNI TITAN';
+            bossStatusDisplay.style.color = '#ff0000';
+            logMessage('[DIMENZIONALNI PROCEP] Boss Titan je ušao u dimenziju! Napada sve frakcije!');
+        }
+
+        function updateBoss() {
+            if (!boss.active) return;
+
+            // Boss napada SVE žive frakcije ISTOVREMENO
+            factions.forEach(f => {
+                if (f.hp > 0 && Math.random() < 0.3) {
+                    const dmg = Math.floor(Math.random() * 800 + 400);
+                    f.hp = Math.max(0, f.hp - dmg);
+                    beams.push({ sx: boss.x, sy: boss.y, tx: f.x, ty: f.y, color: '#ff0055', alpha: 1 });
+                }
+
+                // Frakcije uzvraćaju udarac Boss-u
+                if (f.hp > 0 && Math.random() < 0.2) {
+                    const counterDmg = Math.floor(Math.random() * 1500 + 500);
+                    boss.hp -= counterDmg;
+                    beams.push({ sx: f.x, sy: f.y, tx: boss.x, ty: boss.y, color: f.color, alpha: 1 });
+                }
+            });
+
+            if (boss.hp <= 0) {
+                boss.active = false;
+                bossStatusDisplay.innerText = 'BOSS: UNIŠTEN';
+                bossStatusDisplay.style.color = '#00ff66';
+                logMessage('[BOSS UNIŠTEN] Frakcije su odbile napad iz druge dimenzije!');
+            }
+        }
+
+        function drawBoss() {
+            if (!boss.active) return;
+            ctx.save();
+            ctx.translate(boss.x, boss.y);
+
+            // Boss Aura
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#ff0055';
+            ctx.fillStyle = '#110005';
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 4;
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // HP Bar
+            ctx.fillStyle = '#ff0055';
+            ctx.fillRect(-35, -45, (boss.hp / boss.maxHp) * 70, 6);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(-35, -45, 70, 6);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText('DIMENZIONALNI TITAN', 0, -52);
+            ctx.restore();
+        }
+
+        // Gigantsko Sunce (Solar Dynamic System)
+        const solarSun = { x: 0, y: 0, radius: 70, pulse: 0, angle: 0 };
         function updateSolarSun() {
             const rect = canvas.parentElement.getBoundingClientRect();
             solarSun.pulse += 0.04;
             solarSun.angle += 0.015;
-
-            // Sunce kruži po mapi i stalno menja fokus
             solarSun.x = rect.width / 2 + Math.cos(solarSun.angle) * (rect.width * 0.35);
             solarSun.y = rect.height / 2 + Math.sin(solarSun.angle * 0.7) * (rect.height * 0.35);
-
-            const dynamicRadius = solarSun.radius + Math.sin(solarSun.pulse) * 12;
 
             factions.forEach(f => {
                 if (f.hp <= 0) return;
                 const dist = Math.hypot(f.x - solarSun.x, f.y - solarSun.y);
-                if (dist < dynamicRadius + 50) {
-                    // Ako frakcija ima malo HP, Sunce je leči duplo brže (Rubberbanding)
-                    const lowHpMultiplier = f.hp < (STARTING_HP * 0.3) ? 2.5 : 1.0;
-                    const heal = Math.floor((Math.random() * 80 + 30) * currentFactor.heal * lowHpMultiplier);
+                if (dist < solarSun.radius + 50) {
+                    const heal = Math.floor(Math.random() * 60 + 20);
                     f.hp = Math.min(f.maxHp, f.hp + heal);
                     f.sunBonus += heal;
                 }
@@ -240,26 +307,19 @@
         function drawSolarSun() {
             ctx.save();
             const r = solarSun.radius + Math.sin(solarSun.pulse) * 10;
-
-            const sunGlow = ctx.createRadialGradient(solarSun.x, solarSun.y, 10, solarSun.x, solarSun.y, r + 90);
+            const sunGlow = ctx.createRadialGradient(solarSun.x, solarSun.y, 10, solarSun.x, solarSun.y, r + 80);
             sunGlow.addColorStop(0, 'rgba(255, 240, 150, 1)');
-            sunGlow.addColorStop(0.3, 'rgba(255, 120, 0, 0.7)');
-            sunGlow.addColorStop(0.8, 'rgba(255, 30, 0, 0.15)');
+            sunGlow.addColorStop(0.3, 'rgba(255, 120, 0, 0.6)');
             sunGlow.addColorStop(1, 'transparent');
 
             ctx.fillStyle = sunGlow;
             ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, r + 90, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(solarSun.x, solarSun.y, r * 0.5, 0, Math.PI * 2);
+            ctx.arc(solarSun.x, solarSun.y, r + 80, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
-        // JPG Monstrumi - Napadaju najjaču frakciju i balansiraju igru
+        // Neutralni JPG Monstrumi
         class Monster {
             constructor() { this.reset(); }
             reset() {
@@ -270,12 +330,8 @@
                 this.pickTarget();
             }
             pickTarget() {
-                // Monstrumi biraju najjaču frakciju da spreče rani beg u bodovima
-                const alive = factions.filter(f => f.hp > 0).sort((a, b) => b.hp - a.hp);
-                if (alive.length > 0) {
-                    // 70% šanse da napadnu vodeću frakciju
-                    this.target = (Math.random() < 0.7) ? alive[0] : alive[Math.floor(Math.random() * alive.length)];
-                }
+                const alive = factions.filter(f => f.hp > 0);
+                if (alive.length > 0) this.target = alive[Math.floor(Math.random() * alive.length)];
             }
             update() {
                 if (!this.target || this.target.hp <= 0) this.pickTarget();
@@ -287,46 +343,29 @@
                     this.y += (dy / dist) * this.speed;
 
                     if (dist < 18) {
-                        const dmg = Math.floor((Math.random() * 800 + 300) * currentFactor.dmg);
+                        const dmg = Math.floor(Math.random() * 600 + 200);
                         this.target.hp = Math.max(0, this.target.hp - dmg);
-                        logMessage(`[BALANS ZVERI] Monstrum oslabio lidera ${this.target.name} (-${dmg} HP)`);
                         this.reset();
                     }
                 }
             }
-            draw() {
-                ctx.drawImage(monsterImg, this.x - 14, this.y - 14, 28, 28);
-            }
+            draw() { ctx.drawImage(monsterImg, this.x - 12, this.y - 12, 24, 24); }
         }
+        const monsters = Array.from({ length: 10 }, () => new Monster());
 
-        const monsters = Array.from({ length: 12 }, () => new Monster());
-
-        // Nepredvidiva Borbena Logika
+        // Ratni Engine (Inter-Faction Warfare)
         let beams = [];
         function runWarEngine() {
-            if (Math.random() < 0.25 * currentFactor.chaos) {
+            if (Math.random() < 0.2) {
                 const alive = factions.filter(f => f.hp > 0);
                 if (alive.length < 2) return;
-
                 const src = alive[Math.floor(Math.random() * alive.length)];
                 const tgt = alive[Math.floor(Math.random() * alive.length)];
 
                 if (src.id !== tgt.id) {
-                    // Iznenadni masivni udarci ili preusmeravanja napada
-                    const isChaosStrike = Math.random() < 0.15;
-                    const dmg = Math.floor((Math.random() * 1200 + 300) * (isChaosStrike ? 3.0 : 1.0));
-                    
+                    const dmg = Math.floor(Math.random() * 1000 + 200);
                     tgt.hp = Math.max(0, tgt.hp - dmg);
-
-                    // Ažuriranje statusa
-                    src.meta = isChaosStrike ? 'HAOS UDAR' : 'Napad';
-                    tgt.meta = tgt.hp < (STARTING_HP * 0.25) ? 'Očajnički Otpor' : 'Odbrambeni';
-
                     beams.push({ sx: src.x, sy: src.y, tx: tgt.x, ty: tgt.y, color: src.color, alpha: 1 });
-
-                    if (isChaosStrike) {
-                        logMessage(`[NEPREDVIDIV PREOKRET] ${src.name} lansira HAOS UDAR na ${tgt.name} (-${dmg} HP)`);
-                    }
                 }
             }
         }
@@ -344,8 +383,7 @@
                 if (f.hp <= 0) return;
                 ctx.save();
                 ctx.translate(f.x, f.y);
-
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 12;
                 ctx.shadowColor = f.color;
                 ctx.fillStyle = '#061a0c';
                 ctx.strokeStyle = f.color;
@@ -382,7 +420,7 @@
                 document.getElementById('stat-name').style.color = selectedFaction.color;
                 document.getElementById('stat-hp').innerText = `${Math.floor(selectedFaction.hp)}`;
                 document.getElementById('stat-sun').innerText = `+${Math.floor(selectedFaction.sunBonus)} HP`;
-                document.getElementById('stat-meta').innerText = selectedFaction.meta;
+                document.getElementById('stat-meta').innerText = selectedFaction.hp > 0 ? 'Aktivno' : 'Uništeno';
             }
         }
 
@@ -390,15 +428,15 @@
             const rect = canvas.parentElement.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
 
-            // Mračna Džungla
             ctx.fillStyle = '#020b05';
             ctx.fillRect(0, 0, rect.width, rect.height);
 
             updateSolarSun();
             drawSolarSun();
+            updateBoss();
+            drawBoss();
             runWarEngine();
 
-            // Laserski projektili
             beams.forEach((b, i) => {
                 ctx.save();
                 ctx.strokeStyle = b.color;
@@ -406,32 +444,48 @@
                 ctx.globalAlpha = b.alpha;
                 ctx.beginPath(); ctx.moveTo(b.sx, b.sy); ctx.lineTo(b.tx, b.ty); ctx.stroke();
                 ctx.restore();
-                b.alpha -= 0.06;
+                b.alpha -= 0.05;
                 if (b.alpha <= 0) beams.splice(i, 1);
             });
 
-            // Monstrumi
             monsters.forEach(m => { m.update(); m.draw(); });
-
             drawBases();
             updateUI();
             requestAnimationFrame(loop);
         }
 
-        // Smena Spoljašnjih Faktora na svakih 3.5 sekunde radi maksimalnog dinamičkog haosa
+        // Rotacija 10 Nasumičnih Destruktivnih Faktora na svakih 4 sec
         setInterval(() => {
-            currentFactor = factors[Math.floor(Math.random() * factors.length)];
+            currentFactor = attackFactors[Math.floor(Math.random() * attackFactors.length)];
             factorDisplay.innerText = `FAKTOR: ${currentFactor.name}`;
-            logMessage(`[SPOLJAŠNJI DOGAĐAJ] ${currentFactor.name}`);
-        }, 3500);
+            
+            // Faktori nanose šteta SVIM živim frakcijama
+            factions.forEach(f => {
+                if (f.hp > 0) {
+                    const dmg = Math.floor((Math.random() * currentFactor.dmg) + 300);
+                    f.hp = Math.max(0, f.hp - dmg);
+                }
+            });
+            logMessage(`[SPOLJAŠNJI NAPAD] ${currentFactor.msg}`);
+        }, 4000);
 
-        // Tajmer
-        let totalSeconds = 0;
-        setInterval(() => {
-            totalSeconds++;
-            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const s = String(totalSeconds % 60).padStart(2, '0');
+        // TAJMER PARTIJE: 6 Minuta i 30 Sekundi (390 sec)
+        let matchTime = 390;
+        const timerInterval = setInterval(() => {
+            matchTime--;
+            const m = String(Math.floor(matchTime / 60)).padStart(2, '0');
+            const s = String(matchTime % 60).padStart(2, '0');
             timerDisplay.innerText = `${m}:${s}`;
+
+            // Izlazak Boss-a na svakih 60 sekundi (na 5:30, 4:30, 3:30...)
+            if (matchTime % 60 === 0 && matchTime > 0) {
+                spawnBoss();
+            }
+
+            if (matchTime <= 0) {
+                clearInterval(timerInterval);
+                logMessage('[KRAJ PARTIJE] Vreme je isteklo! Najjača frakcija je pobednik!');
+            }
         }, 1000);
 
         loop();

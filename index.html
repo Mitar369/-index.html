@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacija Rata</title>
+    <style>
+        body { margin: 0; background: #111; color: white; text-align: center; font-family: sans-serif; }
+        canvas { background: #1e1e1e; display: block; margin: 10px auto; border: 1px solid #444; }
+    </style>
+</head>
+<body>
+    <h2>Simulacija Borbe (2 Baze)</h2>
+    <canvas id="canvas" width="360" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let baseA = { x: 180, y: 60, color: '#00d2ff', timer: 0 };
+        let baseB = { x: 180, y: 440, color: '#ff4757', timer: 0 };
+        let units = [];
+
+        function spawnUnit(from, to) {
+            units.push({ x: from.x, y: from.y, targetX: to.x, targetY: to.y, color: from.color, speed: 1.5 });
+        }
+
+        function update() {
+            baseA.timer++;
+            baseB.timer++;
+            if(baseA.timer > 90) { spawnUnit(baseA, baseB); baseA.timer = 0; }
+            if(baseB.timer > 90) { spawnUnit(baseB, baseA); baseB.timer = 0; }
+
+            for(let i = units.length - 1; i >= 0; i--) {
+                let u = units[i];
+                let dx = u.targetX - u.x;
+                let dy = u.targetY - u.y;
+                let dist = Math.hypot(dx, dy);
+
+                if(dist < 3) {
+                    units.splice(i, 1);
+                } else {
+                    u.x += (dx / dist) * u.speed;
+                    u.y += (dy / dist) * u.speed;
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = baseA.color; ctx.fillRect(baseA.x - 20, baseA.y - 20, 40, 40);
+            ctx.fillStyle = baseB.color; ctx.fillRect(baseB.x - 20, baseB.y - 20, 40, 40);
+
+            units.forEach(u => {
+                ctx.fillStyle = u.color;
+                ctx.beginPath();
+                ctx.arc(u.x, u.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>

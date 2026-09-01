@@ -3,62 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Napoleon's War - Strategic Campaign</title>
+    <title>Napoleon War: Imperial Monopoly</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Cinzel', 'Times New Roman', serif; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #12100e; color: #e5d8b5; }
-        canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Cinzel', serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #0c0907; color: #e5d8b5; }
         
-        /* Imperijalni UI Vrh */
+        #gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        /* Vrh - Resursi */
         #ui-top {
             position: absolute; top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(26, 21, 16, 0.9); padding: 8px 12px; border-radius: 8px;
-            border: 2px solid #8c6d36; z-index: 10; font-size: 11px; flex-wrap: wrap; gap: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+            display: flex; justify-content: space-around; align-items: center;
+            background: rgba(20, 15, 10, 0.95); padding: 8px; border-radius: 6px;
+            border: 2px solid #c5a059; z-index: 10; font-size: 11px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
         }
-        .res-badge { display: flex; align-items: center; gap: 4px; font-weight: bold; color: #f3e5ab; }
-        
-        /* Komande Na Dnu */
+        .res-badge { display: flex; align-items: center; gap: 3px; font-weight: bold; color: #f3e5ab; }
+
+        /* Desna Bočna Statistika Frakcija (Monopol kontrole) */
+        #faction-sidebar {
+            position: absolute; top: 65px; right: 10px; width: 130px;
+            background: rgba(20, 15, 10, 0.9); border: 1px solid #c5a059; border-radius: 6px;
+            padding: 6px; z-index: 10; font-size: 9px; max-height: 45vh; overflow-y: auto;
+        }
+        .faction-row { display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px solid rgba(197,160,89,0.2); padding-bottom: 2px; }
+
+        /* Dno - Komande */
         #ui-bottom {
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 10px; z-index: 10; align-items: center; width: 95%; max-width: 480px; justify-content: center;
+            display: flex; gap: 8px; z-index: 10; width: 92%; max-width: 450px; justify-content: center;
         }
         .btn {
-            background: linear-gradient(135deg, #591c1c, #330f0f); color: #f3e5ab; border: 2px solid #8c6d36;
-            padding: 12px 16px; font-size: 13px; font-weight: bold; border-radius: 6px;
-            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); flex: 1; text-align: center;
-            text-transform: uppercase; letter-spacing: 1px; transition: transform 0.1s;
+            background: linear-gradient(135deg, #591c1c, #2b0d0d); color: #f3e5ab; border: 2px solid #c5a059;
+            padding: 10px 12px; font-size: 11px; font-weight: bold; border-radius: 6px;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.7); flex: 1; text-align: center;
+            text-transform: uppercase;
         }
         .btn:active { transform: scale(0.95); }
-        .btn-shop { background: linear-gradient(135deg, #2b3a4a, #151d26); border-color: #c5a059; }
-        
-        /* Modali u Imperijalnom Stilu */
+        .btn-shop { background: linear-gradient(135deg, #1b2a3a, #0f1721); }
+
+        /* Modali */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 8, 6, 0.85); display: none; justify-content: center; align-items: center;
-            z-index: 100; backdrop-filter: blur(4px); padding: 20px;
+            background: rgba(8, 6, 5, 0.9); display: none; justify-content: center; align-items: center;
+            z-index: 100; backdrop-filter: blur(5px); padding: 15px;
         }
         .modal-content {
-            background: #1c1712; width: 100%; max-width: 400px; border-radius: 10px;
-            padding: 20px; border: 2px solid #c5a059; box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            background: #18130e; width: 100%; max-width: 380px; border-radius: 8px;
+            padding: 15px; border: 2px solid #c5a059; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
             max-height: 80vh; overflow-y: auto; color: #f3e5ab;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #8c6d36; padding-bottom: 8px; }
-        .close-btn { background: none; border: none; color: #c5a059; font-size: 20px; cursor: pointer; }
-        
-        .shop-item, .card-item {
-            background: rgba(40, 32, 24, 0.6); padding: 10px; border-radius: 6px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #8c6d36;
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #c5a059; padding-bottom: 6px; }
+        .close-btn { background: none; border: none; color: #c5a059; font-size: 18px; cursor: pointer; }
+
+        /* Vizuelni Šop Kartice Trupa */
+        .shop-card {
+            background: rgba(30, 24, 18, 0.8); border: 1px solid #8c6d36; border-radius: 6px;
+            padding: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
         }
-        .shop-item button { background: #591c1c; color: #f3e5ab; border: 1px solid #c5a059; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        
-        /* Animacija Kockice */
+        .shop-img { font-size: 28px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; border: 1px solid #c5a059; }
+        .shop-info { flex: 1; font-size: 10px; }
+        .shop-info b { font-size: 12px; color: #f3e5ab; }
+        .shop-card button { background: #591c1c; color: #f3e5ab; border: 1px solid #c5a059; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 10px; }
+
+        /* Kockica Popup */
         #dice-popup {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: #330f0f; color: #f3e5ab; font-size: 42px; font-weight: bold;
-            width: 85px; height: 85px; display: flex; justify-content: center; align-items: center;
-            border-radius: 12px; border: 3px solid #c5a059; box-shadow: 0 0 30px rgba(197, 160, 89, 0.6); z-index: 50;
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: #2b0d0d; color: #f3e5ab; font-size: 38px; font-weight: bold;
+            width: 75px; height: 75px; display: flex; justify-content: center; align-items: center;
+            border-radius: 10px; border: 3px solid #c5a059; box-shadow: 0 0 30px rgba(197, 160, 89, 0.8); z-index: 50;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #dice-popup.show { transform: translate(-50%, -50%) scale(1); }
@@ -67,40 +80,34 @@
 <body>
 
     <div id="ui-top">
-        <div class="res-badge">💰 <span id="r-gold">150</span></div>
-        <div class="res-badge">🪵 <span id="r-wood">80</span></div>
-        <div class="res-badge">🟢 <span id="r-emerald">15</span></div>
-        <div class="res-badge">💣 <span id="r-diamond">3</span></div>
-        <div class="res-badge">🏰 <span id="r-bedrock">0</span>/3</div>
-        <div class="res-badge">⭐ Moral: <span id="s-luck">50%</span></div>
+        <div class="res-badge">💰 <span id="r-gold">250</span></div>
+        <div class="res-badge">🪵 <span id="r-wood">100</span></div>
+        <div class="res-badge">💣 <span id="r-ammo">15</span></div>
+        <div class="res-badge">🏰 <span id="r-fort">1</span>/5</div>
+    </div>
+
+    <!-- Desna Statistika Frakcija -->
+    <div id="faction-sidebar">
+        <div style="font-weight:bold; color:#c5a059; text-align:center; margin-bottom:5px;">FRAKCIJE (MOĆ)</div>
+        <div id="faction-list"></div>
     </div>
 
     <div id="dice-popup">🎲 <span>6</span></div>
 
     <div id="ui-bottom">
         <button class="btn" onclick="rollDice()">📜 Marš (Kocka)</button>
-        <button class="btn btn-shop" onclick="toggleModal('shop-modal', true)">⚔️ Ratni Šop</button>
-        <button class="btn" style="background:linear-gradient(135deg,#78350f,#451a03)" onclick="toggleModal('cards-modal', true)">🃏 Dekret</button>
+        <button class="btn btn-shop" onclick="toggleModal('shop-modal', true)">⚔️ Carski Šop</button>
+        <button class="btn" style="background:linear-gradient(135deg,#78350f,#3a1705)" onclick="openPropertyAction()">🏛️ Imanje</button>
     </div>
 
+    <!-- Šop Modal sa slikama trupa -->
     <div id="shop-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>⚔️ Carska Arsenal Trgovina</h3>
                 <button class="close-btn" onclick="toggleModal('shop-modal', false)">✕</button>
             </div>
-            <div id="shop-list"></div>
-        </div>
-    </div>
-
-    <div id="cards-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🃏 Imperijalni Dekreti</h3>
-                <button class="close-btn" onclick="toggleModal('cards-modal', false)">✕</button>
-            </div>
-            <p style="font-size:11px; color:#c5a059; margin-bottom:10px;">Iskoristi taktiku i skill da nadvladaš front!</p>
-            <div id="cards-list"></div>
+            <div id="shop-items-container"></div>
         </div>
     </div>
 
@@ -111,125 +118,99 @@
         const ctx = canvas.getContext('2d');
 
         function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
-            ctx.scale(dpr, dpr);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // Napoleon imperijalna vojska i ekonomija
+        // Igrač i ekonomija
         let player = {
-            gold: 200, wood: 100, emerald: 20, diamond: 5, bedrock: 0,
-            luck: 50, skill: 75,
+            gold: 300, wood: 150, ammo: 20, forts: 1,
             currentNode: 0,
-            avatar: '🎖️', // Maršalov avatar
-            moveStepsLeft: 0
+            avatar: '🎖️'
         };
 
-        // Geopolitička mapa kampanje (Napoleon War stil)
-        const nodes = [
-            { x: 150, y: 180, name: "Glavni Štab Pariz", type: "base", resType: "gold", amount: 25, cost: 0, desc: "Imperialna baza operacija." },
-            { x: 320, y: 130, name: "Šume Vogeza", type: "farm", resType: "wood", amount: 35, cost: 10, desc: "Snabdevanje drvetom za artiljeriju." },
-            { x: 500, y: 200, name: "Zlatnici Austerlica", type: "farm", resType: "gold", amount: 60, cost: 30, desc: "Bogat ratni plen." },
-            { x: 680, y: 140, name: "Tabor Imperijalne Garde", type: "buff", effect: "luck", val: 15, desc: "Podizanje moral trupa (+15% Sreća)." },
-            { x: 820, y: 260, name: "Rudnici Baruta", type: "farm", resType: "emerald", amount: 12, cost: 45, desc: "Zalihe za municiju." },
-            { x: 750, y: 440, name: "Neprijateljska Zaséda", type: "trap", penalty: 35, desc: "Kosovska zaseda! Zahteva visok Skill." },
-            { x: 550, y: 520, name: "Artiljerijska Livnica", type: "farm", resType: "diamond", amount: 4, cost: 120, desc: "Teške topovske cevi!" },
-            { x: 300, y: 480, name: "Ratna Trgovina", type: "shop_node", desc: "Tti strateška resursna baza." },
-            { x: 150, y: 380, name: "Osvojena Tvrđava", type: "farm", resType: "bedrock", amount: 1, cost: 300, desc: "Ključni utvrđeni bedem za pobedu." }
+        // 10 Frakcija (Statistika oduzimanja moći i kontrole)
+        let factions = [
+            { name: "Francuska Garda", power: 45, color: "#3b82f6" },
+            { name: "Britanska Imperija", power: 40, color: "#ef4444" },
+            { name: "Ruski Kozaci", power: 35, color: "#eab308" },
+            { name: "Pruska Pešadija", power: 30, color: "#64748b" },
+            { name: "Austrijsko Carstvo", power: 28, color: "#a855f7" },
+            { name: "Osmanska Vojska", power: 25, color: "#10b981" },
+            { name: "Španski Gerilci", power: 22, color: "#f97316" },
+            { name: "Italijanske Legije", power: 20, color: "#06b6d4" },
+            { name: "Švedska Garda", power: 18, color: "#84cc16" },
+            { name: "Varšavski Puk", power: 15, color: "#d946ef" }
         ];
 
-        // Maršrutne linije fronta
-        const connections = [
-            [0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,0],
-            [1,7], [2,6]
+        // 3D Prostrana Mapa kampanje (Monopoly + Napoleon stil čvorova)
+        let nodes = [
+            { x: window.innerWidth * 0.5, y: window.innerHeight * 0.8, name: "Pariz (Glavni Štab)", owner: "Player", type: "base", price: 0 },
+            { x: window.innerWidth * 0.25, y: window.innerHeight * 0.7, name: "Vogezi (Šume)", owner: null, type: "res_wood", price: 80 },
+            { x: window.innerWidth * 0.15, y: window.innerHeight * 0.5, name: "Bordo (Luka)", owner: "Britanska Imperija", type: "tax", price: 100, rent: 35 },
+            { x: window.innerWidth * 0.25, y: window.innerHeight * 0.3, name: "Alpi (Zaseda)", owner: null, type: "trap", price: 0 },
+            { x: window.innerWidth * 0.5, y: window.innerHeight * 0.2, name: "Rajna (Utvrda)", owner: null, type: "property", price: 150, rent: 50 },
+            { x: window.innerWidth * 0.75, y: window.innerHeight * 0.3, name: "Berlin (Puk)", owner: "Pruska Pešadija", type: "tax", price: 120, rent: 40 },
+            { x: window.innerWidth * 0.85, y: window.innerHeight * 0.5, name: "Varšava (Arsenal)", owner: null, type: "res_ammo", price: 90 },
+            { x: window.innerWidth * 0.75, y: window.innerHeight * 0.7, name: "Beč (Palata)", owner: "Austrijsko Carstvo", type: "tax", price: 200, rent: 70 }
         ];
 
-        const shopItems = [
-            { id: 'av1', name: 'Gvozdeni General (⚔️)', cost: { gold: 120, wood: 60 }, type: 'avatar', val: '⚔️' },
-            { id: 'av2', name: 'Maršal Imperije (🐎)', cost: { gold: 350, emerald: 25, diamond: 3 }, type: 'avatar', val: '🐎' },
-            { id: 'up1', name: 'Ttička Akademija (+20 Skill)', cost: { gold: 90, wood: 50 }, type: 'skill', val: 20 },
-            { id: 'up2', name: 'Zastava Pobednika (+25% Moral)', cost: { emerald: 12 }, type: 'luck', val: 25 }
+        // Jedinice u šopu sa vizuelnim sličicama
+        const shopTroops = [
+            { id: 't1', name: 'Carska Linijska Pešadija', img: '💂‍♂️', cost: { gold: 70, wood: 30 }, desc: 'Osnovna pouzdana snaga fronta.' },
+            { id: 't2', name: 'Teška Konjica (Cuirassiers)', img: '🐎', cost: { gold: 150, wood: 50 }, desc: 'Brzi prodor kroz neprijateljske redove.' },
+            { id: 't3', name: 'Artiljerija Velika Baterija', img: '💣', cost: { gold: 220, ammo: 10 }, desc: 'Uništava utvrđenja i napada iz daljine.' },
+            { id: 't4', name: 'Imperijalna Garda', img: '👑', cost: { gold: 400, wood: 100, ammo: 15 }, desc: 'Elitna garda cara Napoleona.' }
         ];
-
-        const cards = [
-            { id: 'c1', name: 'Brzi Manevar', desc: 'Prebaci se taktički na susednu poziciju.', cost: { wood: 35 } },
-            { id: 'c2', name: 'Carska Rekvizicija', desc: 'Izvrši rekviziciju i dobij +120 zlata.', cost: { gold: 60, emerald: 4 } },
-            { id: 'c3', name: 'Strateški Štit', desc: 'Imunitet protiv neprijateljskih zaseda.', cost: { diamond: 1 } }
-        ];
-
-        let cam = { x: 0, y: 0, scale: 1 };
 
         function updateUI() {
             document.getElementById('r-gold').innerText = player.gold;
             document.getElementById('r-wood').innerText = player.wood;
-            document.getElementById('r-emerald').innerText = player.emerald;
-            document.getElementById('r-diamond').innerText = player.diamond;
-            document.getElementById('r-bedrock').innerText = player.bedrock;
-            document.getElementById('s-luck').innerText = player.luck + '%';
+            document.getElementById('r-ammo').innerText = player.ammo;
+            document.getElementById('r-fort').innerText = player.forts;
+
+            let fHtml = '';
+            factions.forEach(f => {
+                fHtml += `<div class="faction-row"><span style="color:${f.color}">${f.name}</span> <b>Moć: ${f.power}</b></div>`;
+            });
+            document.getElementById('faction-list').innerHTML = fHtml;
         }
 
         function toggleModal(id, show) {
             document.getElementById(id).style.display = show ? 'flex' : 'none';
-            if(show) {
-                if(id === 'shop-modal') renderShop();
-                if(id === 'cards-modal') renderCards();
-            }
+            if(show && id === 'shop-modal') renderShop();
         }
 
         function renderShop() {
             let html = '';
-            shopItems.forEach(item => {
-                let costStr = Object.entries(item.cost).map(([k,v]) => `${v} ${k}`).join(', ');
-                html += `<div class="shop-item">
-                    <div><strong>${item.name}</strong><br><small style="color:#c5a059;">Cena: ${costStr}</small></div>
-                    <button onclick="buyShopItem('${item.id}')">Regrutuj</button>
+            shopTroops.forEach(t => {
+                let costStr = Object.entries(t.cost).map(([k,v]) => `${v} ${k}`).join(', ');
+                html += `<div class="shop-card">
+                    <div class="shop-img">${t.img}</div>
+                    <div class="shop-info">
+                        <b>${t.name}</b><br><small>${t.desc}</small><br>
+                        <span style="color:#c5a059;">Cena: ${costStr}</span>
+                    </div>
+                    <button onclick="buyTroop('${t.id}')">Kupi</button>
                 </div>`;
             });
-            document.getElementById('shop-list').innerHTML = html;
+            document.getElementById('shop-items-container').innerHTML = html;
         }
 
-        function buyShopItem(id) {
-            let item = shopItems.find(i => i.id === id);
-            for (let [res, amt] of Object.entries(item.cost)) {
-                if (player[res] < amt) { alert("Nemaš dovoljno ratnih resursa u kasi!"); return; }
+        function buyTroop(id) {
+            let troop = shopTroops.find(t => t.id === id);
+            for (let [res, amt] of Object.entries(troop.cost)) {
+                if (player[res] < amt) { alert("Nemaš dovoljno resursa u carskoj kasi!"); return; }
             }
-            for (let [res, amt] of Object.entries(item.cost)) {
+            for (let [res, amt] of Object.entries(troop.cost)) {
                 player[res] -= amt;
             }
-            if(item.type === 'avatar') player.avatar = item.val;
-            if(item.type === 'skill') player.skill += item.val;
-            if(item.type === 'luck') player.luck = Math.min(100, player.luck + item.val);
-
+            player.avatar = troop.img;
             updateUI();
-            renderShop();
-            alert("Svečana nadogradnja uspešno izvršena!");
-        }
-
-        function renderCards() {
-            let html = '';
-            cards.forEach(card => {
-                let costStr = Object.entries(card.cost).map(([k,v]) => `${v} ${k}`).join(', ');
-                html += `<div class="card-item">
-                    <div><strong>${card.name}</strong><br><small style="color:#a89f91;">${card.desc}</small><br><small style="color:#c5a059;">Cena: ${costStr}</small></div>
-                    <button class="btn" style="padding:6px 12px; font-size:11px;" onclick="useCard('${card.id}')">Izdaj Dekret</button>
-                </div>`;
-            });
-            document.getElementById('cards-list').innerHTML = html;
-        }
-
-        function useCard(id) {
-            if(id === 'c1') {
-                if(player.wood >= 35) { player.wood -= 35; player.currentNode = (player.currentNode + 1) % nodes.length; alert("Jedinice izvršile brzi manevar!"); }
-                else alert("Nedostaje drveta!");
-            } else if(id === 'c2') {
-                if(player.gold >= 60) { player.gold -= 60; player.gold += 120; alert("Rekvizicija uspešna (+120 zlata)!"); }
-                else alert("Nedostaje zlata u kasi!");
-            }
-            updateUI();
-            toggleModal('cards-modal', false);
+            alert("Uspesno regrutovana jedinica: " + troop.name + "!");
+            toggleModal('shop-modal', false);
         }
 
         function rollDice() {
@@ -241,106 +222,107 @@
             
             setTimeout(() => {
                 popup.classList.remove('show');
-                movePlayer(roll);
+                player.currentNode = (player.currentNode + roll) % nodes.length;
+                handleNodeLanding(nodes[player.currentNode]);
+                updateUI();
             }, 1000);
         }
 
-        function movePlayer(steps) {
-            player.currentNode = (player.currentNode + steps) % nodes.length;
-            triggerNodeEvent(nodes[player.currentNode]);
-            updateUI();
+        function handleNodeLanding(node) {
+            let msg = `Stigli ste na sektor: ${node.name}.\n`;
+            if(node.type === 'res_wood') {
+                player.wood += 45;
+                msg += "Uspesno obezbeđene zalihe drveta (+45 🪵).";
+            } else if(node.type === 'res_ammo') {
+                player.ammo += 10;
+                msg += "Osvojene zalihe baruta i artiljerijske municije (+10 💣).";
+            } else if(node.type === 'tax') {
+                player.gold -= node.rent;
+                msg += `Teritorija pod kontrolom: ${node.owner}! Platili ste ratnu danak-kiriju od ${node.rent} zlata 💰.`;
+            } else if(node.type === 'property' && !node.owner) {
+                msg += `Slobodna strateška tačka! Možete je kupiti preko 'Imanje' menija za ${node.price} zlata.`;
+            } else if(node.type === 'trap') {
+                player.gold = Math.max(0, player.gold - 50);
+                msg += "Neprijateljska zaseda u klancu! Izgubljeno 50 zlatnika.";
+            }
+            alert(msg);
         }
 
-        function triggerNodeEvent(node) {
-            let msg = `Glavni Štab obaveštava - Stigli ste na: ${node.name}.\n`;
-            if(node.type === 'farm') {
-                player[node.resType] += node.amount;
-                msg += `Osvojen resurs: +${node.amount} ${node.resType.toUpperCase()}`;
-            } else if(node.type === 'buff') {
-                player.luck += node.val;
-                msg += `Podignut vojni moral! +${node.val}% Sreća.`;
-            } else if(node.type === 'trap') {
-                let success = Math.random() * 100 < player.skill;
-                if(success) {
-                    msg += `Ttičkom veštinom (${player.skill}%) izbegnuta neprijateljska zaseda!`;
+        function openPropertyAction() {
+            let node = nodes[player.currentNode];
+            if(node.type === 'property' && !node.owner) {
+                if(player.gold >= node.price) {
+                    player.gold -= node.price;
+                    node.owner = "Player";
+                    player.forts++;
+                    updateUI();
+                    alert("Čestitamo! Kupili ste teritoriju " + node.name + " i sagradili utvrđenje!");
                 } else {
-                    player.gold = Math.max(0, player.gold - node.penalty);
-                    msg += `Upali ste u zasedu! Izgubili ste ${node.penalty} zlatnika.`;
+                    alert("Nemate dovoljno zlata za kupovinu ovog sektora!");
                 }
-            } else if(node.type === 'shop_node') {
-                msg += `Osvojena logistička baza! Dobijate +30 zlata i +8 emeralda.`;
-                player.gold += 30; player.emerald += 8;
-            }
-            
-            if(player.bedrock >= 3) {
-                alert("🏆 POBEDA IMPERIJE! Osvojili ste sve ključne tvrđave i pokorili kontinent!");
             } else {
-                alert(msg);
+                alert("Niste na slobodnoj građevinskoj parceli koju možete kupiti.");
             }
         }
 
         function draw() {
-            ctx.fillStyle = '#14100d';
+            ctx.fillStyle = '#0f0b08';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.save();
-            ctx.translate(canvas.width / 2 + cam.x, canvas.height / 2 + cam.y);
-            ctx.scale(cam.scale, cam.scale);
-
-            // Putevi kampanje (pergament stil linija)
-            ctx.strokeStyle = 'rgba(197, 160, 89, 0.25)';
-            ctx.lineWidth = 3;
-            connections.forEach(conn => {
-                let p1 = nodes[conn[0]];
-                let p2 = nodes[conn[1]];
+            // 3D Efekat dubine mreže i puteva
+            ctx.strokeStyle = 'rgba(197, 160, 89, 0.3)';
+            ctx.lineWidth = 4;
+            for(let i = 0; i < nodes.length; i++) {
+                let n1 = nodes[i];
+                let n2 = nodes[(i + 1) % nodes.length];
                 ctx.beginPath();
-                ctx.moveTo(p1.x - 500, p1.y - 350);
-                ctx.lineTo(p2.x - 500, p2.y - 350);
+                ctx.moveTo(n1.x, n1.y);
+                ctx.lineTo(n2.x, n2.y);
                 ctx.stroke();
-            });
+            }
 
-            // Čvorovi na mapi
+            // Prikaz 3D čvorova (Monopoly sela/utvrđenja)
             nodes.forEach((node, idx) => {
-                let nx = node.x - 500;
-                let ny = node.y - 350;
-                
-                ctx.fillStyle = idx === player.currentNode ? '#591c1c' : '#1c1712';
-                ctx.strokeStyle = idx === player.currentNode ? '#f3e5ab' : '#8c6d36';
-                ctx.lineWidth = idx === player.currentNode ? 4 : 2;
-                
+                let isCurr = idx === player.currentNode;
+
+                // 3D senka čvora
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
                 ctx.beginPath();
-                ctx.arc(nx, ny, 26, 0, Math.PI * 2);
+                ctx.arc(node.x, node.y + 6, isCurr ? 30 : 22, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Osnova čvora
+                ctx.fillStyle = node.owner === 'Player' ? '#3b82f6' : (node.owner ? '#991b1b' : '#261e16');
+                ctx.strokeStyle = isCurr ? '#f3e5ab' : '#c5a059';
+                ctx.lineWidth = isCurr ? 4 : 2;
+
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, isCurr ? 26 : 20, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
 
+                // Ikona ili slovo na čvoru
                 ctx.fillStyle = '#fff';
                 ctx.font = '14px sans-serif';
                 ctx.textAlign = 'center';
-                let icon = '📍';
-                if(node.resType === 'gold') icon = '💰';
-                if(node.resType === 'wood') icon = '🪵';
-                if(node.resType === 'emerald') icon = '🟢';
-                if(node.resType === 'diamond') icon = '💣';
-                if(node.resType === 'bedrock') icon = '🏰';
-                if(node.type === 'buff') icon = '⭐';
-                if(node.type === 'trap') icon = '⚠️';
-                
-                ctx.fillText(icon, nx, ny + 5);
+                let symbol = '🏛️';
+                if(node.type.includes('res')) symbol = '🌲';
+                if(node.type === 'tax') symbol = '⚔️';
+                if(node.type === 'trap') symbol = '⚠️';
+                ctx.fillText(symbol, node.x, node.y + 5);
 
+                // Naziv sektora
                 ctx.fillStyle = '#c5a059';
                 ctx.font = '10px serif';
-                ctx.fillText(node.name, nx, ny - 34);
+                ctx.fillText(node.name, node.x, node.y - 28);
             });
 
-            // Avatar armije na poziciji
-            let curr = nodes[player.currentNode];
-            let ax = curr.x - 500;
-            let ay = curr.y - 350;
-            ctx.font = '26px sans-serif';
+            // Prikaz igrača na mapi
+            let currNode = nodes[player.currentNode];
+            ctx.font = '28px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(player.avatar, ax, ay - 6);
+            ctx.fillText(player.avatar, currNode.x, currNode.y - 6);
 
-            ctx.restore();
             requestAnimationFrame(draw);
         }
 

@@ -2,2180 +2,455 @@
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,
-               maximum-scale=1,user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ELEMENTAL FRONTIER</title>
-
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    user-select:none;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#080b10;
-    color:#d8e2e8;
-    font-family:Arial, sans-serif;
-}
-
-#game{
-    width:100vw;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-}
-
-/* ================= TOP ================= */
-
-#top{
-    height:44px;
-    background:#10151c;
-    border-bottom:1px solid #27313b;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 12px;
-    font-size:12px;
-}
-
-#title{
-    font-weight:bold;
-    letter-spacing:1px;
-}
-
-#speed button,
-.action{
-    background:#18212a;
-    color:#dce8ee;
-    border:1px solid #35424d;
-    padding:5px 9px;
-    cursor:pointer;
-}
-
-#speed button:hover,
-.action:hover{
-    background:#24313c;
-}
-
-/* ================= MAIN ================= */
-
-#main{
-    flex:1;
-    min-height:0;
-    display:flex;
-}
-
-/* ================= LEFT ================= */
-
-#left{
-    width:210px;
-    background:#0c1117;
-    border-right:1px solid #27313b;
-    overflow:auto;
-}
-
-.section{
-    padding:9px;
-    border-bottom:1px solid #202a33;
-}
-
-.section h3{
-    font-size:10px;
-    color:#81919e;
-    margin-bottom:7px;
-    letter-spacing:1px;
-}
-
-.faction{
-    padding:7px;
-    margin-bottom:4px;
-    background:#111820;
-    border-left:4px solid;
-    cursor:pointer;
-    font-size:10px;
-}
-
-.faction:hover{
-    background:#19232c;
-}
-
-.faction.active{
-    background:#20303b;
-}
-
-.hp{
-    height:4px;
-    background:#202830;
-    margin-top:5px;
-}
-
-.hp i{
-    display:block;
-    height:100%;
-}
-
-/* ================= MAP ================= */
-
-#mapWrap{
-    flex:1;
-    min-width:0;
-    position:relative;
-    background:#070b10;
-}
-
-#map{
-    width:100%;
-    height:100%;
-    display:block;
-}
-
-#selection{
-    position:absolute;
-    pointer-events:none;
-    border:1px solid #ffffff55;
-}
-
-/* ================= RIGHT ================= */
-
-#right{
-    width:245px;
-    background:#0c1117;
-    border-left:1px solid #27313b;
-    overflow:auto;
-}
-
-.panel{
-    padding:10px;
-    border-bottom:1px solid #202a33;
-}
-
-.panel h2{
-    font-size:13px;
-    margin-bottom:8px;
-}
-
-.stat{
-    display:flex;
-    justify-content:space-between;
-    padding:3px 0;
-    font-size:11px;
-}
-
-.spell{
-    width:100%;
-    text-align:left;
-    margin:4px 0;
-    padding:7px;
-    border:1px solid #34414c;
-    background:#151e26;
-    color:#dce6eb;
-    cursor:pointer;
-}
-
-.spell:hover{
-    background:#202d37;
-}
-
-.spell small{
-    display:block;
-    color:#7f909d;
-    margin-top:3px;
-}
-
-.item{
-    padding:6px;
-    background:#121a21;
-    margin-bottom:4px;
-    font-size:10px;
-    cursor:pointer;
-    border:1px solid #293640;
-}
-
-.item:hover{
-    background:#1c2932;
-}
-
-.notice{
-    color:#8fa1ad;
-    font-size:10px;
-    line-height:1.5;
-}
-
-/* ================= BOTTOM ================= */
-
-#bottom{
-    height:96px;
-    background:#0b1015;
-    border-top:1px solid #27313b;
-    display:flex;
-}
-
-#log{
-    flex:1;
-    padding:7px 10px;
-    overflow:auto;
-    font-family:monospace;
-    font-size:10px;
-    line-height:1.5;
-}
-
-#commands{
-    width:245px;
-    padding:7px;
-    display:flex;
-    gap:5px;
-    flex-wrap:wrap;
-    align-content:center;
-}
-
-#commands button{
-    flex:1;
-    min-width:100px;
-}
-
-/* ================= MOBILE ================= */
-
+*{ box-sizing:border-box; margin:0; padding:0; user-select:none; }
+html,body{ width:100%; height:100%; overflow:hidden; background:#080b10; color:#d8e2e8; font-family:Arial, sans-serif; }
+#game{ width:100vw; height:100vh; display:flex; flex-direction:column; }
+#top{ height:44px; background:#10151c; border-bottom:1px solid #27313b; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:12px; }
+#title{ font-weight:bold; letter-spacing:1px; }
+#speed button, .action{ background:#18212a; color:#dce8ee; border:1px solid #35424d; padding:5px 9px; cursor:pointer; }
+#speed button:hover, .action:hover{ background:#24313c; }
+#main{ flex:1; min-height:0; display:flex; }
+#left{ width:210px; background:#0c1117; border-right:1px solid #27313b; overflow:auto; }
+.section{ padding:9px; border-bottom:1px solid #202a33; }
+.section h3{ font-size:10px; color:#81919e; margin-bottom:7px; letter-spacing:1px; }
+.faction{ padding:7px; margin-bottom:4px; background:#111820; border-left:4px solid; cursor:pointer; font-size:10px; }
+.faction:hover{ background:#19232c; }
+.faction.active{ background:#20303b; }
+.hp{ height:4px; background:#202830; margin-top:5px; }
+.hp i{ display:block; height:100%; }
+#mapWrap{ flex:1; min-width:0; position:relative; background:#070b10; }
+#map{ width:100%; height:100%; display:block; }
+#right{ width:245px; background:#0c1117; border-left:1px solid #27313b; overflow:auto; }
+.panel{ padding:10px; border-bottom:1px solid #202a33; }
+.panel h2{ font-size:13px; margin-bottom:8px; }
+.stat{ display:flex; justify-content:space-between; padding:3px 0; font-size:11px; }
+.spell{ width:100%; text-align:left; margin:4px 0; padding:7px; border:1px solid #34414c; background:#151e26; color:#dce6eb; cursor:pointer; }
+.spell:hover{ background:#202d37; }
+.spell small{ display:block; color:#7f909d; margin-top:3px; }
+.item{ padding:6px; background:#121a21; margin-bottom:4px; font-size:10px; cursor:pointer; border:1px solid #293640; }
+.item:hover{ background:#1c2932; }
+.notice{ color:#8fa1ad; font-size:10px; line-height:1.5; }
+#bottom{ height:96px; background:#0b1015; border-top:1px solid #27313b; display:flex; }
+#log{ flex:1; padding:7px 10px; overflow:auto; font-family:monospace; font-size:10px; line-height:1.5; }
+#commands{ width:245px; padding:7px; display:flex; gap:5px; flex-wrap:wrap; align-content:center; }
+#commands button{ flex:1; min-width:100px; }
 @media(max-width:800px){
-
-    #left{
-        width:145px;
-    }
-
-    #right{
-        position:absolute;
-        right:0;
-        top:44px;
-        bottom:96px;
-        width:220px;
-        transform:translateX(100%);
-        transition:.2s;
-        z-index:5;
-    }
-
-    #right.open{
-        transform:translateX(0);
-    }
-
-    #bottom{
-        height:92px;
-    }
-
-    #commands{
-        width:190px;
-    }
-
-    #top{
-        font-size:9px;
-    }
+  #left{ width:145px; }
+  #right{ position:absolute; right:0; top:44px; bottom:96px; width:220px; transform:translateX(100%); transition:.2s; z-index:5; }
+  #right.open{ transform:translateX(0); }
+  #bottom{ height:92px; }
+  #commands{ width:190px; }
+  #top{ font-size:9px; }
 }
 </style>
 </head>
-
 <body>
-
 <div id="game">
-
-<header id="top">
-
-    <div id="title">
-        ELEMENTAL FRONTIER
-    </div>
-
-    <div>
-        <span id="clock">DAY 1 — 00:00</span>
-        &nbsp;
-        <span id="alive">10/10</span>
-    </div>
-
+  <header id="top">
+    <div id="title">ELEMENTAL FRONTIER</div>
+    <div><span id="clock">DAY 1 — 00:00</span> &nbsp; <span id="alive">10/10</span></div>
     <div id="speed">
-        <button onclick="setSpeed(0)">PAUSE</button>
-        <button onclick="setSpeed(1)">1x</button>
-        <button onclick="setSpeed(2)">2x</button>
-        <button onclick="setSpeed(4)">4x</button>
+      <button onclick="setSpeed(0)">PAUSE</button>
+      <button onclick="setSpeed(1)">1x</button>
+      <button onclick="setSpeed(2)">2x</button>
+      <button onclick="setSpeed(4)">4x</button>
     </div>
-
-</header>
-
-
-<div id="main">
-
-<!-- ================= LEFT ================= -->
-
-<aside id="left">
-
-    <div class="section">
-
+  </header>
+  <div id="main">
+    <aside id="left">
+      <div class="section">
         <h3>FACTIONS</h3>
-
         <div id="factions"></div>
-
-    </div>
-
-    <div class="section">
-
+      </div>
+      <div class="section">
         <h3>GAME RULE</h3>
-
-        <div class="notice">
-            Svaka frakcija igra za sebe.
-            Nema unapred određenog pobednika.
-            AI sam bira teritorije,
-            neprijatelje, investicije i napade.
-        </div>
-
-    </div>
-
-</aside>
-
-
-<!-- ================= MAP ================= -->
-
-<main id="mapWrap">
-
-    <canvas id="map"></canvas>
-
-</main>
-
-
-<!-- ================= RIGHT ================= -->
-
-<aside id="right">
-
-    <div class="panel">
-
-        <h2 id="selectedName">
-            Izaberi frakciju
-        </h2>
-
-        <div class="stat">
-            <span>HP</span>
-            <b id="sHP">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Zlato</span>
-            <b id="sGold">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Energija</span>
-            <b id="sEnergy">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Metal</span>
-            <b id="sMetal">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Kristal</span>
-            <b id="sCrystal">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Teritorije</span>
-            <b id="sTerritory">-</b>
-        </div>
-
-        <div class="stat">
-            <span>Vojska</span>
-            <b id="sArmy">-</b>
-        </div>
-
-    </div>
-
-
-    <div class="panel">
-
-        <h3>SPELLS</h3>
-
-        <div id="spells"></div>
-
-    </div>
-
-
-    <div class="panel">
-
-        <h3>SHOP</h3>
-
-        <div id="shop"></div>
-
-    </div>
-
-</aside>
-
-</div>
-
-
-<!-- ================= BOTTOM ================= -->
-
-<footer id="bottom">
-
+        <div class="notice">Svaka frakcija igra za sebe. AI sam bira teritorije, neprijatelje i investicije.</div>
+      </div>
+    </aside>
+    <main id="mapWrap">
+      <canvas id="map"></canvas>
+    </main>
+    <aside id="right">
+      <div class="panel">
+        <h2 id="selectedName">Izaberi frakciju</h2>
+        <div class="stat"><span>HP</span><b id="sHP">-</b></div>
+        <div class="stat"><span>Zlato</span><b id="sGold">-</b></div>
+        <div class="stat"><span>Energija</span><b id="sEnergy">-</b></div>
+        <div class="stat"><span>Metal</span><b id="sMetal">-</b></div>
+        <div class="stat"><span>Kristal</span><b id="sCrystal">-</b></div>
+        <div class="stat"><span>Teritorije</span><b id="sTerritory">-</b></div>
+        <div class="stat"><span>Vojska</span><b id="sArmy">-</b></div>
+      </div>
+      <div class="panel"><h3>SPELLS</h3><div id="spells"></div></div>
+      <div class="panel"><h3>SHOP</h3><div id="shop"></div></div>
+    </aside>
+  </div>
+  <footer id="bottom">
     <div id="log"></div>
-
     <div id="commands">
-
-        <button
-            class="action"
-            onclick="recruit()">
-            RECRUIT
-        </button>
-
-        <button
-            class="action"
-            onclick="buildBase()">
-            BUILD BASE
-        </button>
-
-        <button
-            class="action"
-            onclick="toggleRight()">
-            PANEL
-        </button>
-
-        <button
-            class="action"
-            onclick="restartGame()">
-            RESTART
-        </button>
-
+      <button class="action" onclick="recruit()">RECRUIT</button>
+      <button class="action" onclick="buildBase()">BUILD BASE</button>
+      <button class="action" onclick="toggleRight()">PANEL</button>
+      <button class="action" onclick="restartGame()">RESTART</button>
     </div>
-
-</footer>
-
+  </footer>
 </div>
-
 
 <script>
-
-/* =========================================================
-   ENGINE
-========================================================= */
-
-const canvas =
-    document.getElementById("map");
-
-const ctx =
-    canvas.getContext("2d");
-
-let W;
-let H;
+const canvas = document.getElementById("map");
+const ctx = canvas.getContext("2d");
+let W = 800, H = 600;
 
 function resize(){
-
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
-
-    const dpr =
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        );
-
-    canvas.width =
-        W * dpr;
-
-    canvas.height =
-        H * dpr;
-
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
+  W = canvas.clientWidth;
+  H = canvas.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-
-window.addEventListener(
-    "resize",
-    resize
-);
-
+window.addEventListener("resize", resize);
 resize();
 
-
-/* =========================================================
-   ENVIRONMENT
-========================================================= */
-
-const environment =
-    new Image();
-
-environment.src =
-    "environment.jpg";
-
-let environmentReady =
-    false;
-
-environment.onload =
-    () => environmentReady = true;
-
-
-/* =========================================================
-   FACTION DATA
-========================================================= */
+const environment = new Image();
+environment.src = "environment.jpg";
+let environmentReady = false;
+environment.onload = () => environmentReady = true;
 
 const definitions = [
-
-{
-    name:"ARES",
-    element:"FIRE",
-    color:"#ff3b30",
-    spells:[
-        ["INFERNO","Damage +35%","damage"],
-        ["BURNING GROUND","Enemy speed -45%","slow"],
-        ["WAR FURNACE","Metal +40%","metal"]
-    ]
-},
-
-{
-    name:"TIDAL",
-    element:"WATER",
-    color:"#2196f3",
-    spells:[
-        ["HEALING TIDE","Heal 20% HP","heal"],
-        ["FLOOD","Enemy production -40%","economy"],
-        ["OCEAN HARVEST","Energy +35%","energy"]
-    ]
-},
-
-{
-    name:"TERRA",
-    element:"EARTH",
-    color:"#9c7a4a",
-    spells:[
-        ["STONE WALL","Defense +50%","defense"],
-        ["EARTHQUAKE","Damage nearby enemies","quake"],
-        ["IRON VEIN","Metal +50%","metal"]
-    ]
-},
-
-{
-    name:"AERIS",
-    element:"AIR",
-    color:"#b8e8ff",
-    spells:[
-        ["GALE","Speed +60%","speed"],
-        ["STORM","Area damage","storm"],
-        ["SKY TRADE","Gold +40%","gold"]
-    ]
-},
-
-{
-    name:"CRYON",
-    element:"ICE",
-    color:"#72e6ff",
-    spells:[
-        ["FREEZE","Enemy speed -70%","freeze"],
-        ["ICE ARMOR","Defense +35%","defense"],
-        ["GLACIER","Crystal +45%","crystal"]
-    ]
-},
-
-{
-    name:"VOLT",
-    element:"ENERGY",
-    color:"#ffff33",
-    spells:[
-        ["OVERCHARGE","Damage +50%","damage"],
-        ["EMP","Enemy spells disabled","emp"],
-        ["REACTOR","Energy +60%","energy"]
-    ]
-},
-
-{
-    name:"SYLVAN",
-    element:"NATURE",
-    color:"#50d66b",
-    spells:[
-        ["REGENERATION","Heal over time","regen"],
-        ["ROOTS","Enemy movement -60%","root"],
-        ["GROWTH","Territory income +50%","growth"]
-    ]
-},
-
-{
-    name:"VOID",
-    element:"VOID",
-    color:"#b000ff",
-    spells:[
-        ["NULL","Enemy damage -35%","null"],
-        ["RIFT","Teleport army","teleport"],
-        ["VOID TAX","Steal gold","steal"]
-    ]
-},
-
-{
-    name:"SOLAR",
-    element:"LIGHT",
-    color:"#ffd54f",
-    spells:[
-        ["SOLAR STRIKE","High damage","solar"],
-        ["RADIANCE","Heal army","heal"],
-        ["SUN ECONOMY","Gold +50%","gold"]
-    ]
-},
-
-{
-    name:"NEXUS",
-    element:"ARCANE",
-    color:"#ff55cc",
-    spells:[
-        ["ARCANE BOLT","High damage","arcane"],
-        ["MIND SHIFT","Change target","mind"],
-        ["RESEARCH","Crystal +60%","crystal"]
-    ]
-}
-
+  { name:"ARES", element:"FIRE", color:"#ff3b30", spells:[["INFERNO","Damage +35%","damage"],["BURNING GROUND","Enemy speed -45%","slow"],["WAR FURNACE","Metal +40%","metal"]] },
+  { name:"TIDAL", element:"WATER", color:"#2196f3", spells:[["HEALING TIDE","Heal 20% HP","heal"],["FLOOD","Enemy production -40%","economy"],["OCEAN HARVEST","Energy +35%","energy"]] },
+  { name:"TERRA", element:"EARTH", color:"#9c7a4a", spells:[["STONE WALL","Defense +50%","defense"],["EARTHQUAKE","Damage nearby enemies","quake"],["IRON VEIN","Metal +50%","metal"]] },
+  { name:"AERIS", element:"AIR", color:"#b8e8ff", spells:[["GALE","Speed +60%","speed"],["STORM","Area damage","storm"], ["SKY TRADE","Gold +40%","gold"]] },
+  { name:"CRYON", element:"ICE", color:"#72e6ff", spells:[["FREEZE","Enemy speed -70%","freeze"],["ICE ARMOR","Defense +35%","defense"],["GLACIER","Crystal +45%","crystal"]] },
+  { name:"VOLT", element:"ENERGY", color:"#ffff33", spells:[["OVERCHARGE","Damage +50%","damage"],["EMP","Enemy spells disabled","emp"],["REACTOR","Energy +60%","energy"]] },
+  { name:"SYLVAN", element:"NATURE", color:"#50d66b", spells:[["REGENERATION","Heal over time","regen"],["ROOTS","Enemy movement -60%","root"],["GROWTH","Territory income +50%","growth"]] },
+  { name:"VOID", element:"VOID", color:"#b000ff", spells:[["NULL","Enemy damage -35%","null"],["RIFT","Teleport army","teleport"],["VOID TAX","Steal gold","steal"]] },
+  { name:"SOLAR", element:"LIGHT", color:"#ffd54f", spells:[["SOLAR STRIKE","High damage","solar"],["RADIANCE","Heal army","heal"],["SUN ECONOMY","Gold +50%","gold"]] },
+  { name:"NEXUS", element:"ARCANE", color:"#ff55cc", spells:[["ARCANE BOLT","High damage","arcane"],["MIND SHIFT","Change target","mind"],["RESEARCH","Crystal +60%","crystal"]] }
 ];
-
-
-/* =========================================================
-   FACTIONS
-========================================================= */
 
 let factions = [];
-
 function createFactions(){
-
-    factions = [];
-
-    const radius =
-        Math.min(W,H) * .32;
-
-    definitions.forEach(
-        (d,i)=>{
-
-            const a =
-                Math.PI*2/10*i;
-
-            factions.push({
-
-                id:i,
-
-                ...d,
-
-                x:
-                    W/2 +
-                    Math.cos(a)*radius,
-
-                y:
-                    H/2 +
-                    Math.sin(a)*radius,
-
-                hp:100000,
-                maxHp:100000,
-
-                gold:1000,
-                energy:500,
-                metal:800,
-                crystal:300,
-
-                army:100,
-
-                territory:1,
-
-                bases:1,
-
-                attack:1,
-
-                defense:1,
-
-                speed:1,
-
-                income:1,
-
-                target:null,
-
-                cooldowns:
-                    [0,0,0],
-
-                alive:true,
-
-                aiTimer:
-                    Math.random()*3
-            });
-        }
-    );
+  factions = [];
+  const radius = Math.min(W, H) * 0.32;
+  definitions.forEach((d, i) => {
+    const a = (Math.PI * 2 / 10) * i;
+    factions.push({
+      id: i, ...d,
+      x: W / 2 + Math.cos(a) * radius,
+      y: H / 2 + Math.sin(a) * radius,
+      hp: 100000, maxHp: 100000,
+      gold: 1000, energy: 500, metal: 800, crystal: 300,
+      army: 100, territory: 1, bases: 1,
+      attack: 1, defense: 1, speed: 1, income: 1,
+      target: null, cooldowns: [0,0,0], alive: true,
+      aiTimer: Math.random() * 3
+    });
+  });
 }
-
 createFactions();
 
-
-/* =========================================================
-   TERRITORIES
-========================================================= */
-
 const territories = [];
-
 function createTerritories(){
-
-    territories.length = 0;
-
-    const cols = 8;
-    const rows = 5;
-
-    const tw = W / cols;
-    const th = H / rows;
-
-    let id = 0;
-
-    for(let y=0;y<rows;y++){
-
-        for(let x=0;x<cols;x++){
-
-            territories.push({
-
-                id:id++,
-
-                x:x*tw,
-                y:y*th,
-
-                w:tw,
-                h:th,
-
-                owner:
-                    Math.floor(
-                        Math.random()*10
-                    ),
-
-                value:
-                    1+
-                    Math.floor(
-                        Math.random()*4
-                    )
-            });
-        }
+  territories.length = 0;
+  const cols = 8, rows = 5;
+  const tw = W / cols, th = H / rows;
+  let id = 0;
+  for(let y=0; y<rows; y++){
+    for(let x=0; x<cols; x++){
+      territories.push({ id: id++, x: x*tw, y: y*th, w: tw, h: th, owner: Math.floor(Math.random()*10) });
     }
+  }
 }
-
 createTerritories();
 
-
-/* =========================================================
-   SHOP
-========================================================= */
-
 const shopItems = [
-
-{
-    name:"IRON ARMOR",
-    price:700,
-    effect:"defense",
-    value:.20
-},
-
-{
-    name:"WAR ENGINE",
-    price:900,
-    effect:"attack",
-    value:.20
-},
-
-{
-    name:"RESOURCE CORE",
-    price:1000,
-    effect:"income",
-    value:.25
-},
-
-{
-    name:"ENERGY CELL",
-    price:600,
-    effect:"energy",
-    value:250
-},
-
-{
-    name:"CRYSTAL MODULE",
-    price:1200,
-    effect:"crystal",
-    value:200
-}
-
+  { name:"IRON ARMOR", price:700, effect:"defense", value:0.20 },
+  { name:"WAR ENGINE", price:900, effect:"attack", value:0.20 },
+  { name:"RESOURCE CORE", price:1000, effect:"income", value:0.25 },
+  { name:"ENERGY CELL", price:600, effect:"energy", value:250 },
+  { name:"CRYSTAL MODULE", price:1200, effect:"crystal", value:200 }
 ];
 
-
-/* =========================================================
-   LOG
-========================================================= */
-
 function log(message){
-
-    const box =
-        document.getElementById("log");
-
-    const line =
-        document.createElement("div");
-
-    line.textContent =
-        "[" +
-        Math.floor(gameTime) +
-        "] " +
-        message;
-
-    box.prepend(line);
-
-    while(box.children.length>30){
-
-        box.removeChild(
-            box.lastChild
-        );
-    }
+  const box = document.getElementById("log");
+  const line = document.createElement("div");
+  line.textContent = "[" + Math.floor(gameTime) + "] " + message;
+  box.prepend(line);
+  while(box.children.length > 30) box.removeChild(box.lastChild);
 }
 
-
-/* =========================================================
-   SELECTION
-========================================================= */
-
-let selected =
-    factions[0];
-
-function selectFaction(f){
-
-    selected = f;
-
-    renderUI();
-}
-
-
-/* =========================================================
-   TARGET
-========================================================= */
+let selected = factions[0];
+function selectFaction(f){ selected = f; renderUI(); }
 
 function chooseTarget(f){
-
-    const enemies =
-        factions.filter(
-            e =>
-                e.alive &&
-                e.id !== f.id
-        );
-
-    if(!enemies.length)
-        return null;
-
-    /*
-       AI traži najbližeg protivnika.
-    */
-
-    let best = null;
-    let bestScore = Infinity;
-
-    enemies.forEach(e=>{
-
-        const d =
-            Math.hypot(
-                e.x-f.x,
-                e.y-f.y
-            );
-
-        /*
-           teritorija i vojska
-           menjaju prioritet.
-        */
-
-        const score =
-            d -
-            e.territory*30 -
-            e.army*.1;
-
-        if(score < bestScore){
-
-            bestScore =
-                score;
-
-            best = e;
-        }
-    });
-
-    return best;
+  const enemies = factions.filter(e => e.alive && e.id !== f.id);
+  if(!enemies.length) return null;
+  let best = null, bestScore = Infinity;
+  enemies.forEach(e => {
+    const d = Math.hypot(e.x - f.x, e.y - f.y);
+    const score = d - e.territory * 30 - e.army * 0.1;
+    if(score < bestScore){ bestScore = score; best = e; }
+  });
+  return best;
 }
 
-
-/* =========================================================
-   ECONOMY
-========================================================= */
-
-function economy(f,dt){
-
-    const territories =
-        f.territory;
-
-    f.gold +=
-        10 *
-        territories *
-        f.income *
-        dt;
-
-    f.energy +=
-        4 *
-        territories *
-        dt;
-
-    f.metal +=
-        6 *
-        territories *
-        dt;
-
-    f.crystal +=
-        2 *
-        territories *
-        dt;
-
-    /*
-       Army upkeep
-    */
-
-    f.gold -=
-        f.army *
-        .015 *
-        dt;
-
-    if(f.gold < 0)
-        f.gold = 0;
+function economy(f, dt){
+  f.gold += 10 * f.territory * f.income * dt;
+  f.energy += 4 * f.territory * dt;
+  f.metal += 6 * f.territory * dt;
+  f.crystal += 2 * f.territory * dt;
+  f.gold = Math.max(0, f.gold - f.army * 0.015 * dt);
 }
 
-
-/* =========================================================
-   AI
-========================================================= */
-
-function updateAI(f,dt){
-
-    if(!f.alive)
-        return;
-
-    f.aiTimer -= dt;
-
-    if(f.aiTimer <= 0){
-
-        f.aiTimer =
-            1+
-            Math.random()*3;
-
-        /*
-           AI bira ponašanje
-        */
-
-        const decision =
-            Math.random();
-
-        if(decision < .25){
-
-            aiRecruit(f);
-
-        }else if(decision < .45){
-
-            aiBuy(f);
-
-        }else if(decision < .70){
-
-            aiSpell(f);
-
-        }else{
-
-            f.target =
-                chooseTarget(f);
-        }
+function updateAI(f, dt){
+  if(!f.alive) return;
+  f.aiTimer -= dt;
+  if(f.aiTimer <= 0){
+    f.aiTimer = 1 + Math.random() * 3;
+    const decision = Math.random();
+    if(decision < 0.25) aiRecruit(f);
+    else if(decision < 0.45) aiBuy(f);
+    else if(decision < 0.70) aiSpell(f);
+    else f.target = chooseTarget(f);
+  }
+  if(f.target && f.target.alive){
+    const dx = f.target.x - f.x, dy = f.target.y - f.y, d = Math.hypot(dx, dy);
+    if(d > 100){
+      f.x += (dx / d) * 25 * f.speed * dt;
+      f.y += (dy / d) * 25 * f.speed * dt;
     }
-
-    /*
-       Kretanje prema meti
-    */
-
-    if(
-        f.target &&
-        f.target.alive
-    ){
-
-        const dx =
-            f.target.x-f.x;
-
-        const dy =
-            f.target.y-f.y;
-
-        const d =
-            Math.hypot(dx,dy);
-
-        if(d > 100){
-
-            f.x +=
-                dx/d *
-                25 *
-                f.speed *
-                dt;
-
-            f.y +=
-                dy/d *
-                25 *
-                f.speed *
-                dt;
-        }
-
-        if(d < 115){
-
-            combat(f,f.target);
-        }
-
-    }else{
-
-        f.target =
-            chooseTarget(f);
-    }
-
-    /*
-       Granice
-    */
-
-    f.x =
-        Math.max(
-            20,
-            Math.min(
-                W-20,
-                f.x
-            )
-        );
-
-    f.y =
-        Math.max(
-            20,
-            Math.min(
-                H-20,
-                f.y
-            )
-        );
+    if(d < 115) combat(f, f.target);
+  } else {
+    f.target = chooseTarget(f);
+  }
+  f.x = Math.max(20, Math.min(W - 20, f.x));
+  f.y = Math.max(20, Math.min(H - 20, f.y));
 }
 
-
-/* =========================================================
-   RECRUIT
-========================================================= */
-
-function aiRecruit(f){
-
-    const cost = 250;
-
-    if(f.gold >= cost){
-
-        f.gold -= cost;
-
-        f.army += 10;
-    }
-}
-
+function aiRecruit(f){ if(f.gold >= 250){ f.gold -= 250; f.army += 10; } }
 function recruit(){
-
-    if(!selected)
-        return;
-
-    const cost = 250;
-
-    if(selected.gold >= cost){
-
-        selected.gold -= cost;
-
-        selected.army += 10;
-
-        log(
-            selected.name+
-            " regrutuje 10 jedinica."
-        );
-    }
+  if(selected && selected.gold >= 250){
+    selected.gold -= 250; selected.army += 10;
+    log(selected.name + " regrutuje 10 jedinica.");
+  }
 }
-
-
-/* =========================================================
-   BASE
-========================================================= */
 
 function buildBase(){
-
-    if(!selected)
-        return;
-
-    const cost = 1500;
-
-    if(
-        selected.gold >= cost &&
-        selected.metal >= 500
-    ){
-
-        selected.gold -= cost;
-        selected.metal -= 500;
-
-        selected.bases++;
-
-        selected.defense += .15;
-
-        log(
-            selected.name+
-            " gradi novu bazu."
-        );
-    }
+  if(selected && selected.gold >= 1500 && selected.metal >= 500){
+    selected.gold -= 1500; selected.metal -= 500;
+    selected.bases++; selected.defense += 0.15;
+    log(selected.name + " gradi novu bazu.");
+  }
 }
 
-
-/* =========================================================
-   COMBAT
-========================================================= */
-
-function combat(a,b){
-
-    if(
-        !a.alive ||
-        !b.alive
-    )
-        return;
-
-    const attackPower =
-        100 *
-        a.attack *
-        (a.army/100);
-
-    const defensePower =
-        b.defense;
-
-    const damage =
-        Math.max(
-            100,
-            attackPower /
-            defensePower *
-            (.7+
-             Math.random()*.6)
-        );
-
-    b.hp -= damage;
-
-    b.army -=
-        damage*.025;
-
-    if(b.hp <= 0){
-
-        b.hp = 0;
-        b.alive = false;
-
-        const gained =
-            b.territory;
-
-        a.territory +=
-            gained;
-
-        b.territory = 0;
-
-        log(
-            a.name+
-            " je eliminisao "+
-            b.name
-        );
-    }
+function combat(a, b){
+  if(!a.alive || !b.alive) return;
+  const attackPower = 100 * a.attack * (a.army / 100);
+  const damage = Math.max(100, (attackPower / b.defense) * (0.7 + Math.random() * 0.6));
+  b.hp -= damage;
+  b.army -= damage * 0.025;
+  if(b.hp <= 0){
+    b.hp = 0; b.alive = false;
+    a.territory += b.territory; b.territory = 0;
+    log(a.name + " je eliminisao " + b.name);
+  }
 }
 
-
-/* =========================================================
-   SPELL SYSTEM
-========================================================= */
-
-function castSpell(
-    caster,
-    index
-){
-
-    if(!caster.alive)
-        return;
-
-    const spell =
-        caster.spells[index];
-
-    if(!spell)
-        return;
-
-    if(caster.cooldowns[index] > 0)
-        return;
-
-    caster.cooldowns[index] = 15;
-
-    const type =
-        spell[2];
-
-    const target =
-        caster.target ||
-        chooseTarget(caster);
-
-    switch(type){
-
-        case"damage":
-
-            if(target){
-
-                target.hp -=
-                    18000 *
-                    caster.attack;
-
-                log(
-                    caster.name+
-                    " koristi "+
-                    spell[0]
-                );
-            }
-
-        break;
-
-
-        case"heal":
-
-            caster.hp =
-                Math.min(
-                    caster.maxHp,
-                    caster.hp+22000
-                );
-
-        break;
-
-
-        case"metal":
-
-            caster.metal += 600;
-
-        break;
-
-
-        case"energy":
-
-            caster.energy += 600;
-
-        break;
-
-
-        case"gold":
-
-            caster.gold += 700;
-
-        break;
-
-
-        case"crystal":
-
-            caster.crystal += 500;
-
-        break;
-
-
-        case"defense":
-
-            caster.defense += .25;
-
-        break;
-
-
-        case"speed":
-
-            caster.speed += .25;
-
-            setTimeout(
-                ()=>{
-                    caster.speed -= .25;
-                },
-                8000
-            );
-
-        break;
-
-
-        case"attack":
-
-            caster.attack += .25;
-
-            setTimeout(
-                ()=>{
-                    caster.attack -= .25;
-                },
-                8000
-            );
-
-        break;
-
-
-        case"steal":
-
-            if(target){
-
-                const amount =
-                    Math.min(
-                        500,
-                        target.gold
-                    );
-
-                target.gold -= amount;
-                caster.gold += amount;
-            }
-
-        break;
-
-
-        case"growth":
-
-            caster.income += .25;
-
-        break;
-
-
-        case"null":
-
-            if(target)
-                target.attack -= .25;
-
-        break;
-
-
-        case"quake":
-
-            factions.forEach(
-                enemy=>{
-
-                    if(
-                        enemy !== caster &&
-                        enemy.alive
-                    ){
-
-                        const d =
-                            Math.hypot(
-                                enemy.x-caster.x,
-                                enemy.y-caster.y
-                            );
-
-                        if(d < 220){
-
-                            enemy.hp -=
-                                9000;
-                        }
-                    }
-                }
-            );
-
-        break;
-
-
-        default:
-
-            if(target){
-
-                target.hp -=
-                    12000;
-            }
-    }
+function castSpell(caster, index){
+  if(!caster.alive || caster.cooldowns[index] > 0) return;
+  const spell = caster.spells[index];
+  if(!spell) return;
+  caster.cooldowns[index] = 15;
+  const target = caster.target || chooseTarget(caster);
+
+  switch(spell[2]){
+    case "damage": if(target) target.hp -= 18000 * caster.attack; break;
+    case "heal": caster.hp = Math.min(caster.maxHp, caster.hp + 22000); break;
+    case "metal": caster.metal += 600; break;
+    case "energy": caster.energy += 600; break;
+    case "gold": caster.gold += 700; break;
+    case "crystal": caster.crystal += 500; break;
+    case "defense": caster.defense += 0.25; break;
+    case "speed": caster.speed += 0.25; setTimeout(() => caster.speed -= 0.25, 8000); break;
+    default: if(target) target.hp -= 12000;
+  }
+  log(caster.name + " koristi " + spell[0]);
 }
 
-
-function aiSpell(f){
-
-    const index =
-        Math.floor(
-            Math.random()*3
-        );
-
-    castSpell(
-        f,
-        index
-    );
-}
-
-
-/* =========================================================
-   SHOP
-========================================================= */
+function aiSpell(f){ castSpell(f, Math.floor(Math.random() * 3)); }
 
 function buyItem(item){
-
-    if(!selected)
-        return;
-
-    if(
-        selected.gold <
-        item.price
-    ){
-
-        log(
-            "Nema dovoljno zlata."
-        );
-
-        return;
-    }
-
-    selected.gold -=
-        item.price;
-
-    switch(item.effect){
-
-        case"attack":
-            selected.attack +=
-                item.value;
-        break;
-
-        case"defense":
-            selected.defense +=
-                item.value;
-        break;
-
-        case"income":
-            selected.income +=
-                item.value;
-        break;
-
-        case"energy":
-            selected.energy +=
-                item.value;
-        break;
-
-        case"crystal":
-            selected.crystal +=
-                item.value;
-        break;
-    }
-
-    log(
-        selected.name+
-        " kupuje "+
-        item.name
-    );
+  if(!selected || selected.gold < item.price){ log("Nema dovoljno zlata."); return; }
+  selected.gold -= item.price;
+  if(item.effect === "attack") selected.attack += item.value;
+  else if(item.effect === "defense") selected.defense += item.value;
+  else if(item.effect === "income") selected.income += item.value;
+  log(selected.name + " kupuje " + item.name);
 }
-
 
 function aiBuy(f){
-
-    const item =
-        shopItems[
-            Math.floor(
-                Math.random()*
-                shopItems.length
-            )
-        ];
-
-    if(f.gold >= item.price){
-
-        f.gold -=
-            item.price;
-
-        switch(item.effect){
-
-            case"attack":
-                f.attack +=
-                    item.value;
-            break;
-
-            case"defense":
-                f.defense +=
-                    item.value;
-            break;
-
-            case"income":
-                f.income +=
-                    item.value;
-            break;
-
-            case"energy":
-                f.energy +=
-                    item.value;
-            break;
-
-            case"crystal":
-                f.crystal +=
-                    item.value;
-            break;
-        }
-    }
+  const item = shopItems[Math.floor(Math.random() * shopItems.length)];
+  if(f.gold >= item.price){
+    f.gold -= item.price;
+    if(item.effect === "attack") f.attack += item.value;
+    else if(item.effect === "defense") f.defense += item.value;
+    else if(item.effect === "income") f.income += item.value;
+  }
 }
-
-
-/* =========================================================
-   TERRITORY CONTROL
-========================================================= */
 
 function updateTerritories(){
-
-    territories.forEach(t=>{
-
-        let closest = null;
-        let distance = Infinity;
-
-        factions.forEach(f=>{
-
-            if(!f.alive)
-                return;
-
-            const tx =
-                t.x+t.w/2;
-
-            const ty =
-                t.y+t.h/2;
-
-            const d =
-                Math.hypot(
-                    f.x-tx,
-                    f.y-ty
-                );
-
-            if(d < distance){
-
-                distance = d;
-                closest = f;
-            }
-        });
-
-        if(
-            closest &&
-            distance < 120
-        ){
-
-            t.owner =
-                closest.id;
-        }
+  territories.forEach(t => {
+    let closest = null, distance = Infinity;
+    factions.forEach(f => {
+      if(!f.alive) return;
+      const d = Math.hypot(f.x - (t.x + t.w/2), f.y - (t.y + t.h/2));
+      if(d < distance){ distance = d; closest = f; }
     });
-
-    factions.forEach(
-        f=>{
-
-            f.territory =
-                territories.filter(
-                    t =>
-                        t.owner === f.id
-                ).length;
-        }
-    );
+    if(closest && distance < 120) t.owner = closest.id;
+  });
+  factions.forEach(f => {
+    f.territory = territories.filter(t => t.owner === f.id).length;
+  });
 }
-
-
-/* =========================================================
-   COOLDOWNS
-========================================================= */
 
 function updateCooldowns(dt){
-
-    factions.forEach(f=>{
-
-        for(
-            let i=0;
-            i<3;
-            i++
-        ){
-
-            f.cooldowns[i] =
-                Math.max(
-                    0,
-                    f.cooldowns[i]-dt
-                );
-        }
-    });
+  factions.forEach(f => {
+    for(let i=0; i<3; i++) f.cooldowns[i] = Math.max(0, f.cooldowns[i] - dt);
+  });
 }
-
-
-/* =========================================================
-   DRAW MAP
-========================================================= */
 
 function drawMap(){
+  ctx.fillStyle = "#070b10";
+  ctx.fillRect(0, 0, W, H);
 
-    /*
-       Background
-    */
+  if(environmentReady){
+    ctx.globalAlpha = 0.7;
+    ctx.drawImage(environment, 0, 0, W, H);
+    ctx.globalAlpha = 1.0;
+  }
 
-    ctx.fillStyle =
-        "#070b10";
+  territories.forEach(t => {
+    const owner = factions[t.owner];
+    ctx.fillStyle = owner ? owner.color + "16" : "#ffffff05";
+    ctx.fillRect(t.x, t.y, t.w, t.h);
+    ctx.strokeStyle = "#ffffff12";
+    ctx.strokeRect(t.x, t.y, t.w, t.h);
+  });
 
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
+  factions.forEach(f => {
+    if(!f.alive) return;
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(f.x, f.y, 19, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = f.color;
+    ctx.beginPath(); ctx.arc(f.x, f.y, 7, 0, Math.PI*2); ctx.fill();
 
-    if(environmentReady){
+    ctx.fillStyle = "#fff";
+    ctx.font = "10px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(f.name, f.x, f.y - 25);
 
-        const ratio =
-            environment.width /
-            environment.height;
-
-        const screen =
-            W/H;
-
-        let dw,dh;
-
-        if(ratio>screen){
-
-            dh=H;
-            dw=H*ratio;
-
-        }else{
-
-            dw=W;
-            dh=W/ratio;
-        }
-
-        ctx.globalAlpha=.7;
-
-        ctx.drawImage(
-            environment,
-            (W-dw)/2,
-            (H-dh)/2,
-            dw,
-            dh
-        );
-
-        ctx.globalAlpha=1;
-
-    }else{
-
-        drawDefaultMap();
-    }
-
-
-    /*
-       Territories
-    */
-
-    territories.forEach(t=>{
-
-        const owner =
-            factions[t.owner];
-
-        ctx.fillStyle =
-            owner
-            ? owner.color+"16"
-            : "#ffffff05";
-
-        ctx.fillRect(
-            t.x,
-            t.y,
-            t.w,
-            t.h
-        );
-
-        ctx.strokeStyle =
-            "#ffffff12";
-
-        ctx.strokeRect(
-            t.x,
-            t.y,
-            t.w,
-            t.h
-        );
-    });
-
-
-    /*
-       Bases
-    */
-
-    factions.forEach(f=>{
-
-        if(!f.alive)
-            return;
-
-        ctx.strokeStyle =
-            f.color;
-
-        ctx.lineWidth=2;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            f.x,
-            f.y,
-            19,
-            0,
-            Math.PI*2
-        );
-
-        ctx.stroke();
-
-
-        ctx.fillStyle =
-            f.color;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            f.x,
-            f.y,
-            7,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /*
-           Name
-        */
-
-        ctx.fillStyle =
-            "#fff";
-
-        ctx.font =
-            "10px Arial";
-
-        ctx.textAlign =
-            "center";
-
-        ctx.fillText(
-            f.name,
-            f.x,
-            f.y-25
-        );
-
-
-        /*
-           HP
-        */
-
-        const hp =
-            Math.max(
-                0,
-                f.hp/f.maxHp
-            );
-
-        ctx.fillStyle =
-            "#202830";
-
-        ctx.fillRect(
-            f.x-22,
-            f.y+25,
-            44,
-            4
-        );
-
-        ctx.fillStyle =
-            f.color;
-
-        ctx.fillRect(
-            f.x-22,
-            f.y+25,
-            44*hp,
-            4
-        );
-    });
+    const hp = Math.max(0, f.hp / f.maxHp);
+    ctx.fillStyle = "#202830";
+    ctx.fillRect(f.x - 22, f.y + 25, 44, 4);
+    ctx.fillStyle = f.color;
+    ctx.fillRect(f.x - 22, f.y + 25, 44 * hp, 4);
+  });
 }
-
-
-function drawDefaultMap(){
-
-    const g =
-        ctx.createRadialGradient(
-            W/2,
-            H/2,
-            20,
-            W/2,
-            H/2,
-            Math.max(W,H)
-        );
-
-    g.addColorStop(
-        0,
-        "#13232a"
-    );
-
-    g.addColorStop(
-        1,
-        "#05070a"
-    );
-
-    ctx.fillStyle=g;
-
-    ctx.fillRect(
-        0,0,W,H
-    );
-}
-
-
-/* =========================================================
-   UI
-========================================================= */
 
 function renderUI(){
+  const factionBox = document.getElementById("factions");
+  factionBox.innerHTML = "";
+  [...factions].sort((a,b) => b.territory - a.territory).forEach(f => {
+    const el = document.createElement("div");
+    el.className = "faction" + (selected.id === f.id ? " active" : "");
+    el.style.borderColor = f.color;
+    el.innerHTML = `<b>${f.name}</b> <small>${f.element}</small>
+      <div class="hp"><i style="width:${(f.hp/f.maxHp)*100}%; background:${f.color};"></i></div>`;
+    el.onclick = () => selectFaction(f);
+    factionBox.appendChild(el);
+  });
 
-    const factionBox =
-        document.getElementById(
-            "factions"
-        );
+  if(!selected) return;
+  document.getElementById("selectedName").textContent = selected.name + " — " + selected.element;
+  document.getElementById("sHP").textContent = Math.floor(selected.hp);
+  document.getElementById("sGold").textContent = Math.floor(selected.gold);
+  document.getElementById("sEnergy").textContent = Math.floor(selected.energy);
+  document.getElementById("sMetal").textContent = Math.floor(selected.metal);
+  document.getElementById("sCrystal").textContent = Math.floor(selected.crystal);
+  document.getElementById("sTerritory").textContent = selected.territory;
+  document.getElementById("sArmy").textContent = Math.floor(selected.army);
 
-    factionBox.innerHTML="";
+  const spells = document.getElementById("spells");
+  spells.innerHTML = "";
+  selected.spells.forEach((spell, i) => {
+    const btn = document.createElement("button");
+    btn.className = "spell";
+    const cd = selected.cooldowns[i];
+    btn.innerHTML = `<b>${i+1}. ${spell[0]}</b><small>${spell[1]} ${cd > 0 ? " — CD " + cd.toFixed(1) : " — READY"}</small>`;
+    btn.onclick = () => castSpell(selected, i);
+    spells.appendChild(btn);
+  });
 
-    [...factions]
-        .sort(
-            (a,b)=>
-                b.territory-a.territory
-        )
-        .forEach(f=>{
-
-            const el =
-                document.createElement(
-                    "div"
-                );
-
-            el.className =
-                "faction"+
-                (
-                    selected.id===f.id
-                    ?" active"
-                    :""
-                );
-
-            el.style.borderColor =
-                f.color;
-
-            el.innerHTML =
-
-                `<b>${f.name}</b>
-                 <small>
-                 ${f.element}
-                 </small>
-                 <div class="hp">
-                   <i style="
-                     width:${f.hp/f.maxHp*100}%;
-                     background:${f.color};
-                   "></i>
-                 </div>`;
-
-            el.onclick =
-                () => selectFaction(f);
-
-            factionBox.appendChild(el);
-        });
-
-
-    if(!selected)
-        return;
-
-
-    document.getElementById(
-        "selectedName"
-    ).textContent =
-        selected.name+
-        " — "+
-        selected.element;
-
-
-    document.getElementById(
-        "sHP"
-    ).textContent =
-        Math.floor(selected.hp);
-
-
-    document.getElementById(
-        "sGold"
-    ).textContent =
-        Math.floor(selected.gold);
-
-
-    document.getElementById(
-        "sEnergy"
-    ).textContent =
-        Math.floor(selected.energy);
-
-
-    document.getElementById(
-        "sMetal"
-    ).textContent =
-        Math.floor(selected.metal);
-
-
-    document.getElementById(
-        "sCrystal"
-    ).textContent =
-        Math.floor(selected.crystal);
-
-
-    document.getElementById(
-        "sTerritory"
-    ).textContent =
-        selected.territory;
-
-
-    document.getElementById(
-        "sArmy"
-    ).textContent =
-        Math.floor(selected.army);
-
-
-    /*
-       Spells
-    */
-
-    const spells =
-        document.getElementById(
-            "spells"
-        );
-
-    spells.innerHTML="";
-
-    selected.spells.forEach(
-        (spell,i)=>{
-
-            const btn =
-                document.createElement(
-                    "button"
-                );
-
-            btn.className="spell";
-
-            const cd =
-                selected.cooldowns[i];
-
-            btn.innerHTML =
-                `<b>${i+1}. ${spell[0]}</b>
-                 <small>
-                 ${spell[1]}
-                 ${cd>0
-                    ?" — CD "+
-                    cd.toFixed(1)
-                    :" — READY"}
-                 </small>`;
-
-            btn.onclick =
-                ()=>castSpell(
-                    selected,
-                    i
-                );
-
-            spells.appendChild(btn);
-        }
-    );
-
-
-    /*
-       Shop
-    */
-
-    const shop =
-        document.getElementById(
-            "shop"
-        );
-
-    shop.innerHTML="";
-
-    shopItems.forEach(item=>{
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-        div.className="item";
-
-        div.innerHTML =
-            `<b>${item.name}</b>
-             <br>
-             ${item.price} GOLD`;
-
-        div.onclick =
-            ()=>buyItem(item);
-
-        shop.appendChild(div);
-    });
+  const shop = document.getElementById("shop");
+  shop.innerHTML = "";
+  shopItems.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `<b>${item.name}</b><br>${item.price} GOLD`;
+    div.onclick = () => buyItem(item);
+    shop.appendChild(div);
+  });
 }
 
-
-/* =========================================================
-   GAME STATE
-========================================================= */
-
-let gameTime=0;
-
-let speed=1;
-
-function setSpeed(value){
-
-    speed=value;
-}
-
-function toggleRight(){
-
-    document
-        .getElementById("right")
-        .classList.toggle("open");
-}
-
-
-/* =========================================================
-   RESTART
-========================================================= */
-
+let gameTime = 0, speed = 1;
+function setSpeed(v){ speed = v; }
+function toggleRight(){ document.getElementById("right").classList.toggle("open"); }
 function restartGame(){
-
-    gameTime=0;
-
-    createFactions();
-
-    createTerritories();
-
-    selected =
-        factions[0];
-
-    log(
-        "Nova simulacija pokrenuta."
-    );
+  gameTime = 0; createFactions(); createTerritories();
+  selected = factions[0]; log("Nova simulacija pokrenuta.");
 }
 
-
-/* =========================================================
-   MAIN LOOP
-========================================================= */
-
-let last =
-    performance.now();
-
-let uiTimer=0;
-let territoryTimer=0;
-
+let last = performance.now(), uiTimer = 0, territoryTimer = 0;
 function loop(now){
+  let dt = (now - last) / 1000;
+  last = now;
+  dt = Math.min(dt, 0.1);
+  const simDt = dt * speed;
 
-    let dt =
-        (now-last)/1000;
+  if(speed > 0){
+    gameTime += simDt;
+    factions.forEach(f => {
+      if(!f.alive) return;
+      economy(f, simDt);
+      updateAI(f, simDt);
+    });
+    updateCooldowns(simDt);
+    territoryTimer += simDt;
+    if(territoryTimer > 2){ territoryTimer = 0; updateTerritories(); }
+  }
 
-    last=now;
-
-    dt =
-        Math.min(
-            dt,
-            .1
-        );
-
-    const simDt =
-        dt*speed;
-
-    if(speed>0){
-
-        gameTime +=
-            simDt;
-
-        factions.forEach(
-            f=>{
-
-                if(!f.alive)
-                    return;
-
-                economy(
-                    f,
-                    simDt
-                );
-
-                updateAI(
-                    f,
-                    simDt
-                );
-            }
-        );
-
-        updateCooldowns(
-            simDt
-        );
-
-        territoryTimer +=
-            simDt;
-
-        if(
-            territoryTimer > 2
-        ){
-
-            territoryTimer=0;
-
-            updateTerritories();
-        }
-    }
-
-
-    /*
-       Render
-    */
-
-    drawMap();
-
-
-    /*
-       UI ne mora
-       da se renderuje
-       60 puta u sekundi.
-    */
-
-    uiTimer += dt;
-
-    if(uiTimer>.25){
-
-        uiTimer=0;
-
-        renderUI();
-
-        const alive =
-            factions.filter(
-                f=>f.alive
-            ).length;
-
-        document.getElementById(
-            "alive"
-        ).textContent =
-            alive+"/10";
-
-        const day =
-            Math.floor(
-                gameTime/120
-            )+1;
-
-        const seconds =
-            Math.floor(
-                gameTime%120
-            );
-
-        document.getElementById(
-            "clock"
-        ).textContent =
-            "DAY "+
-            day+
-            " — "+
-            seconds
-            .toString()
-            .padStart(2,"0");
-    }
-
-
-    requestAnimationFrame(
-        loop
-    );
+  drawMap();
+  uiTimer += dt;
+  if(uiTimer > 0.25){
+    uiTimer = 0;
+    renderUI();
+    document.getElementById("alive").textContent = factions.filter(f => f.alive).length + "/10";
+    const day = Math.floor(gameTime / 120) + 1;
+    const seconds = Math.floor(gameTime % 120);
+    document.getElementById("clock").textContent = "DAY " + day + " — " + seconds.toString().padStart(2, "0");
+  }
+  requestAnimationFrame(loop);
 }
 
-
-/* =========================================================
-   START
-========================================================= */
-
-log(
-    "ELEMENTAL FRONTIER pokrenut."
-);
-
-log(
-    "10 nezavisnih frakcija ulazi u simulaciju."
-);
-
-log(
-    "Ekonomija, teritorije i AI aktivni."
-);
-
+log("ELEMENTAL FRONTIER pokrenut.");
 renderUI();
-
-requestAnimationFrame(
-    loop
-);
-
+requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>

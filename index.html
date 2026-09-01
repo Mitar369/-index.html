@@ -6,44 +6,69 @@
 <title>ELEMENTAL FRONTIER</title>
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; user-select:none; }
-html,body{ width:100%; height:100%; overflow:hidden; background:#080b10; color:#d8e2e8; font-family:Arial, sans-serif; }
+html,body{ width:100%; height:100%; overflow:hidden; background:#080b10; color:#d8e2e8; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 #game{ width:100vw; height:100vh; display:flex; flex-direction:column; }
-#top{ height:44px; background:#10151c; border-bottom:1px solid #27313b; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:12px; }
-#title{ font-weight:bold; letter-spacing:1px; }
-#speed button, .action{ background:#18212a; color:#dce8ee; border:1px solid #35424d; padding:5px 9px; cursor:pointer; }
+
+/* TOP BAR */
+#top{ height:40px; background:#10151c; border-bottom:1px solid #27313b; display:flex; align-items:center; justify-content:space-between; padding:0 10px; font-size:11px; flex-shrink:0; }
+#title{ font-weight:bold; letter-spacing:1px; color:#e0e8f0; }
+#speed button, .action{ background:#18212a; color:#dce8ee; border:1px solid #35424d; padding:4px 8px; cursor:pointer; font-size:10px; border-radius:3px; }
 #speed button:hover, .action:hover{ background:#24313c; }
-#main{ flex:1; min-height:0; display:flex; }
-#left{ width:210px; background:#0c1117; border-right:1px solid #27313b; overflow:auto; }
-.section{ padding:9px; border-bottom:1px solid #202a33; }
-.section h3{ font-size:10px; color:#81919e; margin-bottom:7px; letter-spacing:1px; }
-.faction{ padding:7px; margin-bottom:4px; background:#111820; border-left:4px solid; cursor:pointer; font-size:10px; }
+
+/* MAIN AREA */
+#main{ flex:1; min-height:0; display:flex; position:relative; overflow:hidden; }
+
+/* LEFT PANEL */
+#left{ width:180px; background:#0c1117; border-right:1px solid #27313b; overflow-y:auto; flex-shrink:0; }
+.section{ padding:8px; border-bottom:1px solid #202a33; }
+.section h3{ font-size:10px; color:#81919e; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase; }
+.faction{ padding:6px; margin-bottom:4px; background:#111820; border-left:3px solid; cursor:pointer; font-size:10px; border-radius:2px; }
 .faction:hover{ background:#19232c; }
 .faction.active{ background:#20303b; }
-.hp{ height:4px; background:#202830; margin-top:5px; }
-.hp i{ display:block; height:100%; }
-#mapWrap{ flex:1; min-width:0; position:relative; background:#070b10; }
+.hp{ height:4px; background:#202830; margin-top:4px; border-radius:2px; overflow:hidden; }
+.hp i{ display:block; height:100%; transition:width 0.2s; }
+
+/* MAP AREA */
+#mapWrap{ flex:1; min-width:0; position:relative; background:#070b10; display:flex; justify-content:center; align-items:center; }
 #map{ width:100%; height:100%; display:block; }
-#right{ width:245px; background:#0c1117; border-left:1px solid #27313b; overflow:auto; }
-.panel{ padding:10px; border-bottom:1px solid #202a33; }
-.panel h2{ font-size:13px; margin-bottom:8px; }
-.stat{ display:flex; justify-content:space-between; padding:3px 0; font-size:11px; }
-.spell{ width:100%; text-align:left; margin:4px 0; padding:7px; border:1px solid #34414c; background:#151e26; color:#dce6eb; cursor:pointer; }
-.spell:hover{ background:#202d37; }
-.spell small{ display:block; color:#7f909d; margin-top:3px; }
-.item{ padding:6px; background:#121a21; margin-bottom:4px; font-size:10px; cursor:pointer; border:1px solid #293640; }
-.item:hover{ background:#1c2932; }
-.notice{ color:#8fa1ad; font-size:10px; line-height:1.5; }
-#bottom{ height:96px; background:#0b1015; border-top:1px solid #27313b; display:flex; }
-#log{ flex:1; padding:7px 10px; overflow:auto; font-family:monospace; font-size:10px; line-height:1.5; }
-#commands{ width:245px; padding:7px; display:flex; gap:5px; flex-wrap:wrap; align-content:center; }
-#commands button{ flex:1; min-width:100px; }
-@media(max-width:800px){
-  #left{ width:145px; }
-  #right{ position:absolute; right:0; top:44px; bottom:96px; width:220px; transform:translateX(100%); transition:.2s; z-index:5; }
+
+/* RIGHT PANEL (STATS & LOL SHOP) */
+#right{ width:260px; background:#0c1117; border-left:1px solid #27313b; overflow-y:auto; flex-shrink:0; z-index:10; }
+.panel{ padding:8px; border-bottom:1px solid #202a33; }
+.panel h2{ font-size:12px; margin-bottom:6px; color:#f0f4f8; }
+.stat{ display:flex; justify-content:space-between; padding:2px 0; font-size:10px; color:#a0b0c0; }
+
+/* GRAPH CANVAS */
+#resourceGraph{ width:100%; height:60px; background:#080d12; border:1px solid #1c2730; margin-top:5px; border-radius:3px; }
+
+/* LOL STYLE SHOP */
+.shop-cats{ display:flex; gap:2px; margin-bottom:6px; }
+.shop-cat{ flex:1; padding:3px 0; font-size:8px; text-align:center; background:#141c24; border:1px solid #283644; color:#8fa0b0; cursor:pointer; }
+.shop-cat.active{ background:#203040; color:#fff; border-color:#456078; }
+.item-grid{ display:grid; grid-template-columns:1fr; gap:4px; }
+.lol-item{ padding:6px; background:#121a21; border:1px solid #253340; cursor:pointer; border-radius:3px; display:flex; justify-content:space-between; align-items:center; }
+.lol-item:hover{ background:#1a2632; border-color:#3b5066; }
+.lol-item-info{ display:flex; flex-direction:column; }
+.lol-item-title{ font-size:10px; font-weight:bold; color:#d0e0f0; }
+.lol-item-desc{ font-size:8px; color:#7a8c9e; }
+.lol-item-price{ font-size:10px; font-weight:bold; color:#ffca28; }
+
+.spell{ width:100%; text-align:left; margin:3px 0; padding:5px; border:1px solid #2d3b47; background:#141d26; color:#dce6eb; cursor:pointer; font-size:9px; border-radius:3px; }
+.spell:hover{ background:#1e2c38; }
+
+/* BOTTOM BAR */
+#bottom{ height:70px; background:#0b1015; border-top:1px solid #27313b; display:flex; flex-shrink:0; }
+#log{ flex:1; padding:5px 8px; overflow-y:auto; font-family:monospace; font-size:9px; line-height:1.4; color:#9ab0c0; }
+#commands{ width:220px; padding:5px; display:flex; gap:4px; flex-wrap:wrap; align-content:center; flex-shrink:0; }
+#commands button{ flex:1 1 45%; font-size:9px; padding:6px 2px; }
+
+/* RESPONSIVE MOBILE */
+@media(max-width:768px){
+  #left{ width:120px; }
+  #right{ position:absolute; right:0; top:0; bottom:0; width:220px; transform:translateX(100%); transition:transform 0.2s ease; }
   #right.open{ transform:translateX(0); }
-  #bottom{ height:92px; }
-  #commands{ width:190px; }
-  #top{ font-size:9px; }
+  #bottom{ height:75px; }
+  #commands{ width:150px; }
 }
 </style>
 </head>
@@ -59,35 +84,55 @@ html,body{ width:100%; height:100%; overflow:hidden; background:#080b10; color:#
       <button onclick="setSpeed(4)">4x</button>
     </div>
   </header>
+  
   <div id="main">
     <aside id="left">
       <div class="section">
-        <h3>FACTIONS</h3>
+        <h3>FRAKCIJE</h3>
         <div id="factions"></div>
       </div>
-      <div class="section">
-        <h3>GAME RULE</h3>
-        <div class="notice">Svaka frakcija igra za sebe. AI sam bira teritorije, neprijatelje i investicije.</div>
-      </div>
     </aside>
+    
     <main id="mapWrap">
       <canvas id="map"></canvas>
     </main>
+    
     <aside id="right">
       <div class="panel">
         <h2 id="selectedName">Izaberi frakciju</h2>
-        <div class="stat"><span>HP</span><b id="sHP">-</b></div>
-        <div class="stat"><span>Zlato</span><b id="sGold">-</b></div>
-        <div class="stat"><span>Energija</span><b id="sEnergy">-</b></div>
-        <div class="stat"><span>Metal</span><b id="sMetal">-</b></div>
-        <div class="stat"><span>Kristal</span><b id="sCrystal">-</b></div>
-        <div class="stat"><span>Teritorije</span><b id="sTerritory">-</b></div>
-        <div class="stat"><span>Vojska</span><b id="sArmy">-</b></div>
+        <div class="stat"><span>HP:</span><b id="sHP">-</b></div>
+        <div class="stat"><span>Zlato:</span><b id="sGold">-</b></div>
+        <div class="stat"><span>Vojska:</span><b id="sArmy">-</b></div>
+        <div class="stat"><span>Napad / Odbrana:</span><b id="sStats">-</b></div>
+        <div class="stat"><span>Teritorije:</span><b id="sTerritory">-</b></div>
       </div>
-      <div class="panel"><h3>SPELLS</h3><div id="spells"></div></div>
-      <div class="panel"><h3>SHOP</h3><div id="shop"></div></div>
+
+      <!-- GRAFIKON STATISTIKE RESURSA -->
+      <div class="panel">
+        <h3>RESOURCE STATS</h3>
+        <canvas id="resourceGraph"></canvas>
+      </div>
+      
+      <!-- SPELLS -->
+      <div class="panel">
+        <h3>SPELLS</h3>
+        <div id="spells"></div>
+      </div>
+
+      <!-- LOL ITEM SHOP -->
+      <div class="panel">
+        <h3>ITEM SHOP</h3>
+        <div class="shop-cats">
+          <div class="shop-cat active" onclick="filterShop('all', this)">ALL</div>
+          <div class="shop-cat" onclick="filterShop('offense', this)">OFF</div>
+          <div class="shop-cat" onclick="filterShop('defense', this)">DEF</div>
+          <div class="shop-cat" onclick="filterShop('eco', this)">ECO</div>
+        </div>
+        <div id="shop" class="item-grid"></div>
+      </div>
     </aside>
   </div>
+
   <footer id="bottom">
     <div id="log"></div>
     <div id="commands">
@@ -100,31 +145,36 @@ html,body{ width:100%; height:100%; overflow:hidden; background:#080b10; color:#
 </div>
 
 <script>
+/* CANVASES SETUP */
 const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
+const graphCanvas = document.getElementById("resourceGraph");
+const gCtx = graphCanvas.getContext("2d");
+
 let W = 800, H = 600;
 
 function resize(){
-  W = canvas.clientWidth;
-  H = canvas.clientHeight;
+  const wrap = document.getElementById("mapWrap");
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  graphCanvas.width = graphCanvas.clientWidth * dpr;
+  graphCanvas.height = graphCanvas.clientHeight * dpr;
+  gCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 window.addEventListener("resize", resize);
-resize();
 
-const environment = new Image();
-environment.src = "environment.jpg";
-let environmentReady = false;
-environment.onload = () => environmentReady = true;
-
+/* DEFINICIJE FRAKCIJA I URAVNOTEŽENA STATISTIKA */
 const definitions = [
   { name:"ARES", element:"FIRE", color:"#ff3b30", spells:[["INFERNO","Damage +35%","damage"],["BURNING GROUND","Enemy speed -45%","slow"],["WAR FURNACE","Metal +40%","metal"]] },
   { name:"TIDAL", element:"WATER", color:"#2196f3", spells:[["HEALING TIDE","Heal 20% HP","heal"],["FLOOD","Enemy production -40%","economy"],["OCEAN HARVEST","Energy +35%","energy"]] },
   { name:"TERRA", element:"EARTH", color:"#9c7a4a", spells:[["STONE WALL","Defense +50%","defense"],["EARTHQUAKE","Damage nearby enemies","quake"],["IRON VEIN","Metal +50%","metal"]] },
-  { name:"AERIS", element:"AIR", color:"#b8e8ff", spells:[["GALE","Speed +60%","speed"],["STORM","Area damage","storm"], ["SKY TRADE","Gold +40%","gold"]] },
+  { name:"AERIS", element:"AIR", color:"#b8e8ff", spells:[["GALE","Speed +60%","speed"],["STORM","Area damage","storm"],["SKY TRADE","Gold +40%","gold"]] },
   { name:"CRYON", element:"ICE", color:"#72e6ff", spells:[["FREEZE","Enemy speed -70%","freeze"],["ICE ARMOR","Defense +35%","defense"],["GLACIER","Crystal +45%","crystal"]] },
   { name:"VOLT", element:"ENERGY", color:"#ffff33", spells:[["OVERCHARGE","Damage +50%","damage"],["EMP","Enemy spells disabled","emp"],["REACTOR","Energy +60%","energy"]] },
   { name:"SYLVAN", element:"NATURE", color:"#50d66b", spells:[["REGENERATION","Heal over time","regen"],["ROOTS","Enemy movement -60%","root"],["GROWTH","Territory income +50%","growth"]] },
@@ -143,16 +193,14 @@ function createFactions(){
       id: i, ...d,
       x: W / 2 + Math.cos(a) * radius,
       y: H / 2 + Math.sin(a) * radius,
-      hp: 100000, maxHp: 100000,
-      gold: 1000, energy: 500, metal: 800, crystal: 300,
-      army: 100, territory: 1, bases: 1,
-      attack: 1, defense: 1, speed: 1, income: 1,
+      hp: 2500, maxHp: 2500, // OPTIMIZOVAN HP
+      gold: 500, army: 30, territory: 1, bases: 1,
+      attack: 15, defense: 10, speed: 1, income: 1, hpRegen: 1,
       target: null, cooldowns: [0,0,0], alive: true,
-      aiTimer: Math.random() * 3
+      aiTimer: Math.random() * 2, items: []
     });
   });
 }
-createFactions();
 
 const territories = [];
 function createTerritories(){
@@ -166,161 +214,140 @@ function createTerritories(){
     }
   }
 }
-createTerritories();
 
+/* LOL STYLE ITEM SHOP DATA */
 const shopItems = [
-  { name:"IRON ARMOR", price:700, effect:"defense", value:0.20 },
-  { name:"WAR ENGINE", price:900, effect:"attack", value:0.20 },
-  { name:"RESOURCE CORE", price:1000, effect:"income", value:0.25 },
-  { name:"ENERGY CELL", price:600, effect:"energy", value:250 },
-  { name:"CRYSTAL MODULE", price:1200, effect:"crystal", value:200 }
+  { id:"doran", name:"Doran's Shield", cat:"defense", price:450, desc:"+150 HP, +2 HP Regen", hp:150, regen:2, att:0, def:2 },
+  { id:"longsword", name:"Long Sword", cat:"offense", price:350, desc:"+10 Attack", hp:0, regen:0, att:10, def:0 },
+  { id:"ruby", name:"Ruby Crystal", cat:"defense", price:400, desc:"+250 HP", hp:250, regen:0, att:0, def:0 },
+  { id:"bf", name:"B.F. Sword", cat:"offense", price:1300, desc:"+40 Attack", hp:0, regen:0, att:40, def:0 },
+  { id:"chain", name:"Chain Vest", cat:"defense", price:800, desc:"+25 Defense", hp:0, regen:0, att:0, def:25 },
+  { id:"warmog", name:"Warmog's Armor", cat:"defense", price:2800, desc:"+800 HP, +15 HP Regen", hp:800, regen:15, att:0, def:10 },
+  { id:"ie", name:"Infinity Edge", cat:"offense", price:3400, desc:"+70 Attack, Critical Damage", hp:0, regen:0, att:70, def:0 },
+  { id:"coin", name:"Ancient Coin", cat:"eco", price:400, desc:"+30% Income Boost", hp:0, regen:0, att:0, def:0, eco:0.3 }
 ];
 
-function log(message){
+let currentShopFilter = "all";
+function filterShop(cat, el){
+  currentShopFilter = cat;
+  document.querySelectorAll(".shop-cat").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  renderShop();
+}
+
+function renderShop(){
+  const shopEl = document.getElementById("shop");
+  shopEl.innerHTML = "";
+  shopItems.filter(i => currentShopFilter === "all" || i.cat === currentShopFilter).forEach(item => {
+    const div = document.createElement("div");
+    div.className = "lol-item";
+    div.innerHTML = `
+      <div class="lol-item-info">
+        <span class="lol-item-title">${item.name}</span>
+        <span class="lol-item-desc">${item.desc}</span>
+      </div>
+      <span class="lol-item-price">${item.price}G</span>
+    `;
+    div.onclick = () => buyItem(item);
+    shopEl.appendChild(div);
+  });
+}
+
+function buyItem(item){
+  if(!selected || selected.gold < item.price) { log("Nema dovoljno zlata!"); return; }
+  selected.gold -= item.price;
+  applyItemEffects(selected, item);
+  log(selected.name + " kupuje " + item.name);
+  renderUI();
+}
+
+function applyItemEffects(f, item){
+  f.maxHp += (item.hp || 0);
+  f.hp += (item.hp || 0);
+  f.attack += (item.att || 0);
+  f.defense += (item.def || 0);
+  f.hpRegen += (item.regen || 0);
+  if(item.eco) f.income += item.eco;
+  f.items.push(item.id);
+}
+
+/* LOG & SELECTION */
+function log(msg){
   const box = document.getElementById("log");
   const line = document.createElement("div");
-  line.textContent = "[" + Math.floor(gameTime) + "] " + message;
+  line.textContent = "[" + Math.floor(gameTime) + "] " + msg;
   box.prepend(line);
-  while(box.children.length > 30) box.removeChild(box.lastChild);
+  while(box.children.length > 20) box.removeChild(box.lastChild);
 }
 
-let selected = factions[0];
+let selected = null;
 function selectFaction(f){ selected = f; renderUI(); }
 
-function chooseTarget(f){
-  const enemies = factions.filter(e => e.alive && e.id !== f.id);
-  if(!enemies.length) return null;
-  let best = null, bestScore = Infinity;
-  enemies.forEach(e => {
-    const d = Math.hypot(e.x - f.x, e.y - f.y);
-    const score = d - e.territory * 30 - e.army * 0.1;
-    if(score < bestScore){ bestScore = score; best = e; }
-  });
-  return best;
+/* EKONOMIJA & BORBA (BALANSIRANO) */
+function economy(f, dt){
+  f.gold += 8 * f.territory * f.income * dt;
+  f.hp = Math.min(f.maxHp, f.hp + f.hpRegen * dt);
+  f.gold = Math.max(0, f.gold - f.army * 0.01 * dt);
 }
 
-function economy(f, dt){
-  f.gold += 10 * f.territory * f.income * dt;
-  f.energy += 4 * f.territory * dt;
-  f.metal += 6 * f.territory * dt;
-  f.crystal += 2 * f.territory * dt;
-  f.gold = Math.max(0, f.gold - f.army * 0.015 * dt);
+function combat(a, b, dt){
+  if(!a.alive || !b.alive) return;
+  const attPower = (a.attack * (a.army / 20));
+  const defPower = b.defense;
+  const dmg = Math.max(5, (attPower - defPower * 0.4)) * dt;
+  
+  b.hp -= dmg;
+  b.army -= dmg * 0.02;
+
+  if(b.hp <= 0){
+    b.hp = 0; b.alive = false;
+    a.territory += b.territory; b.territory = 0;
+    log(a.name + " je osvojio teritoriju od " + b.name);
+  }
 }
 
 function updateAI(f, dt){
   if(!f.alive) return;
   f.aiTimer -= dt;
   if(f.aiTimer <= 0){
-    f.aiTimer = 1 + Math.random() * 3;
-    const decision = Math.random();
-    if(decision < 0.25) aiRecruit(f);
-    else if(decision < 0.45) aiBuy(f);
-    else if(decision < 0.70) aiSpell(f);
-    else f.target = chooseTarget(f);
+    f.aiTimer = 1.5 + Math.random() * 2;
+    if(f.gold > 400 && Math.random() < 0.4){
+      const affordable = shopItems.filter(i => f.gold >= i.price);
+      if(affordable.length) applyItemEffects(f, affordable[Math.floor(Math.random()*affordable.length)]);
+    } else if(f.gold >= 200){
+      f.gold -= 200; f.army += 8;
+    }
   }
+
+  // AI kretanje
+  if(!f.target || !f.target.alive){
+    const enemies = factions.filter(e => e.alive && e.id !== f.id);
+    if(enemies.length) f.target = enemies[Math.floor(Math.random() * enemies.length)];
+  }
+  
   if(f.target && f.target.alive){
     const dx = f.target.x - f.x, dy = f.target.y - f.y, d = Math.hypot(dx, dy);
-    if(d > 100){
-      f.x += (dx / d) * 25 * f.speed * dt;
-      f.y += (dy / d) * 25 * f.speed * dt;
+    if(d > 80){
+      f.x += (dx / d) * 20 * dt;
+      f.y += (dy / d) * 20 * dt;
+    } else {
+      combat(f, f.target, dt);
     }
-    if(d < 115) combat(f, f.target);
-  } else {
-    f.target = chooseTarget(f);
-  }
-  f.x = Math.max(20, Math.min(W - 20, f.x));
-  f.y = Math.max(20, Math.min(H - 20, f.y));
-}
-
-function aiRecruit(f){ if(f.gold >= 250){ f.gold -= 250; f.army += 10; } }
-function recruit(){
-  if(selected && selected.gold >= 250){
-    selected.gold -= 250; selected.army += 10;
-    log(selected.name + " regrutuje 10 jedinica.");
   }
 }
 
-function buildBase(){
-  if(selected && selected.gold >= 1500 && selected.metal >= 500){
-    selected.gold -= 1500; selected.metal -= 500;
-    selected.bases++; selected.defense += 0.15;
-    log(selected.name + " gradi novu bazu.");
-  }
-}
-
-function combat(a, b){
-  if(!a.alive || !b.alive) return;
-  const attackPower = 100 * a.attack * (a.army / 100);
-  const damage = Math.max(100, (attackPower / b.defense) * (0.7 + Math.random() * 0.6));
-  b.hp -= damage;
-  b.army -= damage * 0.025;
-  if(b.hp <= 0){
-    b.hp = 0; b.alive = false;
-    a.territory += b.territory; b.territory = 0;
-    log(a.name + " je eliminisao " + b.name);
-  }
-}
-
-function castSpell(caster, index){
-  if(!caster.alive || caster.cooldowns[index] > 0) return;
-  const spell = caster.spells[index];
-  if(!spell) return;
-  caster.cooldowns[index] = 15;
-  const target = caster.target || chooseTarget(caster);
-
-  switch(spell[2]){
-    case "damage": if(target) target.hp -= 18000 * caster.attack; break;
-    case "heal": caster.hp = Math.min(caster.maxHp, caster.hp + 22000); break;
-    case "metal": caster.metal += 600; break;
-    case "energy": caster.energy += 600; break;
-    case "gold": caster.gold += 700; break;
-    case "crystal": caster.crystal += 500; break;
-    case "defense": caster.defense += 0.25; break;
-    case "speed": caster.speed += 0.25; setTimeout(() => caster.speed -= 0.25, 8000); break;
-    default: if(target) target.hp -= 12000;
-  }
-  log(caster.name + " koristi " + spell[0]);
-}
-
-function aiSpell(f){ castSpell(f, Math.floor(Math.random() * 3)); }
-
-function buyItem(item){
-  if(!selected || selected.gold < item.price){ log("Nema dovoljno zlata."); return; }
-  selected.gold -= item.price;
-  if(item.effect === "attack") selected.attack += item.value;
-  else if(item.effect === "defense") selected.defense += item.value;
-  else if(item.effect === "income") selected.income += item.value;
-  log(selected.name + " kupuje " + item.name);
-}
-
-function aiBuy(f){
-  const item = shopItems[Math.floor(Math.random() * shopItems.length)];
-  if(f.gold >= item.price){
-    f.gold -= item.price;
-    if(item.effect === "attack") f.attack += item.value;
-    else if(item.effect === "defense") f.defense += item.value;
-    else if(item.effect === "income") f.income += item.value;
-  }
-}
-
-function updateTerritories(){
-  territories.forEach(t => {
-    let closest = null, distance = Infinity;
-    factions.forEach(f => {
-      if(!f.alive) return;
-      const d = Math.hypot(f.x - (t.x + t.w/2), f.y - (t.y + t.h/2));
-      if(d < distance){ distance = d; closest = f; }
-    });
-    if(closest && distance < 120) t.owner = closest.id;
-  });
+/* RENDER GRAFIKONA U SNOPSU (RESOURCE GRAPH) */
+function drawResourceGraph(){
+  gCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+  const totalGold = factions.reduce((acc, f) => acc + (f.alive ? f.gold : 0), 0) || 1;
+  
+  let currentX = 0;
   factions.forEach(f => {
-    f.territory = territories.filter(t => t.owner === f.id).length;
-  });
-}
-
-function updateCooldowns(dt){
-  factions.forEach(f => {
-    for(let i=0; i<3; i++) f.cooldowns[i] = Math.max(0, f.cooldowns[i] - dt);
+    if(!f.alive) return;
+    const width = (f.gold / totalGold) * (graphCanvas.width / (window.devicePixelRatio||1));
+    gCtx.fillStyle = f.color;
+    gCtx.fillRect(currentX, 0, width, graphCanvas.height / (window.devicePixelRatio||1));
+    currentX += width;
   });
 }
 
@@ -328,17 +355,11 @@ function drawMap(){
   ctx.fillStyle = "#070b10";
   ctx.fillRect(0, 0, W, H);
 
-  if(environmentReady){
-    ctx.globalAlpha = 0.7;
-    ctx.drawImage(environment, 0, 0, W, H);
-    ctx.globalAlpha = 1.0;
-  }
-
   territories.forEach(t => {
     const owner = factions[t.owner];
-    ctx.fillStyle = owner ? owner.color + "16" : "#ffffff05";
+    ctx.fillStyle = owner ? owner.color + "18" : "#ffffff05";
     ctx.fillRect(t.x, t.y, t.w, t.h);
-    ctx.strokeStyle = "#ffffff12";
+    ctx.strokeStyle = "#ffffff10";
     ctx.strokeRect(t.x, t.y, t.w, t.h);
   });
 
@@ -346,20 +367,20 @@ function drawMap(){
     if(!f.alive) return;
     ctx.strokeStyle = f.color;
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(f.x, f.y, 19, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(f.x, f.y, 14, 0, Math.PI*2); ctx.stroke();
     ctx.fillStyle = f.color;
-    ctx.beginPath(); ctx.arc(f.x, f.y, 7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(f.x, f.y, 5, 0, Math.PI*2); ctx.fill();
 
     ctx.fillStyle = "#fff";
-    ctx.font = "10px Arial";
+    ctx.font = "9px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(f.name, f.x, f.y - 25);
+    ctx.fillText(f.name, f.x, f.y - 18);
 
-    const hp = Math.max(0, f.hp / f.maxHp);
+    const hpPct = Math.max(0, f.hp / f.maxHp);
     ctx.fillStyle = "#202830";
-    ctx.fillRect(f.x - 22, f.y + 25, 44, 4);
+    ctx.fillRect(f.x - 15, f.y + 18, 30, 3);
     ctx.fillStyle = f.color;
-    ctx.fillRect(f.x - 22, f.y + 25, 44 * hp, 4);
+    ctx.fillRect(f.x - 15, f.y + 18, 30 * hpPct, 3);
   });
 }
 
@@ -368,7 +389,7 @@ function renderUI(){
   factionBox.innerHTML = "";
   [...factions].sort((a,b) => b.territory - a.territory).forEach(f => {
     const el = document.createElement("div");
-    el.className = "faction" + (selected.id === f.id ? " active" : "");
+    el.className = "faction" + (selected && selected.id === f.id ? " active" : "");
     el.style.borderColor = f.color;
     el.innerHTML = `<b>${f.name}</b> <small>${f.element}</small>
       <div class="hp"><i style="width:${(f.hp/f.maxHp)*100}%; background:${f.color};"></i></div>`;
@@ -378,34 +399,34 @@ function renderUI(){
 
   if(!selected) return;
   document.getElementById("selectedName").textContent = selected.name + " — " + selected.element;
-  document.getElementById("sHP").textContent = Math.floor(selected.hp);
+  document.getElementById("sHP").textContent = Math.floor(selected.hp) + " / " + Math.floor(selected.maxHp);
   document.getElementById("sGold").textContent = Math.floor(selected.gold);
-  document.getElementById("sEnergy").textContent = Math.floor(selected.energy);
-  document.getElementById("sMetal").textContent = Math.floor(selected.metal);
-  document.getElementById("sCrystal").textContent = Math.floor(selected.crystal);
-  document.getElementById("sTerritory").textContent = selected.territory;
   document.getElementById("sArmy").textContent = Math.floor(selected.army);
+  document.getElementById("sStats").textContent = Math.floor(selected.attack) + " / " + Math.floor(selected.defense);
+  document.getElementById("sTerritory").textContent = selected.territory;
 
   const spells = document.getElementById("spells");
   spells.innerHTML = "";
   selected.spells.forEach((spell, i) => {
     const btn = document.createElement("button");
     btn.className = "spell";
-    const cd = selected.cooldowns[i];
-    btn.innerHTML = `<b>${i+1}. ${spell[0]}</b><small>${spell[1]} ${cd > 0 ? " — CD " + cd.toFixed(1) : " — READY"}</small>`;
-    btn.onclick = () => castSpell(selected, i);
+    btn.innerHTML = `<b>${spell[0]}</b> <small>(${spell[1]})</small>`;
     spells.appendChild(btn);
   });
+}
 
-  const shop = document.getElementById("shop");
-  shop.innerHTML = "";
-  shopItems.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `<b>${item.name}</b><br>${item.price} GOLD`;
-    div.onclick = () => buyItem(item);
-    shop.appendChild(div);
-  });
+function recruit(){
+  if(selected && selected.gold >= 200){
+    selected.gold -= 200; selected.army += 10;
+    log(selected.name + " je regrutovao 10 vojnika.");
+  }
+}
+
+function buildBase(){
+  if(selected && selected.gold >= 800){
+    selected.gold -= 800; selected.defense += 5;
+    log(selected.name + " nadograđuje odbranu baze.");
+  }
 }
 
 let gameTime = 0, speed = 1;
@@ -413,10 +434,11 @@ function setSpeed(v){ speed = v; }
 function toggleRight(){ document.getElementById("right").classList.toggle("open"); }
 function restartGame(){
   gameTime = 0; createFactions(); createTerritories();
-  selected = factions[0]; log("Nova simulacija pokrenuta.");
+  selected = factions[0]; log("Simulacija je ponovo pokrenuta.");
+  renderShop();
 }
 
-let last = performance.now(), uiTimer = 0, territoryTimer = 0;
+let last = performance.now(), uiTimer = 0;
 function loop(now){
   let dt = (now - last) / 1000;
   last = now;
@@ -426,30 +448,31 @@ function loop(now){
   if(speed > 0){
     gameTime += simDt;
     factions.forEach(f => {
-      if(!f.alive) return;
       economy(f, simDt);
       updateAI(f, simDt);
     });
-    updateCooldowns(simDt);
-    territoryTimer += simDt;
-    if(territoryTimer > 2){ territoryTimer = 0; updateTerritories(); }
   }
 
   drawMap();
+  
   uiTimer += dt;
-  if(uiTimer > 0.25){
+  if(uiTimer > 0.2){
     uiTimer = 0;
     renderUI();
+    drawResourceGraph();
     document.getElementById("alive").textContent = factions.filter(f => f.alive).length + "/10";
-    const day = Math.floor(gameTime / 120) + 1;
-    const seconds = Math.floor(gameTime % 120);
-    document.getElementById("clock").textContent = "DAY " + day + " — " + seconds.toString().padStart(2, "0");
+    document.getElementById("clock").textContent = "DAY " + (Math.floor(gameTime / 120) + 1) + " — " + Math.floor(gameTime % 120).toString().padStart(2, "0");
   }
   requestAnimationFrame(loop);
 }
 
-log("ELEMENTAL FRONTIER pokrenut.");
-renderUI();
+/* INITIALIZATION */
+resize();
+createFactions();
+createTerritories();
+selected = factions[0];
+renderShop();
+log("Elemental Frontier pokrenut.");
 requestAnimationFrame(loop);
 </script>
 </body>

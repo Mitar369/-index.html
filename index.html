@@ -1,386 +1,312 @@
-<!DOCTYPE html>
-<html lang="sr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Total War Simulation - 10 Systems</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Share+Tech+Mono&display=swap');
+// ============================================================
+// ENVIRONMENT MAP — OPTIMIZOVAN BACKGROUND
+// ============================================================
 
-        :root {
-            --bg-color: #04080a;
-            --panel-bg: rgba(6, 12, 16, 0.95);
-            --border-color: #1a2c35;
-            --text-primary: #b5c4cb;
-            --text-muted: #627781;
-            --highlight: #00d2ff;
-            --shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-            --header-font: 'Roboto Condensed', sans-serif;
-            --mono-font: 'Share Tech Mono', monospace;
-            --f-ares: #ff4c4c;
-            --f-orion: #008cff;
-            --f-zephyr: #4cff4c;
-            --f-nexus: #a54cff;
-            --f-solaris: #ffcc00;
-            --f-vortex: #00ffff;
-            --f-eclipse: #ff8c4c;
-            --f-phoenix: #ff4c8c;
-            --f-titan: #cccccc;
-            --f-nova: #ffffff;
-        }
+const mapTextureCanvas = document.createElement('canvas');
+mapTextureCanvas.width = V_WIDTH;
+mapTextureCanvas.height = V_HEIGHT;
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--header-font);
-            font-size: 14px;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: grid;
-            grid-template-areas: 
-                "header header header"
-                "factions map stats"
-                "log log mini";
-            grid-template-columns: 280px 1fr 300px;
-            grid-template-rows: 60px 1fr 220px;
-            border: 2px solid var(--border-color);
-        }
+const mctx = mapTextureCanvas.getContext('2d', {
+    alpha: false
+});
 
-        /* --- Globalni UI Elementi --- */
-        .ui-panel {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            padding: 10px;
-            overflow: hidden;
-        }
+// Ovde možeš kasnije staviti svoju JPG/PNG mapu.
+// Ako je fajl npr. "environment.jpg", mora biti u istom folderu
+// kao HTML fajl.
+const environmentImage = new Image();
+environmentImage.src = "environment.jpg";
 
-        .panel-header {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
+let environmentLoaded = false;
 
-        .data-mono {
-            font-family: var(--mono-font);
-            color: var(--highlight);
-        }
+environmentImage.onload = () => {
+    environmentLoaded = true;
+    renderEnvironmentMap();
+};
 
-        /* --- Header --- */
-        header {
-            grid-area: header;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            background: linear-gradient(180deg, rgba(16,32,41,1) 0%, rgba(6,12,16,1) 100%);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .header-title { font-size: 18px; font-weight: 700; color: white; letter-spacing: 1px; }
-        .header-debug { font-size: 11px; color: var(--f-zephyr); font-family: var(--mono-font); }
-        .header-timer { font-size: 18px; display: flex; gap: 5px; }
+environmentImage.onerror = () => {
+    console.warn("[ENVIRONMENT] JPG nije pronađen — koristi se ugrađena mapa.");
+    renderFallbackMap();
+};
 
-        /* --- Faction List (Left) --- */
-        #factions-panel { grid-area: factions; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        .faction-card {
-            display: grid;
-            grid-template-columns: 30px 1fr 70px;
-            align-items: center;
-            padding: 5px;
-            border-radius: 3px;
-            border: 1px solid transparent;
-            cursor: pointer;
-        }
-        .faction-card.active { background-color: rgba(26,44,53,0.5); border-color: #315061; }
-        .faction-id { font-size: 16px; font-weight: 700; text-align: center; }
-        .faction-name { font-size: 14px; font-weight: 700; padding-left: 5px; }
-        .faction-stats { font-family: var(--mono-font); font-size: 11px; text-align: right; color: var(--text-muted); }
-        .stat-main { color: var(--text-primary); font-size: 12px; }
 
-        /* --- Game Map (Center) --- */
-        #map-container {
-            grid-area: map;
-            position: relative;
-            border-left: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-        #gameCanvas { display: block; width: 100%; height: 100%; }
+// ============================================================
+// RENDER ENVIRONMENT
+// ============================================================
 
-        /* --- Statistics (Right) --- */
-        #stats-panel { grid-area: stats; display: flex; flex-direction: column; gap: 8px; }
-        .global-stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(26,44,53,0.5);
-            font-size: 13px;
-        }
-        .stat-label { color: var(--text-muted); }
-        .stat-value { font-weight: 700; }
+function renderEnvironmentMap() {
 
-        /* --- Battle Log (Bottom Left) --- */
-        #log-panel {
-            grid-area: log;
-            display: flex;
-            flex-direction: column;
-            border-top: 1px solid var(--border-color);
-        }
-        #log-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            font-family: var(--mono-font);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 2px;
-            color: var(--text-muted);
-        }
-        .log-entry { display: flex; gap: 10px; }
-        .log-time { color: var(--highlight); }
+    // Crna osnova
+    mctx.fillStyle = "#01040a";
+    mctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-        /* --- Mini Map (Bottom Right) --- */
-        #mini-map-panel {
-            grid-area: mini;
-            border-top: 1px solid var(--border-color);
-            border-left: 1px solid var(--border-color);
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #miniCanvas { width: 100%; height: 100%; max-width: 180px; max-height: 180px; border: 1px solid #102029; }
+    // Cover scaling — nema deformacije slike
+    const imageRatio =
+        environmentImage.width / environmentImage.height;
 
-        /* --- Faction Colors --- */
-        .color-ares { color: var(--f-ares); } .border-ares { border-left: 4px solid var(--f-ares); }
-        .color-orion { color: var(--f-orion); } .border-orion { border-left: 4px solid var(--f-orion); }
-        .color-zephyr { color: var(--f-zephyr); } .border-zephyr { border-left: 4px solid var(--f-zephyr); }
-        .color-nexus { color: var(--f-nexus); } .border-nexus { border-left: 4px solid var(--f-nexus); }
-        .color-solaris { color: var(--f-solaris); } .border-solaris { border-left: 4px solid var(--f-solaris); }
-        .color-vortex { color: var(--f-vortex); } .border-vortex { border-left: 4px solid var(--f-vortex); }
-        .color-eclipse { color: var(--f-eclipse); } .border-eclipse { border-left: 4px solid var(--f-eclipse); }
-        .color-phoenix { color: var(--f-phoenix); } .border-phoenix { border-left: 4px solid var(--f-phoenix); }
-        .color-titan { color: var(--f-titan); } .border-titan { border-left: 4px solid var(--f-titan); }
-        .color-nova { color: var(--f-nova); } .border-nova { border-left: 4px solid var(--f-nova); }
+    const canvasRatio =
+        V_WIDTH / V_HEIGHT;
 
-        /* Mobile Layout */
-        @media (max-width: 800px) {
-            body {
-                grid-template-areas: 
-                    "header"
-                    "map"
-                    "factions";
-                grid-template-columns: 1fr;
-                grid-template-rows: 50px minmax(250px, 1fr) 180px;
-                font-size: 12px;
-            }
-            #factions-panel { flex-direction: row; overflow-x: auto; gap: 5px; padding: 5px; height: 180px; }
-            .faction-card { grid-template-columns: 1fr; grid-template-rows: 20px 20px 1fr; text-align: center; width: 80px; flex-shrink: 0; padding: 3px; }
-            .faction-stats { text-align: center; }
-            #stats-panel, #log-panel, #mini-map-panel { display: none; }
-            .header-title { font-size: 14px; }
-            .header-timer { font-size: 14px; }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="header-debug">SYSTEM.WAR.SIM (10) | DEBUG.OFF</div>
-        <div class="header-title">10 SYSTEMS - TOTAL WAR SIMULATION</div>
-        <div class="header-timer data-mono">
-            <span class="color-ares" id="game-time">00:00</span> / <span class="color-zephyr">10:00</span>
-        </div>
-    </header>
+    let drawWidth;
+    let drawHeight;
+    let offsetX;
+    let offsetY;
 
-    <aside id="factions-panel" class="ui-panel">
-        <div class="panel-header">FACTIONS</div>
-        <div id="faction-list-content"></div>
-    </aside>
+    if (imageRatio > canvasRatio) {
 
-    <main id="map-container">
-        <canvas id="gameCanvas"></canvas>
-    </main>
+        drawHeight = V_HEIGHT;
+        drawWidth = V_HEIGHT * imageRatio;
 
-    <aside id="stats-panel" class="ui-panel">
-        <div class="panel-header">STATISTIKA / RANGIRANJE</div>
-        <div class="global-stat-row"><span class="stat-label">STATUS</span><span class="stat-value color-zephyr" id="sim-status">RUNNING</span></div>
-        <div class="global-stat-row"><span class="stat-label">TOTAL UNITS</span><span class="stat-value" id="total-units">0</span></div>
-        <div class="global-stat-row"><span class="stat-label">BATTLES</span><span class="stat-value color-solaris" id="total-battles">0</span></div>
-        <div style="height: 10px;"></div>
-        <div class="panel-header">FACTION DATA</div>
-        <div id="selected-faction-details">Select faction to view.</div>
-    </aside>
+        offsetX = (V_WIDTH - drawWidth) / 2;
+        offsetY = 0;
 
-    <section id="log-panel" class="ui-panel">
-        <div class="panel-header">EVENT LOG</div>
-        <div id="log-messages"></div>
-    </section>
+    } else {
 
-    <aside id="mini-map-panel" class="ui-panel">
-        <div class="panel-header">MINI MAP</div>
-        <canvas id="miniCanvas"></canvas>
-    </aside>
+        drawWidth = V_WIDTH;
+        drawHeight = V_WIDTH / imageRatio;
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const miniCanvas = document.getElementById('miniCanvas');
-        const miniCtx = miniCanvas.getContext('2d');
-        const factionListContent = document.getElementById('faction-list-content');
-        const logMessages = document.getElementById('log-messages');
-        const gameTimeDisplay = document.getElementById('game-time');
-        const totalUnitsDisplay = document.getElementById('total-units');
-        const selectedFactionDetails = document.getElementById('selected-faction-details');
+        offsetX = 0;
+        offsetY = (V_HEIGHT - drawHeight) / 2;
+    }
 
-        // Postavljanje veličine kanvasa
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            miniCanvas.width = 150;
-            miniCanvas.height = 150;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+    mctx.drawImage(
+        environmentImage,
+        offsetX,
+        offsetY,
+        drawWidth,
+        drawHeight
+    );
 
-        // --- Definisanje Frakcija ---
-        const factions = [
-            { id: 1, name: 'ARES', color: '#ff4c4c', class: 'ares', units: 0, territory: 0 },
-            { id: 2, name: 'ORION', color: '#008cff', class: 'orion', units: 0, territory: 0 },
-            { id: 3, name: 'ZEPHYR', color: '#4cff4c', class: 'zephyr', units: 0, territory: 0 },
-            { id: 4, name: 'NEXUS', color: '#a54cff', class: 'nexus', units: 0, territory: 0 },
-            { id: 5, name: 'SOLARIS', color: '#ffcc00', class: 'solaris', units: 0, territory: 0 },
-            { id: 6, name: 'VORTEX', color: '#00ffff', class: 'vortex', units: 0, territory: 0 },
-            { id: 7, name: 'ECLIPSE', color: '#ff8c4c', class: 'eclipse', units: 0, territory: 0 },
-            { id: 8, name: 'PHOENIX', color: '#ff4c8c', class: 'phoenix', units: 0, territory: 0 },
-            { id: 9, name: 'TITAN', color: '#cccccc', class: 'titan', units: 0, territory: 0 },
-            { id: 10, name: 'NOVA', color: '#ffffff', class: 'nova', units: 0, territory: 0 }
-        ];
+    // Tamni strateški overlay
+    mctx.fillStyle = "rgba(0, 5, 15, 0.30)";
+    mctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-        // --- Generisanje UI Liste Frakcija ---
-        factions.forEach(f => {
-            const card = document.createElement('div');
-            card.className = `faction-card border-${f.class}`;
-            card.innerHTML = `
-                <div class="faction-id color-${f.class}">${f.id}</div>
-                <div class="faction-name">${f.name}</div>
-                <div class="faction-stats">
-                    <span class="stat-main" id="f-${f.id}-u">0k</span> U<br>
-                    <span id="f-${f.id}-t">0</span> T
-                </div>
-            `;
-            factionListContent.appendChild(card);
-        });
+    // GRID
+    mctx.strokeStyle = "rgba(0,255,204,0.08)";
+    mctx.lineWidth = 1;
 
-        // --- Simulacioni motor ---
-        class Unit {
-            constructor(x, y, factionId) {
-                this.x = x; this.y = y;
-                this.factionId = factionId;
-                this.color = factions.find(f => f.id === factionId).color;
-                this.speed = 1 + Math.random() * 0.5;
-                this.target = null;
-                this.state = 'idle'; // idle, move, attack
-            }
+    const gridSize = 60;
 
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
+    for (let x = 0; x <= V_WIDTH; x += gridSize) {
 
-            update() {
-                // Vrlo jednostavna AI za kretanje ka sredini
-                const targetX = canvas.width / 2;
-                const targetY = canvas.height / 2;
-                const dx = targetX - this.x;
-                const dy = targetY - this.y;
-                const dist = Math.hypot(dx, dy);
+        mctx.beginPath();
+        mctx.moveTo(x, 0);
+        mctx.lineTo(x, V_HEIGHT);
+        mctx.stroke();
+    }
 
-                if (dist > 10) {
-                    this.x += (dx / dist) * this.speed;
-                    this.y += (dy / dist) * this.speed;
-                }
-            }
-        }
+    for (let y = 0; y <= V_HEIGHT; y += gridSize) {
 
-        const units = [];
-        let gameTimeSecs = 0;
-        let selectedFactionId = null;
+        mctx.beginPath();
+        mctx.moveTo(0, y);
+        mctx.lineTo(V_WIDTH, y);
+        mctx.stroke();
+    }
 
-        // Inicijalno generisanje jedinica
-        for (let i = 0; i < 500; i++) {
-            const f = factions[Math.floor(Math.random() * factions.length)];
-            units.push(new Unit(Math.random() * canvas.width, Math.random() * canvas.height, f.id));
-        }
+    // Centralna zona
+    const cx = V_WIDTH / 2;
+    const cy = V_HEIGHT / 2;
 
-        // --- Glavna petlja ---
-        function loop() {
-            // Brisanje ekrana
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-color');
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const centralGlow =
+        mctx.createRadialGradient(
+            cx,
+            cy,
+            20,
+            cx,
+            cy,
+            420
+        );
 
-            // Crtanje i ažuriranje jedinica
-            let counts = {};
-            units.forEach(u => {
-                u.update();
-                u.draw();
-                counts[u.factionId] = (counts[u.factionId] || 0) + 1;
-            });
+    centralGlow.addColorStop(
+        0,
+        "rgba(0,255,204,0.14)"
+    );
 
-            // Ažuriranje UI statistike
-            let total = 0;
-            factions.forEach(f => {
-                const count = counts[f.id] || 0;
-                total += count;
-                document.getElementById(`f-${f.id}-u`).innerText = (count / 1000).toFixed(1) + 'k';
-                document.getElementById(`f-${f.id}-t`).innerText = (count / 10).toFixed(0);
-            });
-            totalUnitsDisplay.innerText = (total / 1000).toFixed(1) + 'k';
+    centralGlow.addColorStop(
+        1,
+        "rgba(0,255,204,0)"
+    );
 
-            // Crtanje mini mape
-            miniCtx.fillStyle = '#081216';
-            miniCtx.fillRect(0, 0, miniCanvas.width, miniCanvas.height);
-            units.forEach(u => {
-                miniCtx.fillStyle = u.color;
-                miniCtx.fillRect(
-                    (u.x / canvas.width) * miniCanvas.width, 
-                    (u.y / canvas.height) * miniCanvas.height, 
-                    2, 2
-                );
-            });
+    mctx.fillStyle = centralGlow;
 
-            requestAnimationFrame(loop);
-        }
+    mctx.beginPath();
+    mctx.arc(cx, cy, 420, 0, Math.PI * 2);
+    mctx.fill();
 
-        // --- Tajmer i Log ---
-        setInterval(() => {
-            gameTimeSecs++;
-            const mins = Math.floor(gameTimeSecs / 60).toString().padStart(2, '0');
-            const secs = (gameTimeSecs % 60).toString().padStart(2, '0');
-            gameTimeDisplay.innerText = `${mins}:${secs}`;
+    // Vignette
+    const vignette =
+        mctx.createRadialGradient(
+            cx,
+            cy,
+            250,
+            cx,
+            cy,
+            Math.max(V_WIDTH, V_HEIGHT) * 0.75
+        );
 
-            // Nasumični logovi
-            if (Math.random() < 0.2) {
-                const f1 = factions[Math.floor(Math.random() * factions.length)];
-                const f2 = factions[Math.floor(Math.random() * factions.length)];
-                if(f1 != f2) {
-                    const timeStr = `[${mins}:${secs}]`;
-                    const msg = `<span class="log-time">${timeStr}</span> <span class="color-${f1.class}">${f1.name}</span> napada sistem <span class="color-${f2.class}">${f2.name}</span>`;
-                    logMessages.innerHTML = `<div class="log-entry">${msg}</div>` + logMessages.innerHTML;
-                }
-            }
-        }, 1000);
+    vignette.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+    );
 
-        // Start
-        loop();
+    vignette.addColorStop(
+        1,
+        "rgba(0,0,0,0.65)"
+    );
 
-    </script>
-</body>
-</html>
+    mctx.fillStyle = vignette;
+    mctx.fillRect(
+        0,
+        0,
+        V_WIDTH,
+        V_HEIGHT
+    );
+
+    console.log(
+        "[ENVIRONMENT] Environment mapa učitana."
+    );
+}
+
+
+// ============================================================
+// FALLBACK MAP
+// Ako JPG ne postoji, igra i dalje radi.
+// ============================================================
+
+function renderFallbackMap() {
+
+    mctx.fillStyle = "#01040a";
+    mctx.fillRect(
+        0,
+        0,
+        V_WIDTH,
+        V_HEIGHT
+    );
+
+    const cx = V_WIDTH / 2;
+    const cy = V_HEIGHT / 2;
+
+    // Energetske zone
+    for (let i = 0; i < 10; i++) {
+
+        const x =
+            Math.random() * V_WIDTH;
+
+        const y =
+            Math.random() * V_HEIGHT;
+
+        const radius =
+            120 + Math.random() * 300;
+
+        const gradient =
+            mctx.createRadialGradient(
+                x,
+                y,
+                5,
+                x,
+                y,
+                radius
+            );
+
+        gradient.addColorStop(
+            0,
+            "rgba(0,255,204,0.16)"
+        );
+
+        gradient.addColorStop(
+            0.5,
+            "rgba(0,100,255,0.06)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(0,0,0,0)"
+        );
+
+        mctx.fillStyle = gradient;
+
+        mctx.beginPath();
+        mctx.arc(
+            x,
+            y,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
+        mctx.fill();
+    }
+
+    // Zvezde
+    for (let i = 0; i < 600; i++) {
+
+        const x =
+            Math.random() * V_WIDTH;
+
+        const y =
+            Math.random() * V_HEIGHT;
+
+        const size =
+            Math.random() * 1.6;
+
+        mctx.fillStyle =
+            `rgba(255,255,255,${0.2 + Math.random() * 0.8})`;
+
+        mctx.beginPath();
+
+        mctx.arc(
+            x,
+            y,
+            size,
+            0,
+            Math.PI * 2
+        );
+
+        mctx.fill();
+    }
+
+    // GRID
+    mctx.strokeStyle =
+        "rgba(0,255,204,0.07)";
+
+    for (
+        let x = 0;
+        x < V_WIDTH;
+        x += 60
+    ) {
+
+        mctx.beginPath();
+        mctx.moveTo(x, 0);
+        mctx.lineTo(x, V_HEIGHT);
+        mctx.stroke();
+    }
+
+    for (
+        let y = 0;
+        y < V_HEIGHT;
+        y += 60
+    ) {
+
+        mctx.beginPath();
+        mctx.moveTo(0, y);
+        mctx.lineTo(V_WIDTH, y);
+        mctx.stroke();
+    }
+
+    console.log(
+        "[ENVIRONMENT] Fallback mapa aktivna."
+    );
+}
+
+
+// ============================================================
+// DRAW BACKGROUND
+// ============================================================
+
+function drawEnvironment() {
+
+    ctx.drawImage(
+        mapTextureCanvas,
+        0,
+        0
+    );
+}

@@ -3,187 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ELEMENTAL FRONTIER — TURN BASED LUDO</title>
+<title>ELEMENTAL LUDO 10x10</title>
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; user-select:none; }
-html,body{ width:100%; height:100%; overflow:hidden; background:#05080c; color:#d8e2e8; font-family:sans-serif; }
+html,body{ width:100%; height:100%; overflow:hidden; background:#070b10; color:#d8e2e8; font-family:sans-serif; }
 #game{ width:100vw; height:100vh; display:flex; flex-direction:column; }
 
-/* TOP BAR */
-#top{ height:45px; background:#0d131a; border-bottom:1px solid #1e2936; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:12px; }
-#turnIndicator{ font-weight:bold; color:#ffca28; }
-
-/* MAIN AREA */
+#top{ height:40px; background:#0e1620; border-bottom:1px solid #1e2c3a; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:12px; }
 #main{ flex:1; display:flex; position:relative; overflow:hidden; }
 
-/* LEFT PANEL - FRAKCIJE */
-#left{ width:180px; background:#0a0f14; border-right:1px solid #1e2936; overflow-y:auto; padding:8px; }
-.faction-card{ padding:8px; margin-bottom:6px; background:#0f1720; border-left:4px solid; border-radius:3px; font-size:11px; cursor:pointer; }
-.faction-card.active-turn{ background:#192938; box-shadow:0 0 8px rgba(255,255,255,0.2); }
-.hp-bar{ height:5px; background:#18222d; margin-top:4px; border-radius:2px; overflow:hidden; }
-.hp-bar i{ display:block; height:100%; }
-
 /* MAP AREA */
-#mapWrap{ flex:1; position:relative; background:#030508; display:flex; justify-content:center; align-items:center; }
-#map{ width:100%; height:100%; display:block; }
+#mapWrap{ flex:1; background:#04070a; display:flex; justify-content:center; align-items:center; position:relative; }
+#map{ display:block; }
 
-/* RIGHT PANEL - SHOP & STATS */
-#right{ width:280px; background:#0a0f14; border-left:1px solid #1e2936; display:flex; flex-direction:column; padding:10px; overflow-y:auto; }
-.stat-box{ background:#111923; padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #1f2e3d; font-size:11px; }
-.stat-row{ display:flex; justify-content:space-between; margin-bottom:3px; }
+/* RIGHT PANEL */
+#right{ width:260px; background:#0a1017; border-left:1px solid #1e2c3a; display:flex; flex-direction:column; padding:8px; overflow-y:auto; }
+.box{ background:#111a24; padding:8px; border-radius:4px; margin-bottom:8px; border:1px solid #1f2f40; font-size:11px; }
+.stat-row{ display:flex; justify-content:space-between; margin-bottom:2px; }
 
-/* DICE & ACTION */
-#diceBox{ text-align:center; background:#162330; padding:10px; border-radius:6px; border:1px solid #2d4156; margin-bottom:10px; }
-#diceVal{ font-size:28px; font-weight:bold; color:#ffca28; margin:4px 0; }
-.btn-roll{ width:100%; padding:10px; background:#ffca28; color:#000; font-weight:bold; border:none; border-radius:4px; cursor:pointer; font-size:13px; }
-.btn-roll:hover{ background:#ffd54f; }
-.btn-roll:disabled{ background:#444; color:#888; cursor:not-allowed; }
+/* DICE BUTTON */
+.btn-roll{ width:100%; padding:12px; background:#ffca28; color:#000; font-weight:bold; border:none; border-radius:4px; cursor:pointer; font-size:14px; }
+.btn-roll:active{ background:#cca010; }
 
 /* SHOP */
-.shop-title{ font-size:12px; font-weight:bold; margin-bottom:6px; color:#fff; }
-.item-list{ display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; }
-.item-card{ background:#121b24; border:1px solid #223242; padding:6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
-.item-card:hover{ border-color:#3a5470; background:#182430; }
-.item-title{ font-size:10px; font-weight:bold; color:#dce6f0; }
-.item-stats{ font-size:8px; color:#7f93a8; display:block; }
-.item-price{ font-size:11px; font-weight:bold; color:#ffca28; }
+.item-list{ display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto; margin-top:4px; }
+.item-card{ background:#14202c; border:1px solid #233446; padding:5px; border-radius:3px; display:flex; justify-content:space-between; cursor:pointer; font-size:10px; }
+.item-card:hover{ border-color:#ffca28; }
 
-/* BOTTOM LOG */
-#bottom{ height:60px; background:#080c10; border-top:1px solid #1e2936; padding:6px 12px; font-family:monospace; font-size:10px; color:#859bb0; overflow-y:auto; }
+#bottom{ height:50px; background:#05080c; border-top:1px solid #1e2c3a; padding:6px 12px; font-family:monospace; font-size:10px; color:#8fa3b8; overflow-y:auto; }
 
 @media(max-width:768px){
-  #left{ width:130px; }
-  #right{ width:210px; }
+  #main{ flex-direction:column; }
+  #right{ width:100%; height:200px; flex-shrink:0; }
 }
 </style>
 </head>
 <body>
 <div id="game">
   <header id="top">
-    <div><b>ELEMENTAL FRONTIER</b></div>
-    <div id="turnIndicator">NA POTEZU: ARES</div>
-    <div>RUNDA: <span id="roundNum">1</span></div>
+    <div><b>LUDO BOARD (10 FRAKCIJA)</b></div>
+    <div id="turnTxt" style="font-weight:bold; color:#ffca28;">NA POTEZU: ARES</div>
+    <div>RUNDA: <span id="rNum">1</span></div>
   </header>
 
   <div id="main">
-    <!-- FRAKCIJE -->
-    <aside id="left">
-      <div id="factionsList"></div>
-    </aside>
-
-    <!-- MAPA -->
     <main id="mapWrap">
       <canvas id="map"></canvas>
     </main>
 
-    <!-- KOCKICA & ŠOP -->
     <aside id="right">
-      <div id="diceBox">
-        <div style="font-size:10px; color:#aaa;">POTEZNA KOCKICA</div>
-        <div id="diceVal">-</div>
-        <button id="rollBtn" class="btn-roll" onclick="playTurn()">BACI KOCKICU</button>
+      <div class="box" style="text-align:center;">
+        <div style="font-size:10px; color:#8095a8;">REZULTAT KOCKICE</div>
+        <div id="diceVal" style="font-size:32px; font-weight:bold; color:#ffca28; margin:2px 0;">-</div>
+        <button class="btn-roll" onclick="playTurn()">BACI KOCKICU</button>
       </div>
 
-      <div class="stat-box">
+      <div class="box">
         <div class="stat-row"><span>Frakcija:</span><b id="stName">-</b></div>
         <div class="stat-row"><span>Zlato:</span><b id="stGold" style="color:#ffca28;">0 G</b></div>
-        <div class="stat-row"><span>HP:</span><b id="stHP">0/0</b></div>
+        <div class="stat-row"><span>HP / Max:</span><b id="stHP">0 / 0</b></div>
         <div class="stat-row"><span>ATK / DEF:</span><b id="stStats">0 / 0</b></div>
-        <div class="stat-row"><span>SPD / HEAL:</span><b id="stExtra">0 / 0</b></div>
       </div>
 
-      <div class="shop-title">ŠOP (50+ ITEMA)</div>
+      <div style="font-size:11px; font-weight:bold; color:#fff; margin-bottom:4px;">PRODAVNICA ITEMA</div>
       <div id="shopList" class="item-list"></div>
     </aside>
   </div>
 
-  <footer id="bottom" id="logBox">
+  <footer id="bottom">
     <div id="log"></div>
   </footer>
 </div>
 
 <script>
-/* CANVAS SETUP */
 const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
-let W = 600, H = 600;
+let size = 400;
 
 function resize(){
   const wrap = document.getElementById("mapWrap");
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  buildBoardPath();
+  size = Math.min(wrap.clientWidth, wrap.clientHeight) - 20;
+  if(size < 280) size = 280;
+  canvas.width = size;
+  canvas.height = size;
+  buildBoardGrid();
 }
 window.addEventListener("resize", resize);
 
-/* BOARD PATH (ČOVEČE NE LJUTI SE STAZE) */
+/* EFEKTI POLJA (SPECIAL TILES) */
+const TILE_TYPES = {
+  NORMAL: 0,
+  GOLD: 1,   // Bonus Zlato
+  BUFF: 2,   // Bonus Napad
+  PORTAL: 3, // Idi napred
+  TRAP: 4    // Zamka
+};
+
 const boardNodes = [];
 const TOTAL_NODES = 40;
 
-function buildBoardPath(){
+function buildBoardGrid(){
   boardNodes.length = 0;
-  const pad = 40;
-  const rw = W - pad * 2;
-  const rh = H - pad * 2;
+  const cellSize = size / 11;
+  
+  // Staza od 40 polja po obodu 11x11 mreže
+  const coords = [];
+  for(let x=1; x<=9; x++) coords.push({x:x, y:1});
+  for(let y=1; y<=9; y++) coords.push({x:9, y:y});
+  for(let x=9; x>=1; x--) coords.push({x:x, y:9});
+  for(let y=9; y>=1; y--) coords.push({x:1, y:y});
+
   for(let i=0; i<TOTAL_NODES; i++){
-    let pct = i / TOTAL_NODES;
-    let x, y;
-    if(pct < 0.25){ x = pad + (pct / 0.25) * rw; y = pad; }
-    else if(pct < 0.5){ x = pad + rw; y = pad + ((pct - 0.25) / 0.25) * rh; }
-    else if(pct < 0.75){ x = pad + rw - ((pct - 0.5) / 0.25) * rw; y = pad + rh; }
-    else { x = pad; y = pad + rh - ((pct - 0.75) / 0.25) * rh; }
-    boardNodes.push({ x, y });
+    let type = TILE_TYPES.NORMAL;
+    if(i % 8 === 2) type = TILE_TYPES.GOLD;
+    else if(i % 8 === 5) type = TILE_TYPES.BUFF;
+    else if(i % 10 === 7) type = TILE_TYPES.PORTAL;
+    else if(i % 9 === 4) type = TILE_TYPES.TRAP;
+
+    boardNodes.push({
+      x: coords[i].x * cellSize + cellSize/2,
+      y: coords[i].y * cellSize + cellSize/2,
+      gridX: coords[i].x,
+      gridY: coords[i].y,
+      type: type
+    });
   }
 }
 
-/* 50 GENERISANIH ITEMA (250G - 5000G) */
-const namePrefixes = ["Runic", "Void", "Shadow", "Celestial", "Infernal", "Glacial", "Arcane", "Titan's"];
-const nameTypes = ["Blade", "Aegis", "Tome", "Crown", "Scepter", "Visage", "Heart", "Ring"];
-const nameSuffixes = ["of Abyss", "of Ruin", "of Storms", "of Eternity", "of Might"];
-
+/* GENERIŠI 50 ITEMA (250G - 5000G) */
 function generate50Items(){
   const list = [];
-  for(let i = 0; i < 50; i++){
-    const ratio = i / 49;
-    const price = Math.round((250 + ratio * 4750) / 10) * 10;
+  const prefixes = ["Runic", "Void", "Shadow", "Celestial", "Infernal", "Titan's"];
+  const names = ["Blade", "Aegis", "Tome", "Crown", "Heart", "Ring"];
+  for(let i=0; i<50; i++){
+    const price = Math.round((250 + (i/49)*4750)/10)*10;
     const p = price / 250;
-    
-    const pFix = namePrefixes[i % namePrefixes.length];
-    const tFix = nameTypes[i % nameTypes.length];
-    const sFix = nameSuffixes[i % nameSuffixes.length];
-
     list.push({
-      id: i + 1,
-      name: `${pFix} ${tFix} ${sFix}`,
+      id: i+1,
+      name: `${prefixes[i%prefixes.length]} ${names[i%names.length]} +${i+1}`,
       price: price,
-      hp: Math.floor((Math.random() * 60 + 30) * p),
-      att: Math.floor((Math.random() * 10 + 5) * p),
-      def: Math.floor((Math.random() * 8 + 3) * p),
-      speed: parseFloat((Math.random() * 1.5 + 0.5 * (p * 0.3)).toFixed(1)),
-      heal: Math.floor((Math.random() * 8 + 2) * p),
-      manaRegen: parseFloat((Math.random() * 1 + 0.5 * p).toFixed(1))
+      hp: Math.floor((Math.random()*50 + 25)*p),
+      att: Math.floor((Math.random()*8 + 4)*p),
+      def: Math.floor((Math.random()*6 + 2)*p)
     });
   }
   return list.sort((a,b) => a.price - b.price);
 }
 const shopItems = generate50Items();
 
-/* FRAKCIJE */
+/* 10 FRAKCIJA I KUĆICE */
 const defs = [
-  { name:"ARES", color:"#ff3b30", start:0 },
-  { name:"TIDAL", color:"#2196f3", start:4 },
-  { name:"TERRA", color:"#9c7a4a", start:8 },
-  { name:"AERIS", color:"#b8e8ff", start:12 },
-  { name:"CRYON", color:"#72e6ff", start:16 },
-  { name:"VOLT", color:"#ffff33", start:20 },
-  { name:"SYLVAN", color:"#50d66b", start:24 },
-  { name:"VOID", color:"#b000ff", start:28 },
-  { name:"SOLAR", color:"#ffd54f", start:32 },
-  { name:"NEXUS", color:"#ff55cc", start:36 }
+  { name:"ARES", color:"#ff3b30", home:{x:0, y:0}, start:0 },
+  { name:"TIDAL", color:"#2196f3", home:{x:10, y:0}, start:4 },
+  { name:"TERRA", color:"#9c7a4a", home:{x:10, y:10}, start:8 },
+  { name:"AERIS", color:"#b8e8ff", home:{x:0, y:10}, start:12 },
+  { name:"CRYON", color:"#72e6ff", home:{x:5, y:0}, start:16 },
+  { name:"VOLT", color:"#ffff33", home:{x:10, y:5}, start:20 },
+  { name:"SYLVAN", color:"#50d66b", home:{x:5, y:10}, start:24 },
+  { name:"VOID", color:"#b000ff", home:{x:0, y:5}, start:28 },
+  { name:"SOLAR", color:"#ffd54f", start:32, home:{x:2, y:2} },
+  { name:"NEXUS", color:"#ff55cc", start:36, home:{x:8, y:8} }
 ];
 
 let factions = [];
@@ -193,54 +172,66 @@ let consecutiveSixes = 0;
 
 function initFactions(){
   factions = defs.map((d, i) => ({
-    id: i,
-    name: d.name,
-    color: d.color,
-    node: d.start,
-    hp: 800, maxHp: 800,
-    gold: 500, // Početni novac
-    attack: 30, defense: 10,
-    speed: 10, heal: 0, manaRegen: 1,
+    id: i, name: d.name, color: d.color,
+    home: d.home, node: d.start,
+    hp: 800, maxHp: 800, gold: 500, attack: 30, defense: 10,
     alive: true
   }));
 }
 
-/* LOGIKA IGRE I POTEZA */
+/* IGRA NA POTEZE */
 function playTurn(){
   const f = factions[currentTurn];
-  if(!f || !f.alive){
-    nextTurn();
-    return;
-  }
+  if(!f || !f.alive){ nextTurn(); return; }
 
   const dice = Math.floor(Math.random() * 6) + 1;
   document.getElementById("diceVal").textContent = dice;
 
-  // Pomeranje po poljima
+  // Pomeranje
   f.node = (f.node + dice) % TOTAL_NODES;
+  const tile = boardNodes[f.node];
 
-  // Zarada po potezu (skalira sa rundama)
-  const scale = Math.pow(1.05, roundCount);
-  const earned = Math.floor((120 + dice * 25) * scale);
-  f.gold += earned;
+  // Osnovna zarada
+  f.gold += 100 + dice * 20;
+  log(`${f.name} bacio [${dice}] -> Polje ${f.node}`);
 
-  log(`${f.name} bacio [${dice}]. Stao na polje ${f.node}. Zaradio +${earned}G.`);
+  // Efekti Polja
+  if(tile.type === TILE_TYPES.GOLD){
+    f.gold += 200;
+    log(`🟡 ${f.name} stao na GOLD POLJE! Bonus +200G!`);
+  } else if(tile.type === TILE_TYPES.BUFF){
+    f.attack += 15;
+    log(`⚔️ ${f.name} stao na BUFF POLJE! +15 Napad!`);
+  } else if(tile.type === TILE_TYPES.PORTAL){
+    f.node = (f.node + 3) % TOTAL_NODES;
+    log(`🌀 ${f.name} stao na PORTAL! Teleportovan +3 polja napred!`);
+  } else if(tile.type === TILE_TYPES.TRAP){
+    f.hp -= 150;
+    log(`💣 ${f.name} JE ULETIOM U ZAMKU! -150 HP!`);
+  }
 
-  // Napad: Samo frakcija koja baca kockicu napada ako stane na nekoga
+  // Napad na protivnika ako stane na njega
   factions.forEach(target => {
     if(target.id !== f.id && target.alive && target.node === f.node){
-      executeAttack(f, target);
+      log(`⚔️ NAPAD: ${f.name} je stao na polje frakcije ${target.name}!`);
+      const dmg = Math.max(20, f.attack * 1.5 - target.defense * 0.5);
+      target.hp -= dmg;
+      if(target.hp <= 0){
+        target.alive = false;
+        f.gold += target.gold;
+        log(`☠️ ${f.name} je ELIMINISAO ${target.name}!`);
+      }
     }
   });
 
-  // Pravilo za dve šestice (igra se opet)
+  // Pravilo za 2 šestice
   if(dice === 6){
     consecutiveSixes++;
     if(consecutiveSixes === 2){
-      log(`🔥 ${f.name} JE DOBIO DVE ŠESTICE ZAREDOM! Dobija dodatno bacanje!`);
+      log(`🔥 DVE ŠESTICE ZAREDOM! ${f.name} igra ponovo!`);
       consecutiveSixes = 0;
       renderUI();
-      return; // Ne prelazi na sledećeg
+      return;
     }
   } else {
     consecutiveSixes = 0;
@@ -258,85 +249,33 @@ function nextTurn(){
   renderUI();
 }
 
-function executeAttack(attacker, defender){
-  log(`⚔️ BOJ: ${attacker.name} napada ${defender.name} na polju ${attacker.node}!`);
-  
-  const dmg = Math.max(15, attacker.attack * 1.4 - defender.defense * 0.4);
-  defender.hp -= dmg;
-
-  if(defender.hp <= 0){
-    defender.hp = 0;
-    defender.alive = false;
-    attacker.gold += defender.gold;
-    log(`☠️ ${attacker.name} je ELIMINISAO ${defender.name} i uzeo sve njegove dukate!`);
-  } else {
-    log(`${defender.name} preživeo napad sa ${Math.floor(defender.hp)} HP.`);
-  }
-}
-
 function buyItem(item){
   const f = factions[currentTurn];
-  if(!f || !f.alive) return;
-  if(f.gold < item.price){
-    log(`❌ ${f.name} nema dovoljno zlata za ${item.name}!`);
-    return;
-  }
-
+  if(f.gold < item.price){ log(`Nemaš dovoljno zlata!`); return; }
   f.gold -= item.price;
-  f.maxHp += item.hp;
-  f.hp += item.hp;
-  f.attack += item.att;
-  f.defense += item.def;
-  f.speed += item.speed;
-  f.heal += item.heal;
-  f.manaRegen += item.manaRegen;
-
-  log(`🛒 ${f.name} je kupio [${item.name}] za ${item.price}G!`);
+  f.maxHp += item.hp; f.hp += item.hp;
+  f.attack += item.att; f.defense += item.def;
+  log(`🛒 ${f.name} kupio ${item.name}!`);
   renderUI();
 }
 
-/* RENDER SVEGA */
 function renderUI(){
-  document.getElementById("roundNum").textContent = roundCount;
+  document.getElementById("rNum").textContent = roundCount;
   const curF = factions[currentTurn];
-  document.getElementById("turnIndicator").textContent = "NA POTEZU: " + curF.name;
-  document.getElementById("turnIndicator").style.color = curF.color;
+  document.getElementById("turnTxt").textContent = "NA POTEZU: " + curF.name;
+  document.getElementById("turnTxt").style.color = curF.color;
 
-  // Lista frakcija
-  const list = document.getElementById("factionsList");
-  list.innerHTML = "";
-  factions.forEach(f => {
-    const d = document.createElement("div");
-    d.className = "faction-card" + (f.id === currentTurn ? " active-turn" : "");
-    d.style.borderColor = f.alive ? f.color : "#333";
-    d.style.opacity = f.alive ? "1" : "0.3";
-    d.innerHTML = `
-      <b>${f.name}</b> <small style="float:right; color:#ffca28;">${Math.floor(f.gold)}G</small>
-      <div class="hp-bar"><i style="width:${Math.max(0, (f.hp/f.maxHp)*100)}%; background:${f.color};"></i></div>
-    `;
-    list.appendChild(d);
-  });
-
-  // Statovi frakcije na potezu
   document.getElementById("stName").textContent = curF.name;
   document.getElementById("stGold").textContent = Math.floor(curF.gold) + " G";
   document.getElementById("stHP").textContent = Math.floor(curF.hp) + " / " + Math.floor(curF.maxHp);
   document.getElementById("stStats").textContent = Math.floor(curF.attack) + " / " + Math.floor(curF.defense);
-  document.getElementById("stExtra").textContent = curF.speed.toFixed(1) + " / " + curF.heal;
 
-  // Šop render
   const shopEl = document.getElementById("shopList");
   shopEl.innerHTML = "";
   shopItems.forEach(item => {
     const card = document.createElement("div");
     card.className = "item-card";
-    card.innerHTML = `
-      <div>
-        <div class="item-title">${item.name}</div>
-        <span class="item-stats">HP:+${item.hp} ATK:+${item.att} DEF:+${item.def} SPD:+${item.speed}</span>
-      </div>
-      <div class="item-price">${item.price}G</div>
-    `;
+    card.innerHTML = `<div><b>${item.name}</b><br><small>HP:+${item.hp} ATK:+${item.att}</small></div><b>${item.price}G</b>`;
     card.onclick = () => buyItem(item);
     shopEl.appendChild(card);
   });
@@ -349,28 +288,46 @@ function log(msg){
   b.prepend(d);
 }
 
+/* ISCRTAVANJE ČOVEČE NE LJUTI SE TABLICE */
 function draw(){
-  ctx.fillStyle = "#030508";
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = "#04070a";
+  ctx.fillRect(0,0,size,size);
 
-  // Polja staze
+  const cellSize = size / 11;
+
+  // Crtanje Kućica (Baza)
+  factions.forEach(f => {
+    ctx.fillStyle = f.color;
+    ctx.globalAlpha = 0.2;
+    ctx.fillRect(f.home.x * cellSize, f.home.y * cellSize, cellSize, cellSize);
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = f.color;
+    ctx.strokeRect(f.home.x * cellSize, f.home.y * cellSize, cellSize, cellSize);
+  });
+
+  // Crtanje Staze
   boardNodes.forEach((n, i) => {
     ctx.beginPath();
-    ctx.arc(n.x, n.y, 7, 0, Math.PI*2);
-    ctx.fillStyle = "#121d28";
+    ctx.arc(n.x, n.y, cellSize/3, 0, Math.PI*2);
+    
+    if(n.type === TILE_TYPES.GOLD) ctx.fillStyle = "#ffca28";
+    else if(n.type === TILE_TYPES.BUFF) ctx.fillStyle = "#ff3b30";
+    else if(n.type === TILE_TYPES.PORTAL) ctx.fillStyle = "#2196f3";
+    else if(n.type === TILE_TYPES.TRAP) ctx.fillStyle = "#b000ff";
+    else ctx.fillStyle = "#162332";
+
     ctx.fill();
-    ctx.strokeStyle = "#253748";
+    ctx.strokeStyle = "#2c3e50";
     ctx.stroke();
   });
 
-  // Figurice
+  // Crtanje Figurica
   factions.forEach(f => {
     if(!f.alive) return;
     const n = boardNodes[f.node];
-    if(!n) return;
-
+    
     ctx.beginPath();
-    ctx.arc(n.x, n.y, 9, 0, Math.PI*2);
+    ctx.arc(n.x, n.y, cellSize/2.5, 0, Math.PI*2);
     ctx.fillStyle = f.color;
     ctx.fill();
     ctx.strokeStyle = f.id === currentTurn ? "#ffffff" : "#000000";
@@ -381,11 +338,10 @@ function draw(){
   requestAnimationFrame(draw);
 }
 
-/* START */
 resize();
 initFactions();
 renderUI();
-log("Igra počinje! ARES je prvi na potezu.");
+log("Nova Čoveče Ne Ljuti Se mapa je spremna. ARES prvi baca kockicu.");
 requestAnimationFrame(draw);
 </script>
 </body>

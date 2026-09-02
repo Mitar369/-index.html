@@ -3,156 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>⚔️ Elemental Conquest - Play Now</title>
+<title>⚔️ Elemental Conquest</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;background:#0a0e14;color:#f4f7fb;font-family:Arial,sans-serif;overflow:hidden}
+html,body{width:100%;height:100%;background:#0a0e14;color:#f4f7fb;font-family:'Segoe UI',Arial,sans-serif;overflow:hidden}
 body{touch-action:none;user-select:none}
-button{border:1px solid #69d2ff;background:#1a3a4a;color:#69d2ff;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px}
+
+button{border:2px solid #69d2ff;background:linear-gradient(135deg,#1a3a4a 0%,#0f2a3a 100%);color:#69d2ff;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;transition:all 0.2s}
+button:hover{background:linear-gradient(135deg,#2a4a5a 0%,#1f3a4a 100%);transform:scale(1.05)}
 button:active{transform:scale(0.95)}
-button:hover{background:#2a4a5a}
+button:disabled{opacity:0.3;cursor:not-allowed;transform:scale(1)}
 
-#gameContainer{width:100%;height:100%;display:flex;flex-direction:column}
-#canvas{flex:1;display:block;background:#0f1419;cursor:pointer}
+.statusBar{position:fixed;top:0;left:0;right:0;height:80px;background:linear-gradient(180deg,rgba(10,14,20,0.98) 0%,rgba(10,14,20,0.9) 100%);border-bottom:3px solid #69d2ff;z-index:100;padding:10px 15px;display:flex;justify-content:space-between;align-items:center}
 
-.hud{position:fixed;z-index:100;display:flex;align-items:center;gap:15px;background:rgba(10,14,20,0.95);border:1px solid #69d2ff;border-radius:8px;padding:10px 15px;font-weight:bold}
+.playerInfo{display:flex;gap:30px;align-items:center;flex:1}
+.playerCard{display:flex;align-items:center;gap:12px;padding:10px 15px;background:rgba(105,210,255,0.1);border:2px solid;border-radius:8px}
+.playerCard.active{border-color:#66e39a;box-shadow:0 0 15px rgba(102,227,154,0.5);background:rgba(102,227,154,0.15)}
+.playerAvatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold}
+.playerName{font-size:13px;font-weight:bold}
+.playerTerritories{font-size:11px;color:#9da8b8}
 
-#topHUD{top:10px;left:10px;flex-direction:column;align-items:flex-start}
-.resource{display:flex;align-items:center;gap:8px;padding:5px 10px;background:rgba(105,210,255,0.1);border-radius:6px}
-.resource span:first-child{font-size:18px}
-.resource span:last-child{font-size:13px;color:#69d2ff}
+.gameStatus{text-align:center;flex:1}
+.gameStatus h1{font-size:16px;color:#69d2ff;margin-bottom:5px}
+.gameStatus p{font-size:12px;color:#9da8b8}
 
-#gameInfo{top:10px;right:10px;flex-direction:column;align-items:flex-end}
-#turnInfo{font-size:14px;color:#66e39a}
-#diceInfo{font-size:12px;color:#ffd166}
-#fpsInfo{position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:6px;font-size:11px}
+.resourcesBar{display:flex;gap:15px}
+.resource{display:flex;align-items:center;gap:5px;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:6px;border:1px solid #69d2ff;font-size:13px;font-weight:bold}
+.resourceIcon{font-size:16px}
 
-#bottomPanel{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(10,14,20,0.95);border:2px solid #69d2ff;border-radius:12px;padding:15px;max-width:95%;z-index:100}
+.fpsCounter{position:fixed;top:10px;right:10px;font-size:10px;background:rgba(0,0,0,0.5);padding:5px 10px;border-radius:4px;color:#66e39a}
 
-.diceArea{text-align:center;margin-bottom:15px}
-.diceArea h2{font-size:16px;color:#69d2ff;margin-bottom:8px}
-.dice{width:50px;height:50px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#69d2ff,#4a9fff);border-radius:8px;font-size:28px;font-weight:bold;color:#000;margin:0 5px}
+#gameContainer{width:100%;height:100%;margin-top:80px;display:flex;flex-direction:column}
+#canvas{flex:1;background:linear-gradient(135deg,#0f1419 0%,#1a2a3a 100%);cursor:pointer}
 
-.buttonGroup{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.controlPanel{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(10,14,20,0.95) 100%,rgba(10,14,20,0.8) 0%);border-top:3px solid #69d2ff;padding:15px;z-index:100;max-height:300px;overflow-y:auto}
 
-#mainMenu{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14 0%,#1a3a4a 100%);display:flex;align-items:center;justify-content:center;z-index:200}
-#mainMenu.hidden{display:none}
-.menuContent{text-align:center}
-.menuContent h1{font-size:48px;color:#69d2ff;margin-bottom:20px;text-shadow:0 0 20px rgba(105,210,255,0.5)}
-.menuContent p{font-size:16px;color:#9da8b8;margin-bottom:30px}
-.startBtn{padding:15px 40px;font-size:16px;background:linear-gradient(135deg,#69d2ff,#4a9fff);color:#000;font-weight:900;border:none;cursor:pointer;border-radius:8px}
-.startBtn:hover{background:linear-gradient(135deg,#7dd3fc,#5aafff)}
+.diceSection{text-align:center;margin-bottom:20px;padding:15px;background:rgba(105,210,255,0.08);border:2px solid #69d2ff;border-radius:10px}
+.diceSection h2{font-size:14px;color:#69d2ff;margin-bottom:10px}
+.diceDisplay{display:inline-block;width:70px;height:70px;background:linear-gradient(135deg,#69d2ff 0%,#4a9fff 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#000;margin:0 10px;box-shadow:0 5px 15px rgba(105,210,255,0.3)}
+.rollMessage{font-size:12px;color:#9da8b8;margin-top:10px}
 
-.gameBoard{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:15px;max-height:300px;overflow-y:auto}
-.tile{padding:10px;background:rgba(105,210,255,0.1);border:2px solid #69d2ff;border-radius:8px;cursor:pointer;text-align:center;font-size:11px}
-.tile.discovered{background:rgba(102,227,154,0.2);border-color:#66e39a}
-.tile.occupied{background:rgba(255,98,98,0.2);border-color:#ff6262}
-.tile.resource{font-weight:bold}
-.tile:hover{transform:scale(1.05)}
+.shopSection{background:rgba(102,227,154,0.08);border:2px solid #66e39a;border-radius:10px;padding:15px;margin-bottom:15px}
+.shopTitle{font-size:13px;font-weight:bold;color:#66e39a;margin-bottom:10px}
+.shopItems{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:15px}
+.shopItem{padding:12px;background:rgba(255,255,255,0.05);border:2px solid #ffd166;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align:center}
+.shopItem:hover{background:rgba(255,198,102,0.15);transform:scale(1.05)}
+.shopItem.locked{opacity:0.4;cursor:not-allowed}
+.shopItem.locked:hover{transform:scale(1)}
+.itemName{font-size:12px;font-weight:bold;color:#ffd166}
+.itemCost{font-size:11px;color:#9da8b8;margin:5px 0}
+.itemEffect{font-size:10px;color:#9da8b8;line-height:1.4}
 
-.playerStatus{background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;margin-bottom:10px;font-size:12px}
-.playerStatus div{margin:5px 0}
+.actionButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px}
 
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:150;opacity:0;pointer-events:none}
+.turnIndicator{position:fixed;top:90px;left:15px;background:rgba(102,227,154,0.1);border:2px solid #66e39a;border-radius:8px;padding:10px 15px;font-size:12px;color:#66e39a;font-weight:bold;z-index:99}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none}
 .modal.show{opacity:1;pointer-events:auto}
-.modalContent{background:#0f1419;border:2px solid #69d2ff;border-radius:12px;padding:20px;max-width:90%;max-height:80vh;overflow:auto}
-.modalContent h2{color:#69d2ff;margin-bottom:15px}
-.modalContent button{margin:5px}
+.modalContent{background:linear-gradient(135deg,#0f1419 0%,#1a2a3a 100%);border:3px solid #69d2ff;border-radius:15px;padding:25px;max-width:500px;max-height:80vh;overflow:auto;box-shadow:0 10px 40px rgba(105,210,255,0.2)}
+.modalContent h2{color:#69d2ff;margin-bottom:15px;font-size:18px}
+.modalContent p{color:#9da8b8;line-height:1.6;margin-bottom:10px;font-size:13px}
 
-@media (max-width:600px){
-.hud{font-size:12px;padding:8px 10px}
-#bottomPanel{bottom:8px;left:8px;right:8px;width:calc(100% - 16px);transform:none}
-.dice{width:40px;height:40px;font-size:20px}
-.menuContent h1{font-size:32px}
-.gameBoard{grid-template-columns:repeat(3,1fr);gap:6px}
+.startScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14 0%,#1a3a4a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:250;gap:20px}
+.startScreen.hidden{display:none}
+.startScreen h1{font-size:52px;color:#69d2ff;text-shadow:0 0 30px rgba(105,210,255,0.5);margin-bottom:10px}
+.startScreen p{font-size:16px;color:#9da8b8;max-width:400px;text-align:center}
+.startBtn{padding:18px 50px;font-size:18px;background:linear-gradient(135deg,#69d2ff,#4a9fff);color:#000;font-weight:900;border:none}
+
+.highlight{color:#66e39a;font-weight:bold}
+.danger{color:#ff6262;font-weight:bold}
+
+@media (max-width:768px){
+.playerInfo{gap:15px}
+.playerCard{padding:8px 10px}
+.playerName{font-size:11px}
+.playerTerritories{font-size:10px}
+.resourcesBar{gap:8px;font-size:11px}
+.diceDisplay{width:50px;height:50px;font-size:30px}
+.shopItems{grid-template-columns:repeat(2,1fr)}
+.startScreen h1{font-size:36px}
 }
 </style>
 </head>
 <body>
 
-<div id="mainMenu">
-    <div class="menuContent">
-        <h1>⚔️ ELEMENTAL CONQUEST</h1>
-        <p>Roll the dice. Conquer territories. Control resources. Dominate the realm!</p>
-        <button class="startBtn" onclick="startNewGame()">START GAME</button>
-    </div>
+<div class="startScreen" id="startScreen">
+    <h1>⚔️ ELEMENTAL CONQUEST</h1>
+    <p>Roll the dice. Claim territories. Build your empire. Win the realm!</p>
+    <button class="startBtn" onclick="startNewGame()">▶ START GAME</button>
 </div>
+
+<div class="statusBar">
+    <div class="playerInfo" id="playerInfo"></div>
+    <div class="gameStatus">
+        <h1 id="turnTitle">Preparing Game...</h1>
+        <p id="turnDesc">Click START GAME to begin</p>
+    </div>
+    <div class="resourcesBar" id="resourcesBar"></div>
+</div>
+
+<div class="turnIndicator" id="turnIndicator"></div>
+<div class="fpsCounter">FPS: <span id="fps">60</span></div>
 
 <div id="gameContainer">
     <canvas id="canvas"></canvas>
 </div>
 
-<div id="topHUD">
-    <div style="font-weight:bold;color:#69d2ff;">RESOURCES</div>
-    <div class="resource"><span>🪙</span><span id="gold">500</span></div>
-    <div class="resource"><span>🌲</span><span id="wood">300</span></div>
-    <div class="resource"><span>⛓️</span><span id="metal">100</span></div>
-    <div class="resource"><span>⚡</span><span id="energy">50</span></div>
-</div>
-
-<div id="gameInfo">
-    <div id="turnInfo">Turn: 1 | Player: 1</div>
-    <div id="diceInfo">Last Roll: -</div>
-</div>
-
-<div id="fpsInfo">
-    FPS: <span id="fps">60</span>
-</div>
-
-<div id="bottomPanel">
-    <div class="diceArea">
-        <h2>🎲 ROLL DICE</h2>
-        <div class="dice" id="diceDisplay">?</div>
-        <div style="margin-top:8px;font-size:12px;color:#9da8b8" id="diceMessage">Click button to roll</div>
+<div class="controlPanel">
+    <div class="diceSection">
+        <h2>🎲 ROLL THE DICE</h2>
+        <div class="diceDisplay" id="diceDisplay">?</div>
+        <div class="rollMessage" id="rollMessage">Click the button below to roll</div>
+        <div style="margin-top:15px">
+            <button id="rollButton" onclick="rollDice()" style="padding:15px 40px;font-size:16px">🎲 ROLL DICE</button>
+        </div>
     </div>
     
-    <div class="playerStatus">
-        <div><strong>Current Player:</strong> <span id="currentPlayer">Player 1 (Water)</span></div>
-        <div><strong>Position:</strong> <span id="playerPos">Start</span></div>
-        <div><strong>Territories:</strong> <span id="territories">0</span></div>
-    </div>
-    
-    <div class="gameBoard" id="gameBoard"></div>
-    
-    <div class="buttonGroup">
-        <button onclick="rollDice()">🎲 ROLL & MOVE</button>
-        <button onclick="buyTerritory()">🏰 BUY TERRITORY</button>
-        <button onclick="viewTerritories()">📊 MY TERRITORIES</button>
-        <button onclick="endTurn()">✓ END TURN</button>
-        <button onclick="showMenu()">☰ MENU</button>
-    </div>
-</div>
-
-<div class="modal" id="endGameModal">
-    <div class="modalContent">
-        <h2>🏆 GAME OVER</h2>
-        <div id="endGameText" style="margin:15px 0;color:#66e39a;font-size:14px"></div>
-        <button onclick="startNewGame()">▶ NEW GAME</button>
-        <button onclick="location.reload()">🔄 RELOAD</button>
-    </div>
-</div>
-
-<div class="modal" id="menuModal">
-    <div class="modalContent">
-        <h2>☰ MENU</h2>
-        <button onclick="resumeGame()">▶ RESUME</button>
-        <button onclick="showRules()">📖 RULES</button>
-        <button onclick="startNewGame()">🆕 NEW GAME</button>
-        <button onclick="location.reload()">🔄 RELOAD</button>
+    <div class="shopSection">
+        <div class="shopTitle">🏪 SHOP - BUY UPGRADES</div>
+        <div class="shopItems" id="shopItems"></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+            <button onclick="buyTerritory()">🏰 BUY TERRITORY (150G)</button>
+            <button onclick="endTurn()">✓ END TURN</button>
+        </div>
     </div>
 </div>
 
 <div class="modal" id="rulesModal">
     <div class="modalContent">
         <h2>📖 HOW TO PLAY</h2>
-        <div style="color:#9da8b8;font-size:13px;line-height:1.6">
-            <p><strong>🎲 Roll Dice:</strong> Move forward on the board</p>
-            <p><strong>🏰 Buy Territory:</strong> Spend resources to own tiles</p>
-            <p><strong>💰 Collect Resources:</strong> Owned territories produce resources each turn</p>
-            <p><strong>🎯 Win Condition:</strong> Be first to own 8+ territories or accumulate 2000 resources</p>
-            <p><strong>⚔️ Combat:</strong> Landing on enemy territory = Battle for control</p>
-            <p><strong>🌍 Elements:</strong> Water, Fire, Earth, Wind - Each has unique bonuses</p>
-        </div>
+        <p><strong>🎲 Roll Dice:</strong> Click the dice button to roll 1-6</p>
+        <p><strong>🏰 Move & Claim:</strong> Move forward, click "BUY TERRITORY" to own tiles (costs 150 Gold)</p>
+        <p><strong>💰 Collect Resources:</strong> Every turn you own a territory, gain resources</p>
+        <p><strong>🛍️ Shop System:</strong> Buy upgrades to boost your territory income</p>
+        <p><strong>🏆 WIN:</strong> First to own 8 territories OR collect 3000 total resources</p>
+        <p><strong>⚠️ Rules:</strong> You must roll dice each turn to move. Can only move once per turn.</p>
         <button onclick="closeRulesModal()">OK</button>
     </div>
 </div>
@@ -160,64 +145,61 @@ button:hover{background:#2a4a5a}
 <script>
 "use strict";
 
-// ========== CONFIG ==========
 const CONFIG = {
-    VERSION: "2.0.0",
-    BOARD_SIZE: 24,
+    VERSION: "3.0.0",
+    BOARD_TILES: 24,
     MAX_PLAYERS: 4,
-    GRID_WIDTH: 6,
-    GRID_HEIGHT: 4,
+    WIN_TERRITORIES: 8,
+    WIN_RESOURCES: 3000,
+    TERRITORY_COST: 150,
     TARGET_FPS: 60,
-    WINNING_TERRITORIES: 8,
-    WINNING_RESOURCES: 2000,
 };
 
-// ========== GAME STATE ==========
 const GAME = {
     canvas: null,
     ctx: null,
     width: 0,
     height: 0,
     running: false,
-    paused: false,
-    turn: 1,
+    turn: 0,
     currentPlayer: 0,
     lastDiceRoll: 0,
+    canRoll: true,
+    canBuy: false,
     fps: 60,
     frameCount: 0,
-    lastFrameTime: 0,
-    camera: {x: 0, y: 0},
+    lastTime: 0,
 };
 
 const PLAYERS = [
-    {id: 0, name: "Player 1", element: "Water", color: "#0d3b66", resources: {gold: 500, wood: 300, metal: 100, energy: 50}, position: 0, territories: new Set(), active: true},
-    {id: 1, name: "Player 2", element: "Fire", color: "#ff6262", resources: {gold: 500, wood: 300, metal: 100, energy: 50}, position: 0, territories: new Set(), active: true},
-    {id: 2, name: "Player 3", element: "Earth", color: "#8b7d4a", resources: {gold: 500, wood: 300, metal: 100, energy: 50}, position: 0, territories: new Set(), active: true},
-    {id: 3, name: "Player 4", element: "Wind", color: "#69d2ff", resources: {gold: 500, wood: 300, metal: 100, energy: 50}, position: 0, territories: new Set(), active: true},
+    {id: 0, name: "Player 1", element: "Water", color: "#0d3b66", bgColor: "rgba(13,59,102,0.2)", resources: {gold: 800, wood: 400, metal: 200, energy: 100}, position: 0, territories: new Set(), shopUpgrades: 0, resourceBonus: 0},
+    {id: 1, name: "Player 2", element: "Fire", color: "#ff6262", bgColor: "rgba(255,98,98,0.2)", resources: {gold: 800, wood: 400, metal: 200, energy: 100}, position: 0, territories: new Set(), shopUpgrades: 0, resourceBonus: 0},
+    {id: 2, name: "Player 3", element: "Earth", color: "#8b7d4a", bgColor: "rgba(139,125,74,0.2)", resources: {gold: 800, wood: 400, metal: 200, energy: 100}, position: 0, territories: new Set(), shopUpgrades: 0, resourceBonus: 0},
+    {id: 3, name: "Player 4", element: "Wind", color: "#69d2ff", bgColor: "rgba(105,210,255,0.2)", resources: {gold: 800, wood: 400, metal: 200, energy: 100}, position: 0, territories: new Set(), shopUpgrades: 0, resourceBonus: 0},
 ];
 
 const TILES = [];
-const RESOURCE_TYPES = ['gold', 'wood', 'metal', 'energy'];
-const RESOURCE_ICONS = {gold: '🪙', wood: '🌲', metal: '⛓️', energy: '⚡'};
+const SHOP_ITEMS = [
+    {id: 0, name: "Resource Boost I", cost: 200, effect: "+20% gold/turn", bonus: 0.2, type: "resource"},
+    {id: 1, name: "Territory Expansion", cost: 300, effect: "-25% buy cost", bonus: 0.25, type: "discount"},
+    {id: 2, name: "Resource Boost II", cost: 400, effect: "+40% gold/turn", bonus: 0.4, type: "resource"},
+    {id: 3, name: "Rapid Development", cost: 500, effect: "+2 tiles value", bonus: 2, type: "value"},
+];
 
-// ========== INITIALIZATION ==========
 function initGame() {
     GAME.canvas = document.getElementById('canvas');
     GAME.ctx = GAME.canvas.getContext('2d', {alpha: false});
     
     if (!GAME.ctx) {
-        alert('Canvas context failed!');
+        alert('Canvas initialization failed!');
         return;
     }
     
     resizeCanvas();
     generateBoard();
-    generateTiles();
-    
-    GAME.running = false;
-    
+    renderShop();
+    updateStatusBar();
     setupInput();
-    updateUI();
     
     console.log('✅ Game Engine Ready - v' + CONFIG.VERSION);
     requestAnimationFrame(gameLoop);
@@ -225,273 +207,281 @@ function initGame() {
 
 function resizeCanvas() {
     GAME.width = window.innerWidth;
-    GAME.height = window.innerHeight;
+    GAME.height = window.innerHeight - 80;
     GAME.canvas.width = GAME.width;
     GAME.canvas.height = GAME.height;
 }
 
 function generateBoard() {
     TILES.length = 0;
-    for (let i = 0; i < CONFIG.BOARD_SIZE; i++) {
-        const angle = (i / CONFIG.BOARD_SIZE) * Math.PI * 2;
-        const radius = 150;
+    const resourceTypes = ['gold', 'wood', 'metal', 'energy'];
+    
+    for (let i = 0; i < CONFIG.BOARD_TILES; i++) {
+        const angle = (i / CONFIG.BOARD_TILES) * Math.PI * 2 - Math.PI / 2;
+        const radius = 120;
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
-        const resourceType = RESOURCE_TYPES[i % RESOURCE_TYPES.length];
+        
         TILES.push({
             id: i,
             x, y,
-            radius: 25,
+            radius: 22,
             owner: null,
-            resource: resourceType,
+            resourceType: resourceTypes[i % 4],
+            resourceValue: Math.floor(50 + Math.random() * 50),
             discovered: false,
         });
     }
 }
 
-function generateTiles() {
-    const container = document.getElementById('gameBoard');
+function renderShop() {
+    const container = document.getElementById('shopItems');
     container.innerHTML = '';
+    const player = PLAYERS[GAME.currentPlayer];
     
-    for (let i = 0; i < 24; i++) {
-        const tile = TILES[i];
+    SHOP_ITEMS.forEach(item => {
+        const owned = Array.from(player.territories).length;
+        const canAfford = player.resources.gold >= item.cost;
         const el = document.createElement('div');
-        el.className = 'tile';
-        el.id = 'tile-' + i;
-        el.innerHTML = `<div>${i + 1}</div><div>${RESOURCE_ICONS[tile.resource] || '?'}</div>`;
-        el.onclick = () => selectTile(i);
+        el.className = `shopItem ${!canAfford ? 'locked' : ''}`;
+        el.innerHTML = `
+            <div class="itemName">${item.name}</div>
+            <div class="itemCost">💰 ${item.cost}G</div>
+            <div class="itemEffect">${item.effect}</div>
+        `;
+        el.onclick = () => canAfford && buyShopItem(item.id);
         container.appendChild(el);
-    }
+    });
 }
 
-// ========== GAME MECHANICS ==========
+function buyShopItem(itemId) {
+    const player = PLAYERS[GAME.currentPlayer];
+    const item = SHOP_ITEMS[itemId];
+    
+    if (player.resources.gold < item.cost) {
+        alert('Not enough gold!');
+        return;
+    }
+    
+    player.resources.gold -= item.cost;
+    player.shopUpgrades++;
+    
+    if (item.type === 'resource') {
+        player.resourceBonus += item.bonus;
+    }
+    
+    renderShop();
+    updateStatusBar();
+    alert(`✅ Bought: ${item.name}\n${item.effect}`);
+}
+
 function rollDice() {
-    if (!GAME.running) return;
-    if (GAME.lastDiceRoll !== 0) return alert('Already rolled this turn! Click END TURN.');
+    if (!GAME.running || !GAME.canRoll) {
+        alert('Cannot roll now!');
+        return;
+    }
+    
+    GAME.canRoll = false;
+    GAME.canBuy = true;
     
     const roll = Math.floor(Math.random() * 6) + 1;
     GAME.lastDiceRoll = roll;
     
     document.getElementById('diceDisplay').textContent = roll;
-    document.getElementById('diceMessage').textContent = `Rolled ${roll}! Moving...`;
-    document.getElementById('diceInfo').textContent = `Last Roll: ${roll}`;
     
     const player = PLAYERS[GAME.currentPlayer];
-    const newPos = (player.position + roll) % CONFIG.BOARD_SIZE;
-    player.position = newPos;
+    const oldPos = player.position;
+    player.position = (player.position + roll) % CONFIG.BOARD_TILES;
     
-    const tile = TILES[newPos];
+    const tile = TILES[player.position];
     tile.discovered = true;
     
+    let message = `<span class="highlight">${player.name}</span> rolled <span class="highlight">${roll}</span>!<br>Moved to Tile ${player.position + 1}`;
+    
     if (tile.owner === null) {
-        document.getElementById('diceMessage').textContent = `Landed on empty tile ${newPos + 1}! Buy territory?`;
+        message += `<br>✨ Empty territory! You can buy it.`;
     } else if (tile.owner === GAME.currentPlayer) {
-        document.getElementById('diceMessage').textContent = `You own this territory!`;
-        gainResources(GAME.currentPlayer, 100);
+        message += `<br>🏰 You own this! +${tile.resourceValue} resources`;
+        gainResources(GAME.currentPlayer, tile.resourceValue);
     } else {
-        document.getElementById('diceMessage').textContent = `Enemy territory! Battle!`;
-        battleTerritory(GAME.currentPlayer, tile.owner, newPos);
+        message += `<br>⚠️ Enemy territory! Cannot occupy.`;
     }
     
-    updateUI();
+    document.getElementById('rollMessage').innerHTML = message;
+    document.getElementById('rollButton').disabled = true;
+    
+    updateStatusBar();
+    renderShop();
 }
 
 function buyTerritory() {
-    if (!GAME.running || GAME.lastDiceRoll === 0) return alert('Roll dice first!');
+    if (!GAME.running || !GAME.canBuy) {
+        alert('Roll dice first!');
+        return;
+    }
     
     const player = PLAYERS[GAME.currentPlayer];
     const tile = TILES[player.position];
     
-    if (tile.owner !== null) return alert('Territory already owned!');
+    if (tile.owner !== null) {
+        alert('Territory already owned!');
+        return;
+    }
     
-    const cost = 150;
-    if (player.resources.gold < cost) return alert('Not enough gold! Need ' + cost);
+    let cost = CONFIG.TERRITORY_COST;
+    if (player.shopUpgrades > 0) {
+        const discount = Math.floor(cost * 0.25);
+        cost -= discount;
+    }
+    
+    if (player.resources.gold < cost) {
+        alert(`Not enough gold! Need ${cost}, have ${player.resources.gold}`);
+        return;
+    }
     
     player.resources.gold -= cost;
     tile.owner = GAME.currentPlayer;
     player.territories.add(tile.id);
     
-    updateTileUI(player.position);
-    updateUI();
+    document.getElementById('rollMessage').innerHTML = `<span class="highlight">✅ Territory Claimed!</span><br>Now own ${player.territories.size}/${CONFIG.WIN_TERRITORIES} territories`;
+    GAME.canBuy = false;
     
+    updateStatusBar();
     checkWinCondition();
-}
-
-function selectTile(id) {
-    console.log('Selected tile ' + id);
-}
-
-function battleTerritory(attacker, defender, tileId) {
-    const attackRoll = Math.floor(Math.random() * 20) + 1;
-    const defendRoll = Math.floor(Math.random() * 20) + 1;
-    
-    const winner = attackRoll > defendRoll ? attacker : defender;
-    
-    if (winner === attacker) {
-        TILES[tileId].owner = attacker;
-        PLAYERS[attacker].territories.add(tileId);
-        PLAYERS[defender].territories.delete(tileId);
-        document.getElementById('diceMessage').textContent = `⚔️ You won the battle!`;
-    } else {
-        document.getElementById('diceMessage').textContent = `⚔️ You lost the battle!`;
-    }
-    
-    updateUI();
 }
 
 function gainResources(playerId, amount) {
-    const resourceType = RESOURCE_TYPES[Math.floor(Math.random() * RESOURCE_TYPES.length)];
-    PLAYERS[playerId].resources[resourceType] += amount;
+    const player = PLAYERS[playerId];
+    const bonus = amount * (player.resourceBonus || 0);
+    const total = Math.floor(amount + bonus);
+    player.resources.gold += total;
 }
 
 function endTurn() {
-    if (!GAME.running) return;
+    if (!GAME.running) {
+        alert('Game not running!');
+        return;
+    }
     
-    GAME.lastDiceRoll = 0;
-    GAME.turn++;
+    const player = PLAYERS[GAME.currentPlayer];
+    let income = 0;
+    
+    player.territories.forEach(tileId => {
+        income += TILES[tileId].resourceValue;
+    });
+    
+    if (income > 0) {
+        gainResources(GAME.currentPlayer, income);
+    }
+    
     GAME.currentPlayer = (GAME.currentPlayer + 1) % CONFIG.MAX_PLAYERS;
+    GAME.turn++;
+    GAME.lastDiceRoll = 0;
+    GAME.canRoll = true;
+    GAME.canBuy = false;
     
     document.getElementById('diceDisplay').textContent = '?';
-    document.getElementById('diceMessage').textContent = 'Click button to roll';
+    document.getElementById('rollMessage').innerHTML = `<span class="highlight">${PLAYERS[GAME.currentPlayer].name}</span>'s turn! Click to roll.`;
+    document.getElementById('rollButton').disabled = false;
     
-    updateUI();
+    updateStatusBar();
+    renderShop();
     checkWinCondition();
-}
-
-function viewTerritories() {
-    const player = PLAYERS[GAME.currentPlayer];
-    alert(`${player.name} owns ${player.territories.size} territories`);
 }
 
 function checkWinCondition() {
     for (let p of PLAYERS) {
-        if (p.territories.size >= CONFIG.WINNING_TERRITORIES || p.resources.gold >= CONFIG.WINNING_RESOURCES) {
+        const totalResources = Object.values(p.resources).reduce((a, b) => a + b, 0);
+        if (p.territories.size >= CONFIG.WIN_TERRITORIES || totalResources >= CONFIG.WIN_RESOURCES) {
             GAME.running = false;
-            document.getElementById('endGameText').textContent = `🏆 ${p.name} WINS!\n\nTerritories: ${p.territories.size}\nResources: ${Object.values(p.resources).reduce((a,b)=>a+b)}`;
-            document.getElementById('endGameModal').classList.add('show');
+            
+            const msg = p.territories.size >= CONFIG.WIN_TERRITORIES 
+                ? `🏆 ${p.name} conquered the realm with ${p.territories.size} territories!`
+                : `🏆 ${p.name} dominates with ${totalResources} total resources!`;
+            
+            alert(msg);
+            document.getElementById('startScreen').classList.remove('hidden');
         }
     }
 }
 
-// ========== UI ==========
-function updateUI() {
+function updateStatusBar() {
+    const playerInfo = document.getElementById('playerInfo');
+    playerInfo.innerHTML = '';
+    
+    PLAYERS.forEach((p, idx) => {
+        const isActive = idx === GAME.currentPlayer;
+        const card = document.createElement('div');
+        card.className = `playerCard ${isActive ? 'active' : ''}`;
+        card.style.borderColor = p.color;
+        card.innerHTML = `
+            <div class="playerAvatar" style="background:${p.color}">${idx + 1}</div>
+            <div>
+                <div class="playerName">${p.element}</div>
+                <div class="playerTerritories">🏰 ${p.territories.size}/${CONFIG.WIN_TERRITORIES}</div>
+            </div>
+        `;
+        playerInfo.appendChild(card);
+    });
+    
     const player = PLAYERS[GAME.currentPlayer];
+    document.getElementById('turnTitle').textContent = `Turn ${GAME.turn} - ${player.name}'s Turn`;
+    document.getElementById('turnDesc').textContent = player.element;
     
-    document.getElementById('turnInfo').textContent = `Turn: ${GAME.turn} | Player: ${GAME.currentPlayer + 1}`;
-    document.getElementById('currentPlayer').textContent = `${player.name} (${player.element})`;
-    document.getElementById('playerPos').textContent = `Tile ${player.position + 1}`;
-    document.getElementById('territories').textContent = player.territories.size;
+    document.getElementById('turnIndicator').innerHTML = `Turn ${GAME.turn}<br><strong>${player.name}</strong>`;
     
-    document.getElementById('gold').textContent = player.resources.gold;
-    document.getElementById('wood').textContent = player.resources.wood;
-    document.getElementById('metal').textContent = player.resources.metal;
-    document.getElementById('energy').textContent = player.resources.energy;
+    const resourcesBar = document.getElementById('resourcesBar');
+    resourcesBar.innerHTML = `
+        <div class="resource"><span class="resourceIcon">🪙</span><span>${player.resources.gold}</span></div>
+        <div class="resource"><span class="resourceIcon">🌲</span><span>${player.resources.wood}</span></div>
+        <div class="resource"><span class="resourceIcon">⛓️</span><span>${player.resources.metal}</span></div>
+        <div class="resource"><span class="resourceIcon">⚡</span><span>${player.resources.energy}</span></div>
+    `;
 }
 
-function updateTileUI(index) {
-    const el = document.getElementById('tile-' + index);
-    const tile = TILES[index];
-    
-    el.classList.add('discovered');
-    if (tile.owner !== null) {
-        el.classList.add('occupied');
-    }
-}
-
-function updateFPS(fps) {
-    document.getElementById('fps').textContent = Math.round(fps);
-}
-
-// ========== MODALS ==========
-function showMenu() {
-    if (!GAME.running) return;
-    GAME.paused = true;
-    document.getElementById('menuModal').classList.add('show');
-}
-
-function resumeGame() {
-    GAME.paused = false;
-    document.getElementById('menuModal').classList.remove('show');
-}
-
-function showRules() {
-    document.getElementById('menuModal').classList.remove('show');
-    document.getElementById('rulesModal').classList.add('show');
-}
-
-function closeRulesModal() {
-    document.getElementById('rulesModal').classList.remove('show');
-    document.getElementById('menuModal').classList.add('show');
-}
-
-function startNewGame() {
-    document.getElementById('mainMenu').classList.add('hidden');
-    document.getElementById('endGameModal').classList.remove('show');
-    document.getElementById('menuModal').classList.remove('show');
-    
-    GAME.turn = 1;
-    GAME.currentPlayer = 0;
-    GAME.lastDiceRoll = 0;
-    GAME.running = true;
-    GAME.paused = false;
-    
-    for (let p of PLAYERS) {
-        p.position = 0;
-        p.territories.clear();
-        p.resources = {gold: 500, wood: 300, metal: 100, energy: 50};
-    }
-    
-    generateBoard();
-    generateTiles();
-    updateUI();
-    
-    console.log('🎮 New game started!');
-}
-
-// ========== RENDERING ==========
 function render() {
     const ctx = GAME.ctx;
     const w = GAME.width;
     const h = GAME.height;
     
-    // Clear
     ctx.fillStyle = '#0f1419';
     ctx.fillRect(0, 0, w, h);
     
-    // Draw board
     const centerX = w / 2;
     const centerY = h / 2;
     
-    // Draw circle
     ctx.strokeStyle = '#69d2ff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 150, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, 130, 0, Math.PI * 2);
     ctx.stroke();
     
-    // Draw tiles
     for (let tile of TILES) {
         const x = centerX + tile.x;
         const y = centerY + tile.y;
         
-        ctx.fillStyle = tile.owner !== null ? PLAYERS[tile.owner].color : 'rgba(105,210,255,0.1)';
-        ctx.beginPath();
-        ctx.arc(x, y, tile.radius, 0, Math.PI * 2);
-        ctx.fill();
+        if (tile.owner !== null) {
+            ctx.fillStyle = PLAYERS[tile.owner].color;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.arc(x, y, tile.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
         
         ctx.strokeStyle = tile.discovered ? '#66e39a' : '#69d2ff';
         ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, tile.radius, 0, Math.PI * 2);
         ctx.stroke();
         
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 14px Arial';
+        ctx.font = 'bold 13px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(tile.id + 1, x, y - 8);
-        ctx.fillText(RESOURCE_ICONS[tile.resource], x, y + 8);
+        ctx.fillText(tile.id + 1, x, y);
     }
     
-    // Draw players
     for (let player of PLAYERS) {
         const tile = TILES[player.position];
         const x = centerX + tile.x;
@@ -499,41 +489,68 @@ function render() {
         
         ctx.fillStyle = player.color;
         ctx.beginPath();
-        ctx.arc(x, y - tile.radius - 20, 10, 0, Math.PI * 2);
+        ctx.arc(x, y - tile.radius - 15, 8, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.stroke();
     }
 }
 
 function gameLoop(currentTime) {
-    const delta = Math.min((currentTime - GAME.lastFrameTime) / 1000, 0.033);
-    GAME.lastFrameTime = currentTime;
+    const delta = Math.min((currentTime - GAME.lastTime) / 1000, 0.033);
+    GAME.lastTime = currentTime;
     
     GAME.frameCount++;
     if (GAME.frameCount % 30 === 0) {
-        updateFPS(1 / delta);
+        document.getElementById('fps').textContent = Math.round(1 / delta);
     }
     
     render();
-    
     requestAnimationFrame(gameLoop);
 }
 
-// ========== INPUT ==========
+function startNewGame() {
+    document.getElementById('startScreen').classList.add('hidden');
+    
+    PLAYERS.forEach(p => {
+        p.position = 0;
+        p.territories.clear();
+        p.resources = {gold: 800, wood: 400, metal: 200, energy: 100};
+        p.shopUpgrades = 0;
+        p.resourceBonus = 0;
+    });
+    
+    GAME.turn = 1;
+    GAME.currentPlayer = 0;
+    GAME.running = true;
+    GAME.canRoll = true;
+    GAME.canBuy = false;
+    
+    generateBoard();
+    updateStatusBar();
+    renderShop();
+    
+    document.getElementById('diceDisplay').textContent = '?';
+    document.getElementById('rollMessage').innerHTML = `${PLAYERS[0].name} starts! Click to roll.`;
+    document.getElementById('rollButton').disabled = false;
+    
+    console.log('🎮 Game Started!');
+}
+
+function closeRulesModal() {
+    document.getElementById('rulesModal').classList.remove('show');
+}
+
 function setupInput() {
     window.addEventListener('resize', resizeCanvas);
 }
 
-// ========== STARTUP ==========
 window.addEventListener('load', initGame);
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGame);
 }
-
-console.log('✅ Elemental Conquest Loaded - v' + CONFIG.VERSION);
 </script>
 
 </body>

@@ -3,51 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Elemental Conquest</title>
+<title>Elemental Conquest - Ultimate</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#0a0e14;color:#f4f7fb;font-family:Arial,sans-serif;overflow:hidden}
 body{touch-action:none}
-button{border:1px solid #69d2ff;background:#1a3a4a;color:#69d2ff;padding:10px 15px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px}
-button:disabled{opacity:0.3;cursor:not-allowed}
-.statusBar{position:fixed;top:0;left:0;right:0;height:70px;background:#0a0e14;border-bottom:2px solid #69d2ff;z-index:100;padding:10px;display:flex;justify-content:space-between;align-items:center}
-.statusLeft{display:flex;gap:20px;align-items:center}
-.playerStatus{background:rgba(105,210,255,0.1);padding:10px 15px;border-radius:6px;border:1px solid #69d2ff}
-.playerStatus.active{background:rgba(102,227,154,0.2);border-color:#66e39a}
-.playerName{font-size:12px;font-weight:bold}
-.playerTerr{font-size:11px;color:#9da8b8}
-.resources{display:flex;gap:10px;align-items:center}
-.resource{display:flex;align-items:center;gap:5px;font-size:12px}
-.gameCanvas{position:fixed;top:70px;left:0;right:0;bottom:150px}
-#canvas{width:100%;height:100%;background:#0f1419}
-.controlPanel{position:fixed;bottom:0;left:0;right:0;height:150px;background:#0a0e14;border-top:2px solid #69d2ff;padding:15px;overflow-y:auto}
+button{border:1px solid #69d2ff;background:#1a3a4a;color:#69d2ff;padding:10px 15px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;transition:all 0.2s}
+button:hover{background:#2a4a5a;transform:scale(1.05)}
+button:disabled{opacity:0.3;cursor:not-allowed;transform:scale(1)}
+input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:#69d2ff;border-radius:6px;font-size:12px}
+
+.mainMenu{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14 0%,#1a3a4a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;gap:20px;padding:20px;text-align:center}
+.mainMenu.hidden{display:none}
+.mainMenu h1{font-size:48px;color:#69d2ff;text-shadow:0 0 20px rgba(105,210,255,0.5);margin-bottom:10px}
+.mainMenu p{font-size:14px;color:#9da8b8;margin-bottom:20px}
+.menuButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;width:100%;max-width:500px}
+.menuBtn{padding:15px;font-size:14px;background:linear-gradient(135deg,#69d2ff,#4a9fff);color:#000;font-weight:bold;border:none}
+
+.settingsPanel{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:250;padding:20px}
+.settingsPanel.hidden{display:none}
+.settingsBox{background:#0f1419;border:2px solid #69d2ff;border-radius:12px;padding:25px;max-width:500px;width:100%}
+.settingsBox h2{color:#69d2ff;margin-bottom:15px}
+.settingRow{margin-bottom:15px}
+.settingRow label{display:block;font-size:12px;color:#9da8b8;margin-bottom:5px;font-weight:bold}
+.settingRow input,.settingRow select{width:100%;padding:8px}
+.settingButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+
+.statusBar{position:fixed;top:0;left:0;right:0;height:70px;background:#0a0e14;border-bottom:2px solid #69d2ff;z-index:100;padding:10px;display:flex;justify-content:space-between;align-items:center;overflow-x:auto}
+.statusLeft{display:flex;gap:15px;align-items:center}
+.playerStatus{background:rgba(105,210,255,0.1);padding:10px 12px;border-radius:6px;border:1px solid #69d2ff;font-size:11px;white-space:nowrap}
+.playerStatus.active{background:rgba(102,227,154,0.2);border-color:#66e39a;box-shadow:0 0 10px rgba(102,227,154,0.5)}
+.playerName{font-weight:bold}
+.playerTerr{color:#9da8b8;font-size:10px}
+.resources{display:flex;gap:8px;align-items:center}
+.resource{display:flex;align-items:center;gap:3px;font-size:12px;padding:5px 10px;background:rgba(255,255,255,0.05);border-radius:4px}
+
+.gameCanvas{position:fixed;top:70px;left:0;right:0;bottom:180px}
+#canvas{width:100%;height:100%;background:linear-gradient(135deg,#0f1419 0%,#1a2a3a 100%)}
+
+.diceAnimation{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:150;pointer-events:none}
+.dice3d{width:80px;height:80px;background:linear-gradient(135deg,#69d2ff 0%,#4a9fff 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:bold;color:#000;box-shadow:0 10px 30px rgba(105,210,255,0.5);animation:rollDice 0.6s ease-out}
+@keyframes rollDice{0%{transform:scale(0) rotateX(0deg) rotateY(0deg)}50%{transform:scale(1.2) rotateX(180deg) rotateY(180deg)}100%{transform:scale(1) rotateX(0deg) rotateY(0deg)}}
+
+.controlPanel{position:fixed;bottom:0;left:0;right:0;height:180px;background:#0a0e14;border-top:2px solid #69d2ff;padding:15px;overflow-y:auto;z-index:100}
 .diceSection{text-align:center;margin-bottom:10px}
-.diceDisplay{display:inline-block;width:60px;height:60px;background:#69d2ff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;color:#000;margin:0 10px}
-.actionMsg{font-size:12px;color:#9da8b8;margin:8px 0}
-.buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:10px}
-.startScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0a0e14 0%,#1a3a4a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:20px;text-align:center}
-.startScreen.hidden{display:none}
-.startScreen h1{font-size:40px;color:#69d2ff;margin-bottom:10px}
-.startScreen p{font-size:14px;color:#9da8b8;margin-bottom:20px}
-.startBtn{padding:15px 40px;font-size:16px;background:#69d2ff;color:#000;font-weight:bold;border:none}
-.gameOverScreen{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:200;text-align:center;flex-direction:column;gap:20px}
+.diceDisplay{display:inline-block;width:70px;height:70px;background:#69d2ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#000;box-shadow:0 5px 15px rgba(105,210,255,0.3)}
+.actionMsg{font-size:12px;color:#9da8b8;margin:8px 0;min-height:30px}
+.buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-top:10px}
+
+.gameOverScreen{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:200;text-align:center;flex-direction:column;gap:20px;padding:20px}
 .gameOverScreen.hidden{display:none}
-.gameOverScreen h1{font-size:36px;color:#66e39a}
+.gameOverScreen h1{font-size:40px;color:#66e39a;text-shadow:0 0 20px rgba(102,227,154,0.5)}
 .gameOverScreen p{font-size:14px;color:#9da8b8}
+.gameOverButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;max-width:300px}
+
+@media (max-width:768px){
+.mainMenu h1{font-size:32px}
+.menuButtons{grid-template-columns:1fr}
+.diceDisplay{width:50px;height:50px;font-size:28px}
+.statusBar{height:60px;font-size:10px}
+.playerStatus{padding:8px 10px}
+.controlPanel{height:150px}
+}
 </style>
 </head>
 <body>
 
-<div class="startScreen" id="startScreen">
+<div class="mainMenu" id="mainMenu">
     <h1>⚔️ ELEMENTAL CONQUEST</h1>
-    <p>Roll dice, claim territories, become champion!</p>
-    <button class="startBtn" onclick="startGame()">START GAME</button>
+    <p>Roll dice. Claim territories. Dominate the realm!</p>
+    <div class="menuButtons">
+        <button class="menuBtn" onclick="startGameMode('ai')">🤖 Play vs AI</button>
+        <button class="menuBtn" onclick="startGameMode('pvp')">👥 Player vs Player</button>
+        <button class="menuBtn" onclick="openSettings()">⚙️ SETTINGS</button>
+    </div>
+</div>
+
+<div class="settingsPanel" id="settingsPanel">
+    <div class="settingsBox">
+        <h2>⚙️ GAME SETTINGS</h2>
+        <div class="settingRow">
+            <label>Difficulty</label>
+            <select id="difficulty">
+                <option value="easy">Easy (AI plays slowly)</option>
+                <option value="medium" selected>Medium (Balanced)</option>
+                <option value="hard">Hard (AI plays smart)</option>
+            </select>
+        </div>
+        <div class="settingRow">
+            <label>Map Theme</label>
+            <select id="mapTheme">
+                <option value="forest" selected>🌲 Forest</option>
+                <option value="desert">🏜️ Desert</option>
+                <option value="volcano">🌋 Volcano</option>
+                <option value="ocean">🌊 Ocean</option>
+            </select>
+        </div>
+        <div class="settingRow">
+            <label>Game Speed</label>
+            <select id="gameSpeed">
+                <option value="slow">Slow</option>
+                <option value="normal" selected>Normal</option>
+                <option value="fast">Fast</option>
+            </select>
+        </div>
+        <div class="settingRow">
+            <label>Number of AI Players</label>
+            <select id="aiCount">
+                <option value="1">1 AI</option>
+                <option value="2" selected>2 AI</option>
+                <option value="3">3 AI</option>
+            </select>
+        </div>
+        <div class="settingRow">
+            <label>Player 1 Name</label>
+            <input type="text" id="playerName" value="You" maxlength="15">
+        </div>
+        <div class="settingButtons">
+            <button onclick="startGameFromSettings()">▶ START GAME</button>
+            <button onclick="closeSettings()">✕ CANCEL</button>
+        </div>
+    </div>
 </div>
 
 <div class="gameOverScreen hidden" id="gameOverScreen">
-    <h1 id="winnerText">Winner!</h1>
+    <h1 id="winnerText">🏆 WINNER!</h1>
     <p id="winnerDetails"></p>
-    <button class="startBtn" onclick="startGame()">NEW GAME</button>
+    <div class="gameOverButtons">
+        <button class="menuBtn" onclick="backToMenu()">MENU</button>
+        <button class="menuBtn" onclick="startNewGame()">NEW GAME</button>
+    </div>
 </div>
 
 <div class="statusBar">
@@ -57,6 +142,9 @@ button:disabled{opacity:0.3;cursor:not-allowed}
 
 <div class="gameCanvas">
     <canvas id="canvas"></canvas>
+    <div class="diceAnimation" id="diceAnimation" style="display:none">
+        <div class="dice3d" id="dice3d"></div>
+    </div>
 </div>
 
 <div class="controlPanel">
@@ -67,6 +155,7 @@ button:disabled{opacity:0.3;cursor:not-allowed}
     <div class="buttons">
         <button id="rollBtn" onclick="rollDice()">🎲 ROLL</button>
         <button id="buyBtn" onclick="buyTerritory()">🏰 BUY</button>
+        <button id="upgradeBtn" onclick="upgradeTerritory()">⬆️ UPGRADE</button>
         <button id="endBtn" onclick="endTurn()">✓ END</button>
     </div>
 </div>
@@ -75,10 +164,20 @@ button:disabled{opacity:0.3;cursor:not-allowed}
 "use strict";
 
 const CONFIG = {
-    BOARD_SIZE: 24,
-    WIN_TERRITORIES: 8,
-    WIN_RESOURCES: 3000,
-    TERRITORY_COST: 150,
+    BOARD_SIZE: 100,
+    WIN_TERRITORIES: 15,
+    WIN_RESOURCES: 5000,
+    START_GOLD: 1000,
+    ZONE_SIZE: 33,
+};
+
+const SETTINGS = {
+    difficulty: 'medium',
+    mapTheme: 'forest',
+    gameSpeed: 'normal',
+    aiCount: 2,
+    playerName: 'You',
+    gameMode: 'ai',
 };
 
 const GAME = {
@@ -92,22 +191,29 @@ const GAME = {
     lastRoll: 0,
     canRoll: true,
     canBuy: false,
+    canUpgrade: false,
 };
 
-const PLAYERS = [
-    {name: "You", color: "#69d2ff", pos: 0, territories: new Set(), gold: 800, ai: false},
-    {name: "AI-1", color: "#ff6262", pos: 0, territories: new Set(), gold: 800, ai: true},
-    {name: "AI-2", color: "#8b7d4a", pos: 0, territories: new Set(), gold: 800, ai: true},
-    {name: "AI-3", color: "#66e39a", pos: 0, territories: new Set(), gold: 800, ai: true},
-];
-
+const PLAYERS = [];
 const TILES = [];
+
+const MAP_BACKGROUNDS = {
+    forest: '#1a3d2a',
+    desert: '#8b7d4a',
+    volcano: '#5a2a2a',
+    ocean: '#0d3b66',
+};
+
+const ZONE_COLORS = [
+    ['#2a5f3f', '#3a7f4f', '#4a9f5f'],
+    ['#3f5f7f', '#5f7f9f', '#7f9fbf'],
+    ['#7f5f2f', '#9f7f4f', '#bf9f6f'],
+];
 
 function initGame() {
     GAME.canvas = document.getElementById('canvas');
     GAME.ctx = GAME.canvas.getContext('2d');
     resizeCanvas();
-    generateBoard();
     window.addEventListener('resize', resizeCanvas);
     requestAnimationFrame(gameLoop);
 }
@@ -122,30 +228,77 @@ function resizeCanvas() {
 
 function generateBoard() {
     TILES.length = 0;
-    const resources = [100, 80, 120, 90, 110, 85, 95, 105, 100, 90, 110, 100];
     
     for (let i = 0; i < CONFIG.BOARD_SIZE; i++) {
         const angle = (i / CONFIG.BOARD_SIZE) * Math.PI * 2 - Math.PI / 2;
-        const radius = 120;
+        const radius = 130;
+        
+        const zone = Math.floor(i / CONFIG.ZONE_SIZE);
+        const baseCost = 50 + (zone * 50);
+        const randomCost = Math.floor(Math.random() * 30);
+        
+        let tileType = 'normal';
+        if (i % 33 === 10) tileType = 'treasure';
+        if (i % 33 === 20) tileType = 'prison';
+        if (i % 33 === 0) tileType = 'mystery';
+        
         TILES.push({
             id: i,
             x: Math.cos(angle) * radius,
             y: Math.sin(angle) * radius,
             owner: null,
-            value: resources[i % resources.length],
+            level: 0,
+            baseCost: baseCost + randomCost,
+            tileType: tileType,
+            zoneColor: ZONE_COLORS[zone % 3][Math.floor(Math.random() * 3)],
         });
     }
 }
 
-function startGame() {
-    document.getElementById('startScreen').classList.add('hidden');
-    document.getElementById('gameOverScreen').classList.add('hidden');
+function startGameMode(mode) {
+    SETTINGS.gameMode = mode;
+    document.getElementById('settingsPanel').classList.remove('hidden');
+}
+
+function openSettings() {
+    document.getElementById('settingsPanel').classList.remove('hidden');
+}
+
+function closeSettings() {
+    document.getElementById('settingsPanel').classList.add('hidden');
+}
+
+function startGameFromSettings() {
+    SETTINGS.difficulty = document.getElementById('difficulty').value;
+    SETTINGS.mapTheme = document.getElementById('mapTheme').value;
+    SETTINGS.gameSpeed = document.getElementById('gameSpeed').value;
+    SETTINGS.aiCount = parseInt(document.getElementById('aiCount').value);
+    SETTINGS.playerName = document.getElementById('playerName').value;
     
-    PLAYERS.forEach(p => {
-        p.pos = 0;
-        p.territories.clear();
-        p.gold = 800;
-    });
+    document.getElementById('settingsPanel').classList.add('hidden');
+    document.getElementById('mainMenu').classList.add('hidden');
+    startNewGame();
+}
+
+function startNewGame() {
+    PLAYERS.length = 0;
+    
+    const names = [SETTINGS.playerName, 'AI-Alpha', 'AI-Beta', 'AI-Gamma'];
+    const colors = ['#69d2ff', '#ff6262', '#8b7d4a', '#66e39a'];
+    const aiCount = SETTINGS.gameMode === 'ai' ? SETTINGS.aiCount : (SETTINGS.gameMode === 'pvp' ? 1 : 3);
+    
+    for (let i = 0; i < 1 + aiCount; i++) {
+        PLAYERS.push({
+            id: i,
+            name: names[i],
+            color: colors[i],
+            pos: 0,
+            territories: new Set(),
+            upgradeMap: {},
+            gold: CONFIG.START_GOLD,
+            ai: i > 0,
+        });
+    }
     
     GAME.turn = 1;
     GAME.currentPlayer = 0;
@@ -153,8 +306,10 @@ function startGame() {
     GAME.lastRoll = 0;
     GAME.canRoll = true;
     GAME.canBuy = false;
+    GAME.canUpgrade = false;
     
     generateBoard();
+    document.getElementById('gameOverScreen').classList.add('hidden');
     updateUI();
     
     if (PLAYERS[0].ai) aiTurn();
@@ -164,31 +319,68 @@ function rollDice() {
     if (!GAME.running || !GAME.canRoll) return;
     
     GAME.canRoll = false;
-    GAME.canBuy = true;
+    GAME.canBuy = false;
+    GAME.canUpgrade = false;
     
     const roll = Math.floor(Math.random() * 6) + 1;
     GAME.lastRoll = roll;
     
-    const player = PLAYERS[GAME.currentPlayer];
-    player.pos = (player.pos + roll) % CONFIG.BOARD_SIZE;
+    showDiceAnimation(roll);
     
-    const tile = TILES[player.pos];
+    setTimeout(() => {
+        const player = PLAYERS[GAME.currentPlayer];
+        player.pos = (player.pos + roll) % CONFIG.BOARD_SIZE;
+        
+        const tile = TILES[player.pos];
+        
+        document.getElementById('diceDisplay').textContent = roll;
+        
+        if (tile.tileType === 'treasure') {
+            player.gold += 100;
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! TREASURE! +100g`;
+            GAME.canBuy = false;
+        } else if (tile.tileType === 'prison') {
+            player.pos = (player.pos - 3 + CONFIG.BOARD_SIZE) % CONFIG.BOARD_SIZE;
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! PRISON! Moved back 3 spaces`;
+            GAME.canBuy = false;
+        } else if (tile.tileType === 'mystery') {
+            const effects = [
+                {text: 'Mystery: -50g', effect: () => {player.gold = Math.max(0, player.gold - 50)}},
+                {text: 'Mystery: +200g', effect: () => {player.gold += 200}},
+                {text: 'Mystery: Extra roll!', effect: () => {GAME.canRoll = true}},
+            ];
+            const random = effects[Math.floor(Math.random() * effects.length)];
+            random.effect();
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! ${random.text}`;
+            GAME.canBuy = false;
+        } else if (tile.owner === null) {
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Empty tile. Cost: ${tile.baseCost + (tile.level * 50)}g`;
+            GAME.canBuy = true;
+        } else if (tile.owner === GAME.currentPlayer) {
+            const cost = tile.baseCost + (tile.level * 50);
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Your tile (Level ${tile.level}). Upgrade for ${cost + 50}g?`;
+            GAME.canUpgrade = true;
+        } else {
+            const cost = tile.baseCost + (tile.level * 50) + (tile.level * 100);
+            player.gold -= cost;
+            PLAYERS[tile.owner].gold += cost;
+            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Enemy tile (Level ${tile.level}). Paid ${cost}g`;
+            GAME.canBuy = false;
+        }
+        
+        updateUI();
+    }, 700);
+}
+
+function showDiceAnimation(num) {
+    const anim = document.getElementById('diceAnimation');
+    const dice = document.getElementById('dice3d');
+    dice.textContent = num;
+    anim.style.display = 'block';
     
-    document.getElementById('diceDisplay').textContent = roll;
-    
-    if (tile.owner === null) {
-        document.getElementById('actionMsg').textContent = `Rolled ${roll}! Land on empty tile. Buy it?`;
-    } else if (tile.owner === GAME.currentPlayer) {
-        const income = tile.value;
-        player.gold += income;
-        document.getElementById('actionMsg').textContent = `Rolled ${roll}! Your tile. +${income}g income`;
-        GAME.canBuy = false;
-    } else {
-        document.getElementById('actionMsg').textContent = `Rolled ${roll}! Enemy tile. No action.`;
-        GAME.canBuy = false;
-    }
-    
-    updateUI();
+    setTimeout(() => {
+        anim.style.display = 'none';
+    }, 700);
 }
 
 function buyTerritory() {
@@ -202,18 +394,45 @@ function buyTerritory() {
         return;
     }
     
-    const cost = CONFIG.TERRITORY_COST;
+    const cost = tile.baseCost;
     if (player.gold < cost) {
-        document.getElementById('actionMsg').textContent = "Not enough gold!";
+        document.getElementById('actionMsg').textContent = `Not enough gold! Need ${cost}g`;
         return;
     }
     
     player.gold -= cost;
     tile.owner = GAME.currentPlayer;
+    tile.level = 0;
     player.territories.add(tile.id);
+    player.upgradeMap[tile.id] = 0;
     GAME.canBuy = false;
     
     document.getElementById('actionMsg').textContent = `Territory claimed! ${player.territories.size}/${CONFIG.WIN_TERRITORIES}`;
+    updateUI();
+    checkWin();
+}
+
+function upgradeTerritory() {
+    if (!GAME.running || !GAME.canUpgrade) return;
+    
+    const player = PLAYERS[GAME.currentPlayer];
+    const tile = TILES[player.pos];
+    
+    if (tile.owner !== GAME.currentPlayer) {
+        document.getElementById('actionMsg').textContent = "Not your territory!";
+        return;
+    }
+    
+    const upgradeCost = tile.baseCost + ((tile.level + 1) * 50);
+    if (player.gold < upgradeCost) {
+        document.getElementById('actionMsg').textContent = `Not enough for upgrade! Need ${upgradeCost}g`;
+        return;
+    }
+    
+    player.gold -= upgradeCost;
+    tile.level++;
+    document.getElementById('actionMsg').textContent = `Territory upgraded to Level ${tile.level}! Rent now: ${tile.baseCost + (tile.level * 50) + (tile.level * 100)}g`;
+    GAME.canUpgrade = false;
     updateUI();
     checkWin();
 }
@@ -224,22 +443,27 @@ function endTurn() {
     const player = PLAYERS[GAME.currentPlayer];
     
     player.territories.forEach(tileId => {
-        player.gold += TILES[tileId].value;
+        const tile = TILES[tileId];
+        const income = 20 + (tile.level * 30);
+        player.gold += income;
     });
     
-    GAME.currentPlayer = (GAME.currentPlayer + 1) % 4;
+    GAME.currentPlayer = (GAME.currentPlayer + 1) % PLAYERS.length;
     GAME.turn++;
     GAME.lastRoll = 0;
     GAME.canRoll = true;
     GAME.canBuy = false;
+    GAME.canUpgrade = false;
     
     document.getElementById('diceDisplay').textContent = '?';
     document.getElementById('actionMsg').textContent = `${PLAYERS[GAME.currentPlayer].name}'s turn`;
+    document.getElementById('rollBtn').disabled = false;
     
     updateUI();
     
     if (PLAYERS[GAME.currentPlayer].ai) {
-        setTimeout(aiTurn, 1500);
+        const delay = SETTINGS.gameSpeed === 'fast' ? 800 : SETTINGS.gameSpeed === 'slow' ? 2000 : 1500;
+        setTimeout(aiTurn, delay);
     }
 }
 
@@ -252,9 +476,21 @@ function aiTurn() {
         const player = PLAYERS[GAME.currentPlayer];
         const tile = TILES[player.pos];
         
-        if (GAME.canBuy && tile.owner === null && player.gold >= CONFIG.TERRITORY_COST) {
-            buyTerritory();
-            setTimeout(endTurn, 800);
+        if (GAME.canBuy && tile.owner === null) {
+            if (player.gold > tile.baseCost) {
+                buyTerritory();
+                setTimeout(endTurn, 800);
+            } else {
+                endTurn();
+            }
+        } else if (GAME.canUpgrade && tile.owner === GAME.currentPlayer) {
+            const upgradeCost = tile.baseCost + ((tile.level + 1) * 50);
+            if (player.gold > upgradeCost && tile.level < 3) {
+                upgradeTerritory();
+                setTimeout(endTurn, 800);
+            } else {
+                endTurn();
+            }
         } else {
             endTurn();
         }
@@ -262,16 +498,15 @@ function aiTurn() {
 }
 
 function checkWin() {
-    for (let i = 0; i < PLAYERS.length; i++) {
-        const player = PLAYERS[i];
-        const totalRes = player.gold + (player.territories.size * 100);
+    for (let p of PLAYERS) {
+        const totalRes = p.gold + (p.territories.size * 100);
         
-        if (player.territories.size >= CONFIG.WIN_TERRITORIES || totalRes >= CONFIG.WIN_RESOURCES) {
+        if (p.territories.size >= CONFIG.WIN_TERRITORIES || totalRes >= CONFIG.WIN_RESOURCES) {
             GAME.running = false;
             
             document.getElementById('gameOverScreen').classList.remove('hidden');
-            document.getElementById('winnerText').textContent = `🏆 ${player.name} WINS!`;
-            document.getElementById('winnerDetails').textContent = `Territories: ${player.territories.size} | Gold: ${player.gold}`;
+            document.getElementById('winnerText').textContent = `🏆 ${p.name} WINS!`;
+            document.getElementById('winnerDetails').textContent = `Territories: ${p.territories.size} | Gold: ${p.gold}`;
         }
     }
 }
@@ -283,7 +518,7 @@ function updateUI() {
     PLAYERS.forEach((p, i) => {
         const el = document.createElement('div');
         el.className = `playerStatus ${i === GAME.currentPlayer ? 'active' : ''}`;
-        el.innerHTML = `<div class="playerName">${p.name}</div><div class="playerTerr">🏰 ${p.territories.size}</div>`;
+        el.innerHTML = `<div class="playerName">${p.name}</div><div class="playerTerr">🏰 ${p.territories.size}/${CONFIG.WIN_TERRITORIES}</div>`;
         statusLeft.appendChild(el);
     });
     
@@ -293,6 +528,13 @@ function updateUI() {
     
     document.getElementById('rollBtn').disabled = !GAME.canRoll;
     document.getElementById('buyBtn').disabled = !GAME.canBuy;
+    document.getElementById('upgradeBtn').disabled = !GAME.canUpgrade;
+}
+
+function backToMenu() {
+    GAME.running = false;
+    document.getElementById('mainMenu').classList.remove('hidden');
+    document.getElementById('gameOverScreen').classList.add('hidden');
 }
 
 function render() {
@@ -300,7 +542,7 @@ function render() {
     const w = GAME.width;
     const h = GAME.height;
     
-    ctx.fillStyle = '#0f1419';
+    ctx.fillStyle = MAP_BACKGROUNDS[SETTINGS.mapTheme];
     ctx.fillRect(0, 0, w, h);
     
     const cx = w / 2;
@@ -309,7 +551,7 @@ function render() {
     ctx.strokeStyle = '#69d2ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 130, 0, Math.PI * 2);
     ctx.stroke();
     
     TILES.forEach(tile => {
@@ -318,24 +560,40 @@ function render() {
         
         if (tile.owner !== null) {
             ctx.fillStyle = PLAYERS[tile.owner].color;
-            ctx.globalAlpha = 0.6;
+            ctx.globalAlpha = 0.7 + (tile.level * 0.1);
             ctx.beginPath();
-            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.arc(x, y, 15 + (tile.level * 2), 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
         }
         
-        ctx.strokeStyle = '#69d2ff';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = tile.zoneColor;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI * 2);
+        ctx.arc(x, y, 15, 0, Math.PI * 2);
         ctx.stroke();
         
+        let label = tile.id + 1;
+        if (tile.tileType === 'treasure') label = '💰';
+        if (tile.tileType === 'prison') label = '🔒';
+        if (tile.tileType === 'mystery') label = '❓';
+        
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 11px Arial';
+        ctx.font = 'bold 10px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(tile.id + 1, x, y);
+        ctx.fillText(label, x, y - 5);
+        
+        if (tile.owner === null && tile.tileType === 'normal') {
+            ctx.fillStyle = '#ffd166';
+            ctx.font = 'bold 8px Arial';
+            ctx.fillText(tile.baseCost + 'g', x, y + 8);
+        } else if (tile.owner !== null) {
+            ctx.fillStyle = '#66e39a';
+            ctx.font = 'bold 8px Arial';
+            const cost = tile.baseCost + (tile.level * 50) + (tile.level * 100);
+            ctx.fillText(`L${tile.level}`, x, y + 8);
+        }
     });
     
     PLAYERS.forEach(player => {
@@ -345,8 +603,12 @@ function render() {
         
         ctx.fillStyle = player.color;
         ctx.beginPath();
-        ctx.arc(x, y - 25, 6, 0, Math.PI * 2);
+        ctx.arc(x, y - 22, 5, 0, Math.PI * 2);
         ctx.fill();
+        
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
     });
 }
 

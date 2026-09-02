@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Elemental Conquest - Ultimate</title>
+<title>Elemental Conquest - Balanced</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#0a0e14;color:#f4f7fb;font-family:Arial,sans-serif;overflow:hidden}
@@ -34,21 +34,31 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
 .playerStatus{background:rgba(105,210,255,0.1);padding:10px 12px;border-radius:6px;border:1px solid #69d2ff;font-size:11px;white-space:nowrap}
 .playerStatus.active{background:rgba(102,227,154,0.2);border-color:#66e39a;box-shadow:0 0 10px rgba(102,227,154,0.5)}
 .playerName{font-weight:bold}
-.playerTerr{color:#9da8b8;font-size:10px}
+.playerStats{color:#9da8b8;font-size:10px}
 .resources{display:flex;gap:8px;align-items:center}
 .resource{display:flex;align-items:center;gap:3px;font-size:12px;padding:5px 10px;background:rgba(255,255,255,0.05);border-radius:4px}
 
-.gameCanvas{position:fixed;top:70px;left:0;right:0;bottom:180px}
+.gameCanvas{position:fixed;top:70px;left:0;right:0;bottom:200px}
 #canvas{width:100%;height:100%;background:linear-gradient(135deg,#0f1419 0%,#1a2a3a 100%)}
 
-.diceAnimation{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:150;pointer-events:none}
-.dice3d{width:80px;height:80px;background:linear-gradient(135deg,#69d2ff 0%,#4a9fff 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:bold;color:#000;box-shadow:0 10px 30px rgba(105,210,255,0.5);animation:rollDice 0.6s ease-out}
-@keyframes rollDice{0%{transform:scale(0) rotateX(0deg) rotateY(0deg)}50%{transform:scale(1.2) rotateX(180deg) rotateY(180deg)}100%{transform:scale(1) rotateX(0deg) rotateY(0deg)}}
+.diceAnimation{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);z-index:150;pointer-events:none}
+.dice3d{width:100px;height:100px;background:linear-gradient(135deg,#69d2ff 0%,#4a9fff 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:bold;color:#000;box-shadow:0 10px 40px rgba(105,210,255,0.7);animation:rollDice 0.8s ease-out;border:3px solid #fff}
+@keyframes rollDice{0%{transform:scale(0) rotateX(0deg) rotateY(0deg)}50%{transform:scale(1.3) rotateX(180deg) rotateY(180deg)}100%{transform:scale(1) rotateX(0deg) rotateY(0deg)}}
 
-.controlPanel{position:fixed;bottom:0;left:0;right:0;height:180px;background:#0a0e14;border-top:2px solid #69d2ff;padding:15px;overflow-y:auto;z-index:100}
+.processLog{position:fixed;top:80px;right:10px;width:250px;max-height:150px;background:rgba(0,0,0,0.7);border:1px solid #69d2ff;border-radius:6px;padding:10px;font-size:11px;color:#9da8b8;overflow-y:auto;z-index:99}
+.logEntry{margin-bottom:5px;padding:3px;border-left:2px solid #69d2ff;padding-left:5px}
+.logEntry.action{color:#66e39a}
+.logEntry.warning{color:#ff9800}
+.logEntry.error{color:#ff6262}
+
+.tileInfo{position:fixed;bottom:200px;right:10px;width:200px;background:rgba(0,0,0,0.8);border:2px solid #69d2ff;border-radius:8px;padding:12px;font-size:12px;z-index:99}
+.tileTitle{color:#69d2ff;font-weight:bold;margin-bottom:5px}
+.tileStat{color:#9da8b8;font-size:11px;margin:3px 0}
+
+.controlPanel{position:fixed;bottom:0;left:0;right:0;height:200px;background:#0a0e14;border-top:2px solid #69d2ff;padding:15px;overflow-y:auto;z-index:100}
 .diceSection{text-align:center;margin-bottom:10px}
-.diceDisplay{display:inline-block;width:70px;height:70px;background:#69d2ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#000;box-shadow:0 5px 15px rgba(105,210,255,0.3)}
-.actionMsg{font-size:12px;color:#9da8b8;margin:8px 0;min-height:30px}
+.diceDisplay{display:inline-block;width:80px;height:80px;background:linear-gradient(135deg,#69d2ff,#4a9fff);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:bold;color:#000;box-shadow:0 5px 15px rgba(105,210,255,0.3);border:2px solid #fff}
+.actionMsg{font-size:12px;color:#9da8b8;margin:8px 0;min-height:35px;line-height:1.4}
 .buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-top:10px}
 
 .gameOverScreen{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:200;text-align:center;flex-direction:column;gap:20px;padding:20px}
@@ -57,13 +67,30 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
 .gameOverScreen p{font-size:14px;color:#9da8b8}
 .gameOverButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;max-width:300px}
 
+.auctionModal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:250;padding:20px}
+.auctionModal.hidden{display:none}
+.auctionBox{background:#0f1419;border:3px solid #ffd166;border-radius:12px;padding:25px;max-width:600px;width:100%;text-align:center}
+.auctionBox h2{color:#ffd166;margin-bottom:15px;font-size:20px}
+.auctionStatus{background:rgba(255,198,102,0.1);padding:15px;border-radius:8px;margin-bottom:15px}
+.auctionBid{font-size:14px;color:#ffd166;font-weight:bold;margin:5px 0}
+.auctionButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-top:15px}
+.auctionButtons button{font-size:13px;padding:12px}
+
+.jailModal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:250;padding:20px}
+.jailModal.hidden{display:none}
+.jailBox{background:#0f1419;border:3px solid #ff6262;border-radius:12px;padding:25px;max-width:500px;width:100%;text-align:center}
+.jailBox h2{color:#ff6262;margin-bottom:15px;font-size:20px}
+.jailButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+
 @media (max-width:768px){
 .mainMenu h1{font-size:32px}
 .menuButtons{grid-template-columns:1fr}
-.diceDisplay{width:50px;height:50px;font-size:28px}
+.diceDisplay{width:60px;height:60px;font-size:36px}
 .statusBar{height:60px;font-size:10px}
 .playerStatus{padding:8px 10px}
 .controlPanel{height:150px}
+.processLog{width:200px}
+.tileInfo{right:5px;width:180px;font-size:11px}
 }
 </style>
 </head>
@@ -71,10 +98,10 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
 
 <div class="mainMenu" id="mainMenu">
     <h1>⚔️ ELEMENTAL CONQUEST</h1>
-    <p>Roll dice. Claim territories. Dominate the realm!</p>
+    <p>Roll dice. Claim territories. Become emperor!</p>
     <div class="menuButtons">
         <button class="menuBtn" onclick="startGameMode('ai')">🤖 Play vs AI</button>
-        <button class="menuBtn" onclick="startGameMode('pvp')">👥 Player vs Player</button>
+        <button class="menuBtn" onclick="startGameMode('pvp')">👥 Local Multiplayer</button>
         <button class="menuBtn" onclick="openSettings()">⚙️ SETTINGS</button>
     </div>
 </div>
@@ -88,15 +115,6 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
                 <option value="easy">Easy (AI plays slowly)</option>
                 <option value="medium" selected>Medium (Balanced)</option>
                 <option value="hard">Hard (AI plays smart)</option>
-            </select>
-        </div>
-        <div class="settingRow">
-            <label>Map Theme</label>
-            <select id="mapTheme">
-                <option value="forest" selected>🌲 Forest</option>
-                <option value="desert">🏜️ Desert</option>
-                <option value="volcano">🌋 Volcano</option>
-                <option value="ocean">🌊 Ocean</option>
             </select>
         </div>
         <div class="settingRow">
@@ -135,10 +153,39 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
     </div>
 </div>
 
+<div class="auctionModal hidden" id="auctionModal">
+    <div class="auctionBox">
+        <h2>🏛️ PROPERTY AUCTION</h2>
+        <div class="auctionStatus">
+            <div id="auctionTile"></div>
+            <div class="auctionBid">Current Bid: <span id="currentBid">0</span>g</div>
+            <div class="auctionBid">Bidder: <span id="currentBidder">-</span></div>
+        </div>
+        <div class="auctionButtons">
+            <button id="bidBtn" onclick="auctionBid()">💰 BID +50g</button>
+            <button onclick="auctionPass()">✕ PASS</button>
+        </div>
+    </div>
+</div>
+
+<div class="jailModal hidden" id="jailModal">
+    <div class="jailBox">
+        <h2>🔒 JAIL</h2>
+        <p id="jailMsg">You are in jail!</p>
+        <div class="jailButtons">
+            <button onclick="payJailBail()">💰 PAY 500g to Exit</button>
+            <button onclick="waitInJail()">⏰ WAIT (Max 3 turns)</button>
+        </div>
+    </div>
+</div>
+
 <div class="statusBar">
     <div class="statusLeft" id="statusLeft"></div>
     <div class="resources" id="resourcesDisplay"></div>
 </div>
+
+<div class="processLog" id="processLog"></div>
+<div class="tileInfo" id="tileInfo"></div>
 
 <div class="gameCanvas">
     <canvas id="canvas"></canvas>
@@ -155,7 +202,7 @@ input,select{padding:8px 10px;background:#1a3a4a;border:1px solid #69d2ff;color:
     <div class="buttons">
         <button id="rollBtn" onclick="rollDice()">🎲 ROLL</button>
         <button id="buyBtn" onclick="buyTerritory()">🏰 BUY</button>
-        <button id="upgradeBtn" onclick="upgradeTerritory()">⬆️ UPGRADE</button>
+        <button id="auctionBtn" onclick="sendToAuction()">🏛️ AUCTION</button>
         <button id="endBtn" onclick="endTurn()">✓ END</button>
     </div>
 </div>
@@ -168,12 +215,19 @@ const CONFIG = {
     WIN_TERRITORIES: 15,
     WIN_RESOURCES: 5000,
     START_GOLD: 1000,
-    ZONE_SIZE: 33,
+    JAIL_EXIT_COST: 500,
+    ZONE_SIZE: 25,
+};
+
+const CORNER_TILES = {
+    START: 0,
+    JAIL: 25,
+    AUCTION: 50,
+    PARKING: 75,
 };
 
 const SETTINGS = {
     difficulty: 'medium',
-    mapTheme: 'forest',
     gameSpeed: 'normal',
     aiCount: 2,
     playerName: 'You',
@@ -191,23 +245,29 @@ const GAME = {
     lastRoll: 0,
     canRoll: true,
     canBuy: false,
-    canUpgrade: false,
+    inJail: false,
+    jailTurns: 0,
+    processLog: [],
 };
 
 const PLAYERS = [];
 const TILES = [];
+let auctionState = null;
 
-const MAP_BACKGROUNDS = {
-    forest: '#1a3d2a',
-    desert: '#8b7d4a',
-    volcano: '#5a2a2a',
-    ocean: '#0d3b66',
-};
+const RANDOM_EFFECTS = [
+    {text: '+50g Bonus!', gold: 50, type: 'positive'},
+    {text: '+100g Jackpot!', gold: 100, type: 'positive'},
+    {text: '-30g Tax!', gold: -30, type: 'negative'},
+    {text: '-50g Fine!', gold: -50, type: 'negative'},
+    {text: 'Extra Roll!', extraRoll: true, type: 'positive'},
+    {text: '-10% Buy Discount', discount: 0.1, type: 'positive'},
+];
 
 const ZONE_COLORS = [
-    ['#2a5f3f', '#3a7f4f', '#4a9f5f'],
-    ['#3f5f7f', '#5f7f9f', '#7f9fbf'],
-    ['#7f5f2f', '#9f7f4f', '#bf9f6f'],
+    ['#8b4513', '#a0522d', '#cd853f'],
+    ['#0d3b66', '#1f5f97', '#4a90e2'],
+    ['#2d5016', '#3d7a2b', '#66bb6a'],
+    ['#5f2c2c', '#8b3a3a', '#cd5c5c'],
 ];
 
 function initGame() {
@@ -226,6 +286,20 @@ function resizeCanvas() {
     GAME.canvas.height = GAME.height;
 }
 
+function addLog(msg, type = 'normal') {
+    GAME.processLog.push({text: msg, type: type});
+    if (GAME.processLog.length > 8) GAME.processLog.shift();
+    updateProcessLog();
+}
+
+function updateProcessLog() {
+    const log = document.getElementById('processLog');
+    log.innerHTML = GAME.processLog.map(e => 
+        `<div class="logEntry ${e.type}">${e.text}</div>`
+    ).join('');
+    log.scrollTop = log.scrollHeight;
+}
+
 function generateBoard() {
     TILES.length = 0;
     
@@ -233,25 +307,45 @@ function generateBoard() {
         const angle = (i / CONFIG.BOARD_SIZE) * Math.PI * 2 - Math.PI / 2;
         const radius = 130;
         
-        const zone = Math.floor(i / CONFIG.ZONE_SIZE);
-        const baseCost = 50 + (zone * 50);
-        const randomCost = Math.floor(Math.random() * 30);
-        
-        let tileType = 'normal';
-        if (i % 33 === 10) tileType = 'treasure';
-        if (i % 33 === 20) tileType = 'prison';
-        if (i % 33 === 0) tileType = 'mystery';
-        
-        TILES.push({
+        let tile = {
             id: i,
             x: Math.cos(angle) * radius,
             y: Math.sin(angle) * radius,
             owner: null,
             level: 0,
-            baseCost: baseCost + randomCost,
-            tileType: tileType,
-            zoneColor: ZONE_COLORS[zone % 3][Math.floor(Math.random() * 3)],
-        });
+            tileType: 'normal',
+            zoneColor: ZONE_COLORS[0][0],
+        };
+        
+        if (i === CORNER_TILES.START) {
+            tile.tileType = 'start';
+            tile.zoneColor = '#66e39a';
+            tile.name = 'START';
+        } else if (i === CORNER_TILES.JAIL) {
+            tile.tileType = 'jail';
+            tile.zoneColor = '#ff6262';
+            tile.name = 'JAIL';
+        } else if (i === CORNER_TILES.AUCTION) {
+            tile.tileType = 'auction';
+            tile.zoneColor = '#ffd166';
+            tile.name = 'AUCTION';
+        } else if (i === CORNER_TILES.PARKING) {
+            tile.tileType = 'parking';
+            tile.zoneColor = '#9da8b8';
+            tile.name = 'PARKING';
+        } else {
+            const zone = Math.floor(i / CONFIG.ZONE_SIZE);
+            const baseCost = 50 + (zone * 50);
+            const randomCost = Math.floor(Math.random() * 30);
+            tile.baseCost = baseCost + randomCost;
+            tile.zoneColor = ZONE_COLORS[zone % 4][Math.floor(Math.random() * 3)];
+            
+            if (i % 3 === 0 && i !== CORNER_TILES.START) {
+                tile.hasRandomEffect = true;
+            }
+        }
+        
+        TILES.push(tile);
     }
 }
 
@@ -270,7 +364,6 @@ function closeSettings() {
 
 function startGameFromSettings() {
     SETTINGS.difficulty = document.getElementById('difficulty').value;
-    SETTINGS.mapTheme = document.getElementById('mapTheme').value;
     SETTINGS.gameSpeed = document.getElementById('gameSpeed').value;
     SETTINGS.aiCount = parseInt(document.getElementById('aiCount').value);
     SETTINGS.playerName = document.getElementById('playerName').value;
@@ -282,6 +375,7 @@ function startGameFromSettings() {
 
 function startNewGame() {
     PLAYERS.length = 0;
+    GAME.processLog = [];
     
     const names = [SETTINGS.playerName, 'AI-Alpha', 'AI-Beta', 'AI-Gamma'];
     const colors = ['#69d2ff', '#ff6262', '#8b7d4a', '#66e39a'];
@@ -294,9 +388,10 @@ function startNewGame() {
             color: colors[i],
             pos: 0,
             territories: new Set(),
-            upgradeMap: {},
             gold: CONFIG.START_GOLD,
             ai: i > 0,
+            inJail: false,
+            jailTurns: 0,
         });
     }
     
@@ -306,10 +401,10 @@ function startNewGame() {
     GAME.lastRoll = 0;
     GAME.canRoll = true;
     GAME.canBuy = false;
-    GAME.canUpgrade = false;
     
     generateBoard();
     document.getElementById('gameOverScreen').classList.add('hidden');
+    addLog(`Game started! ${PLAYERS[0].name} starts`, 'action');
     updateUI();
     
     if (PLAYERS[0].ai) aiTurn();
@@ -318,69 +413,140 @@ function startNewGame() {
 function rollDice() {
     if (!GAME.running || !GAME.canRoll) return;
     
+    const player = PLAYERS[GAME.currentPlayer];
+    
+    if (player.inJail) {
+        addLog(`${player.name} is in JAIL. Roll to escape!`, 'warning');
+    }
+    
     GAME.canRoll = false;
     GAME.canBuy = false;
-    GAME.canUpgrade = false;
     
     const roll = Math.floor(Math.random() * 6) + 1;
     GAME.lastRoll = roll;
     
+    addLog(`${player.name} rolled ${roll}`, 'action');
     showDiceAnimation(roll);
     
     setTimeout(() => {
-        const player = PLAYERS[GAME.currentPlayer];
-        player.pos = (player.pos + roll) % CONFIG.BOARD_SIZE;
-        
-        const tile = TILES[player.pos];
-        
-        document.getElementById('diceDisplay').textContent = roll;
-        
-        if (tile.tileType === 'treasure') {
-            player.gold += 100;
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! TREASURE! +100g`;
-            GAME.canBuy = false;
-        } else if (tile.tileType === 'prison') {
-            player.pos = (player.pos - 3 + CONFIG.BOARD_SIZE) % CONFIG.BOARD_SIZE;
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! PRISON! Moved back 3 spaces`;
-            GAME.canBuy = false;
-        } else if (tile.tileType === 'mystery') {
-            const effects = [
-                {text: 'Mystery: -50g', effect: () => {player.gold = Math.max(0, player.gold - 50)}},
-                {text: 'Mystery: +200g', effect: () => {player.gold += 200}},
-                {text: 'Mystery: Extra roll!', effect: () => {GAME.canRoll = true}},
-            ];
-            const random = effects[Math.floor(Math.random() * effects.length)];
-            random.effect();
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! ${random.text}`;
-            GAME.canBuy = false;
-        } else if (tile.owner === null) {
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Empty tile. Cost: ${tile.baseCost + (tile.level * 50)}g`;
-            GAME.canBuy = true;
-        } else if (tile.owner === GAME.currentPlayer) {
-            const cost = tile.baseCost + (tile.level * 50);
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Your tile (Level ${tile.level}). Upgrade for ${cost + 50}g?`;
-            GAME.canUpgrade = true;
+        if (player.inJail) {
+            if (roll === 6) {
+                addLog(`${player.name} rolled 6! ESCAPED JAIL!`, 'action');
+                player.inJail = false;
+                player.jailTurns = 0;
+                movePlayer(roll);
+            } else {
+                player.jailTurns++;
+                addLog(`${player.name} still in jail (${player.jailTurns}/3)`, 'warning');
+                if (player.jailTurns >= 3) {
+                    addLog(`${player.name} forced to pay 500g to exit jail`, 'warning');
+                    player.gold -= 500;
+                    player.inJail = false;
+                    player.jailTurns = 0;
+                    movePlayer(roll);
+                }
+                endTurn();
+            }
         } else {
-            const cost = tile.baseCost + (tile.level * 50) + (tile.level * 100);
-            player.gold -= cost;
-            PLAYERS[tile.owner].gold += cost;
-            document.getElementById('actionMsg').textContent = `Rolled ${roll}! Enemy tile (Level ${tile.level}). Paid ${cost}g`;
-            GAME.canBuy = false;
+            movePlayer(roll);
         }
-        
         updateUI();
-    }, 700);
+    }, 900);
 }
 
-function showDiceAnimation(num) {
-    const anim = document.getElementById('diceAnimation');
-    const dice = document.getElementById('dice3d');
-    dice.textContent = num;
-    anim.style.display = 'block';
+function movePlayer(roll) {
+    const player = PLAYERS[GAME.currentPlayer];
+    const oldPos = player.pos;
+    player.pos = (player.pos + roll) % CONFIG.BOARD_SIZE;
     
-    setTimeout(() => {
-        anim.style.display = 'none';
-    }, 700);
+    addLog(`Moving from tile ${oldPos + 1} to ${player.pos + 1}`, 'action');
+    
+    if (player.pos < oldPos) {
+        addLog(`${player.name} passed START! +200g`, 'action');
+        player.gold += 200;
+    }
+    
+    handleTile();
+}
+
+function handleTile() {
+    const player = PLAYERS[GAME.currentPlayer];
+    const tile = TILES[player.pos];
+    
+    document.getElementById('diceDisplay').textContent = GAME.lastRoll;
+    
+    if (tile.tileType === 'start') {
+        document.getElementById('actionMsg').textContent = `You are on START. +200g next time you pass it.`;
+        GAME.canBuy = false;
+    } else if (tile.tileType === 'jail') {
+        if (!player.inJail) {
+            player.inJail = true;
+            player.jailTurns = 0;
+            addLog(`${player.name} went to JAIL!`, 'warning');
+            document.getElementById('actionMsg').textContent = `You are in JAIL. Roll 6 to escape, or pay 500g!`;
+            document.getElementById('jailModal').classList.remove('hidden');
+        }
+        GAME.canBuy = false;
+    } else if (tile.tileType === 'auction') {
+        addLog(`${player.name} landed on AUCTION`, 'action');
+        document.getElementById('actionMsg').textContent = `You landed on AUCTION. Send a property for auction!`;
+        GAME.canBuy = false;
+    } else if (tile.tileType === 'parking') {
+        addLog(`${player.name} parked for free`, 'action');
+        document.getElementById('actionMsg').textContent = `Free Parking! Nothing happens.`;
+        GAME.canBuy = false;
+    } else if (tile.owner === null) {
+        if (tile.hasRandomEffect) {
+            const effect = RANDOM_EFFECTS[Math.floor(Math.random() * RANDOM_EFFECTS.length)];
+            addLog(`Random Effect: ${effect.text}`, effect.type === 'positive' ? 'action' : 'warning');
+            if (effect.gold) player.gold += effect.gold;
+            if (effect.extraRoll) GAME.canRoll = true;
+            if (effect.discount) {
+                document.getElementById('actionMsg').textContent = `Random Effect: ${effect.text} - Buy cost -10%`;
+            } else {
+                document.getElementById('actionMsg').textContent = `Random Effect: ${effect.text} - Cost: ${tile.baseCost}g`;
+            }
+        } else {
+            document.getElementById('actionMsg').textContent = `Empty tile. Cost: ${tile.baseCost}g. Buy it?`;
+        }
+        GAME.canBuy = true;
+    } else if (tile.owner === GAME.currentPlayer) {
+        const income = 20 + (tile.level * 30);
+        player.gold += income;
+        addLog(`${player.name} owns this! +${income}g`, 'action');
+        document.getElementById('actionMsg').textContent = `Your tile (Level ${tile.level}). +${income}g income. Send to auction?`;
+        GAME.canBuy = false;
+    } else {
+        const cost = tile.baseCost + (tile.level * 50) + (tile.level * 100);
+        player.gold -= cost;
+        PLAYERS[tile.owner].gold += cost;
+        addLog(`${player.name} paid ${cost}g to ${PLAYERS[tile.owner].name}`, 'warning');
+        document.getElementById('actionMsg').textContent = `Enemy tile (Level ${tile.level}). Paid ${cost}g rent!`;
+        GAME.canBuy = false;
+    }
+    
+    updateTileInfo();
+}
+
+function updateTileInfo() {
+    const tile = TILES[GAME.currentPlayer !== undefined ? PLAYERS[GAME.currentPlayer].pos : 0];
+    if (!tile) return;
+    
+    let info = `<div class="tileTitle">Tile ${tile.id + 1}</div>`;
+    
+    if (tile.tileType === 'normal' && tile.baseCost) {
+        info += `<div class="tileStat">Cost: ${tile.baseCost}g</div>`;
+        if (tile.owner !== null) {
+            info += `<div class="tileStat">Owner: ${PLAYERS[tile.owner].name}</div>`;
+            info += `<div class="tileStat">Level: ${tile.level}</div>`;
+            const rent = tile.baseCost + (tile.level * 50) + (tile.level * 100);
+            info += `<div class="tileStat">Rent: ${rent}g</div>`;
+        }
+    } else {
+        info += `<div class="tileStat">${tile.tileType.toUpperCase()}</div>`;
+    }
+    
+    document.getElementById('tileInfo').innerHTML = info;
 }
 
 function buyTerritory() {
@@ -390,13 +556,14 @@ function buyTerritory() {
     const tile = TILES[player.pos];
     
     if (tile.owner !== null) {
-        document.getElementById('actionMsg').textContent = "Territory already owned!";
+        addLog(`Territory already owned!`, 'error');
         return;
     }
     
     const cost = tile.baseCost;
     if (player.gold < cost) {
-        document.getElementById('actionMsg').textContent = `Not enough gold! Need ${cost}g`;
+        addLog(`Not enough gold! Need ${cost}g`, 'error');
+        document.getElementById('actionMsg').textContent = `Not enough gold! Need ${cost}g, have ${player.gold}g`;
         return;
     }
     
@@ -404,37 +571,92 @@ function buyTerritory() {
     tile.owner = GAME.currentPlayer;
     tile.level = 0;
     player.territories.add(tile.id);
-    player.upgradeMap[tile.id] = 0;
     GAME.canBuy = false;
     
-    document.getElementById('actionMsg').textContent = `Territory claimed! ${player.territories.size}/${CONFIG.WIN_TERRITORIES}`;
+    addLog(`${player.name} bought territory! ${player.territories.size} owned`, 'action');
+    document.getElementById('actionMsg').textContent = `Territory claimed! Own ${player.territories.size}/${CONFIG.WIN_TERRITORIES}`;
     updateUI();
     checkWin();
 }
 
-function upgradeTerritory() {
-    if (!GAME.running || !GAME.canUpgrade) return;
+function sendToAuction() {
+    if (!GAME.running) return;
     
     const player = PLAYERS[GAME.currentPlayer];
-    const tile = TILES[player.pos];
+    const owned = Array.from(player.territories).map(id => TILES[id]);
     
-    if (tile.owner !== GAME.currentPlayer) {
-        document.getElementById('actionMsg').textContent = "Not your territory!";
+    if (owned.length === 0) {
+        addLog(`No territories to auction!`, 'error');
         return;
     }
     
-    const upgradeCost = tile.baseCost + ((tile.level + 1) * 50);
-    if (player.gold < upgradeCost) {
-        document.getElementById('actionMsg').textContent = `Not enough for upgrade! Need ${upgradeCost}g`;
+    const tile = owned[0];
+    startAuction(tile, GAME.currentPlayer);
+}
+
+function startAuction(tile, ownerIndex) {
+    auctionState = {
+        tile: tile,
+        owner: ownerIndex,
+        currentBid: Math.max(tile.baseCost / 2, 50),
+        currentBidder: null,
+        activeBidders: PLAYERS.map((p, i) => i !== ownerIndex),
+        round: 0,
+    };
+    
+    addLog(`AUCTION started for Tile ${tile.id + 1}`, 'action');
+    document.getElementById('auctionModal').classList.remove('hidden');
+    updateAuctionDisplay();
+}
+
+function updateAuctionDisplay() {
+    if (!auctionState) return;
+    
+    const tile = auctionState.tile;
+    document.getElementById('auctionTile').textContent = `Tile ${tile.id + 1} - Base Cost: ${tile.baseCost}g`;
+    document.getElementById('currentBid').textContent = auctionState.currentBid;
+    document.getElementById('currentBidder').textContent = auctionState.currentBidder !== null ? PLAYERS[auctionState.currentBidder].name : '-';
+}
+
+function auctionBid() {
+    if (!auctionState) return;
+    
+    const player = PLAYERS[GAME.currentPlayer];
+    const newBid = auctionState.currentBid + 50;
+    
+    if (player.gold < newBid) {
+        addLog(`Not enough gold for bid!`, 'error');
         return;
     }
     
-    player.gold -= upgradeCost;
-    tile.level++;
-    document.getElementById('actionMsg').textContent = `Territory upgraded to Level ${tile.level}! Rent now: ${tile.baseCost + (tile.level * 50) + (tile.level * 100)}g`;
-    GAME.canUpgrade = false;
-    updateUI();
-    checkWin();
+    auctionState.currentBid = newBid;
+    auctionState.currentBidder = GAME.currentPlayer;
+    updateAuctionDisplay();
+    addLog(`${player.name} bid ${newBid}g`, 'action');
+}
+
+function auctionPass() {
+    if (!auctionState) return;
+    
+    auctionState.activeBidders[GAME.currentPlayer] = false;
+    const activePlayers = auctionState.activeBidders.filter((_, i) => auctionState.activeBidders[i] && i !== auctionState.owner).length;
+    
+    if (activePlayers === 0 || auctionState.currentBidder === GAME.currentPlayer) {
+        const winner = auctionState.currentBidder;
+        if (winner !== null) {
+            const player = PLAYERS[winner];
+            player.gold -= auctionState.currentBid;
+            const tile = auctionState.tile;
+            tile.owner = winner;
+            player.territories.add(tile.id);
+            addLog(`${player.name} won auction for ${auctionState.currentBid}g`, 'action');
+        }
+        document.getElementById('auctionModal').classList.add('hidden');
+        auctionState = null;
+        endTurn();
+    } else {
+        addLog(`${PLAYERS[GAME.currentPlayer].name} passed auction`, 'action');
+    }
 }
 
 function endTurn() {
@@ -453,16 +675,16 @@ function endTurn() {
     GAME.lastRoll = 0;
     GAME.canRoll = true;
     GAME.canBuy = false;
-    GAME.canUpgrade = false;
     
     document.getElementById('diceDisplay').textContent = '?';
     document.getElementById('actionMsg').textContent = `${PLAYERS[GAME.currentPlayer].name}'s turn`;
-    document.getElementById('rollBtn').disabled = false;
+    document.getElementById('jailModal').classList.add('hidden');
     
+    addLog(`${PLAYERS[GAME.currentPlayer].name}'s turn starts`, 'action');
     updateUI();
     
     if (PLAYERS[GAME.currentPlayer].ai) {
-        const delay = SETTINGS.gameSpeed === 'fast' ? 800 : SETTINGS.gameSpeed === 'slow' ? 2000 : 1500;
+        const delay = SETTINGS.gameSpeed === 'fast' ? 1000 : SETTINGS.gameSpeed === 'slow' ? 2500 : 1800;
         setTimeout(aiTurn, delay);
     }
 }
@@ -479,22 +701,29 @@ function aiTurn() {
         if (GAME.canBuy && tile.owner === null) {
             if (player.gold > tile.baseCost) {
                 buyTerritory();
-                setTimeout(endTurn, 800);
-            } else {
-                endTurn();
             }
-        } else if (GAME.canUpgrade && tile.owner === GAME.currentPlayer) {
-            const upgradeCost = tile.baseCost + ((tile.level + 1) * 50);
-            if (player.gold > upgradeCost && tile.level < 3) {
-                upgradeTerritory();
-                setTimeout(endTurn, 800);
-            } else {
-                endTurn();
-            }
-        } else {
-            endTurn();
         }
-    }, 1200);
+        
+        setTimeout(endTurn, 1000);
+    }, 2000);
+}
+
+function payJailBail() {
+    const player = PLAYERS[GAME.currentPlayer];
+    if (player.gold >= CONFIG.JAIL_EXIT_COST) {
+        player.gold -= CONFIG.JAIL_EXIT_COST;
+        player.inJail = false;
+        player.jailTurns = 0;
+        addLog(`${player.name} paid 500g to exit jail`, 'action');
+        document.getElementById('jailModal').classList.add('hidden');
+        movePlayer(GAME.lastRoll);
+    } else {
+        addLog(`Not enough gold!`, 'error');
+    }
+}
+
+function waitInJail() {
+    document.getElementById('jailModal').classList.add('hidden');
 }
 
 function checkWin() {
@@ -507,6 +736,7 @@ function checkWin() {
             document.getElementById('gameOverScreen').classList.remove('hidden');
             document.getElementById('winnerText').textContent = `🏆 ${p.name} WINS!`;
             document.getElementById('winnerDetails').textContent = `Territories: ${p.territories.size} | Gold: ${p.gold}`;
+            addLog(`${p.name} WON THE GAME!`, 'action');
         }
     }
 }
@@ -518,7 +748,8 @@ function updateUI() {
     PLAYERS.forEach((p, i) => {
         const el = document.createElement('div');
         el.className = `playerStatus ${i === GAME.currentPlayer ? 'active' : ''}`;
-        el.innerHTML = `<div class="playerName">${p.name}</div><div class="playerTerr">🏰 ${p.territories.size}/${CONFIG.WIN_TERRITORIES}</div>`;
+        const jailText = p.inJail ? ` 🔒` : '';
+        el.innerHTML = `<div class="playerName">${p.name}${jailText}</div><div class="playerStats">🏰 ${p.territories.size}/${CONFIG.WIN_TERRITORIES}</div>`;
         statusLeft.appendChild(el);
     });
     
@@ -528,7 +759,7 @@ function updateUI() {
     
     document.getElementById('rollBtn').disabled = !GAME.canRoll;
     document.getElementById('buyBtn').disabled = !GAME.canBuy;
-    document.getElementById('upgradeBtn').disabled = !GAME.canUpgrade;
+    document.getElementById('auctionBtn').disabled = player.territories.size === 0;
 }
 
 function backToMenu() {
@@ -537,19 +768,30 @@ function backToMenu() {
     document.getElementById('gameOverScreen').classList.add('hidden');
 }
 
+function showDiceAnimation(num) {
+    const anim = document.getElementById('diceAnimation');
+    const dice = document.getElementById('dice3d');
+    dice.textContent = num;
+    anim.style.display = 'block';
+    
+    setTimeout(() => {
+        anim.style.display = 'none';
+    }, 900);
+}
+
 function render() {
     const ctx = GAME.ctx;
     const w = GAME.width;
     const h = GAME.height;
     
-    ctx.fillStyle = MAP_BACKGROUNDS[SETTINGS.mapTheme];
+    ctx.fillStyle = '#0f1419';
     ctx.fillRect(0, 0, w, h);
     
     const cx = w / 2;
     const cy = h / 2;
     
     ctx.strokeStyle = '#69d2ff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(cx, cy, 130, 0, Math.PI * 2);
     ctx.stroke();
@@ -560,39 +802,36 @@ function render() {
         
         if (tile.owner !== null) {
             ctx.fillStyle = PLAYERS[tile.owner].color;
-            ctx.globalAlpha = 0.7 + (tile.level * 0.1);
+            ctx.globalAlpha = 0.6 + (tile.level * 0.1);
             ctx.beginPath();
-            ctx.arc(x, y, 15 + (tile.level * 2), 0, Math.PI * 2);
+            ctx.arc(x, y, 16 + (tile.level * 2), 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
         }
         
         ctx.strokeStyle = tile.zoneColor;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = tile.tileType === 'normal' ? 1.5 : 2.5;
         ctx.beginPath();
-        ctx.arc(x, y, 15, 0, Math.PI * 2);
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
         ctx.stroke();
         
-        let label = tile.id + 1;
-        if (tile.tileType === 'treasure') label = '💰';
-        if (tile.tileType === 'prison') label = '🔒';
-        if (tile.tileType === 'mystery') label = '❓';
+        let label = '';
+        if (tile.tileType === 'start') label = '▶';
+        else if (tile.tileType === 'jail') label = '🔒';
+        else if (tile.tileType === 'auction') label = '🏛';
+        else if (tile.tileType === 'parking') label = 'P';
+        else label = tile.id + 1;
         
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 10px Arial';
+        ctx.font = tile.tileType === 'normal' ? 'bold 9px Arial' : 'bold 11px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(label, x, y - 5);
+        ctx.fillText(label, x, y - 4);
         
-        if (tile.owner === null && tile.tileType === 'normal') {
+        if (tile.tileType === 'normal' && tile.baseCost) {
             ctx.fillStyle = '#ffd166';
-            ctx.font = 'bold 8px Arial';
-            ctx.fillText(tile.baseCost + 'g', x, y + 8);
-        } else if (tile.owner !== null) {
-            ctx.fillStyle = '#66e39a';
-            ctx.font = 'bold 8px Arial';
-            const cost = tile.baseCost + (tile.level * 50) + (tile.level * 100);
-            ctx.fillText(`L${tile.level}`, x, y + 8);
+            ctx.font = 'bold 7px Arial';
+            ctx.fillText(tile.baseCost + 'g', x, y + 10);
         }
     });
     
@@ -603,11 +842,11 @@ function render() {
         
         ctx.fillStyle = player.color;
         ctx.beginPath();
-        ctx.arc(x, y - 22, 5, 0, Math.PI * 2);
+        ctx.arc(x, y - 25, 6, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.stroke();
     });
 }

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width,
+    initial-scale=1,
+    maximum-scale=1,
+    user-scalable=no,
+    viewport-fit=cover"
+>
+<title>Elemental Frontiers - FIXED</title>
+<style>
+:root {
+    --ui-bg: rgba(8, 12, 18, 0.92);
+    --ui-bg-soft: rgba(15, 22, 32, 0.88);
+    --ui-border: rgba(255, 255, 255, 0.12);
+    --ui-text: #f4f7fb;
+    --ui-muted: #9da8b8;
+    --accent: #69d2ff;
+    --danger: #ff6262;
+    --success: #66e39a;
+    --gold: #ffd166;
+    --energy: #7dd3fc;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #070b10;
+    color: var(--ui-text);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    touch-action: none;
+    user-select: none;
+}
+
+button {
+    border: 0;
+    color: var(--ui-text);
+    background: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#game {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #0a0e14;
+}
+
+#topHUD {
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    right: 0;
+    top: 0;
+    min-height: 62px;
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.hudPanel {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
+    border-radius: 13px;
+    backdrop-filter: blur(5px);
+}
+
+.resource {
+    min-width: 54px;
+    padding: 5px 7px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.045);
+    text-align: center;
+}
+
+.resourceIcon {
+    display: block;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.resourceValue {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+#debugHUD {
+    position: fixed;
+    z-index: 11;
+    top: calc(72px + env(safe-area-inset-top));
+    right: 10px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.35);
+    font-size: 10px;
+    pointer-events: none;
+}
+
+#mapName {
+    font-weight: 800;
+}
+
+#bottomHUD {
+    position: fixed;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 7px 8px calc(8px + env(safe-area-inset-bottom)) 8px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 7px;
+    pointer-events: none;
+}
+
+.actionGroup {
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.actionButton {
+    width: 57px;
+    height: 57px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border);
+    border-radius: 13px;
+    background: var(--ui-bg);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    backdrop-filter: blur(5px);
+}
+
+.actionButton .bigIcon {
+    font-size: 19px;
+    line-height: 20px;
+    margin-bottom: 2px;
+}
+
+.actionButton.active {
+    border-color: var(--accent);
+    background: rgba(60,140,190,0.25);
+}
+
+.actionButton:active {
+    transform: scale(0.95);
+}
+
+.modal {
+    position: fixed;
+    z-index: 50;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0,0,0,0.57);
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modalBox {
+    width: min(560px, 100%);
+    max-height: min(720px, 88vh);
+    overflow: auto;
+    padding: 16px;
+    border: 1px solid var(--ui-border);
+    border-radius: 16px;
+    background: #101720;
+}
+
+@media (max-width: 500px) {
+    .actionButton {
+        width: 53px;
+        height: 53px;
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="topHUD">
+    <div class="hudPanel">
+        <div class="resource">
+            <span class="resourceIcon">🪙</span>
+            <span id="goldValue" class="resourceValue">0</span>
+        </div>
+        <div class="resource">
+            <span class="resourceIcon">🌲</span>
+            <span id="woodValue" class="resourceValue">0</span>
+        </div>
+        <div class="resource">
+            <span class="resourceIcon">⛓️</span>
+            <span id="metalValue" class="resourceValue">0</span>
+        </div>
+        <div class="resource">
+            <span class="resourceIcon">⚡</span>
+            <span id="energyValue" class="resourceValue">0</span>
+        </div>
+    </div>
+    <div class="hudPanel">
+        <div id="factionBadge" style="font-size:11px;font-weight:900;padding:4px 7px;">
+            WATER
+        </div>
+    </div>
+</div>
+
+<div id="debugHUD">
+    <span id="mapName">FOREST</span> · <span id="fpsValue">60</span> FPS
+</div>
+
+<div id="bottomHUD">
+    <div class="actionGroup">
+        <button id="moveButton" class="actionButton active">
+            <span class="bigIcon">➤</span> KRETANJE
+        </button>
+        <button id="attackButton" class="actionButton">
+            <span class="bigIcon">⚔</span> NAPAD
+        </button>
+    </div>
+    <div class="actionGroup">
+        <button id="cardsButton" class="actionButton">
+            <span class="bigIcon">✦</span> KARTE
+        </button>
+        <button id="shopButton" class="actionButton">
+            <span class="bigIcon">▣</span> SHOP
+        </button>
+        <button id="menuButton" class="actionButton">
+            <span class="bigIcon">☰</span> MENI
+        </button>
+    </div>
+</div>
+
+<script>
+"use strict";
+
+// ========================================================
+// CONFIG
+// ========================================================
+
+const CONFIG = {
+    VERSION: "0.1.0-FIXED",
+    TARGET_FPS: 60,
+    MAX_DPR: 2,
+    WORLD_COLS: 64,
+    WORLD_ROWS: 40,
+    TILE_SIZE: 82,
+    CAMERA_MIN_ZOOM: 0.48,
+    CAMERA_MAX_ZOOM: 2.15,
+    START_ZOOM: 0.82,
+    FIXED_STEP: 1000 / 60,
+};
+
+// ========================================================
+// UTILITY FUNCTIONS
+// ========================================================
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function hash2D(x, y, seed) {
+    let h = Math.imul(x ^ seed, 374761393);
+    h = Math.imul(h ^ (y * 668265263), 1274126177);
+    h ^= h >>> 13;
+    h = Math.imul(h, 2246822519);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967295;
+}
+
+function smoothNoise(x, y, seed) {
+    const x0 = Math.floor(x);
+    const y0 = Math.floor(y);
+    const x1 = x0 + 1;
+    const y1 = y0 + 1;
+    
+    const sx = x - x0;
+    const sy = y - y0;
+    
+    const a = hash2D(x0, y0, seed);
+    const b = hash2D(x1, y0, seed);
+    const c = hash2D(x0, y1, seed);
+    const d = hash2D(x1, y1, seed);
+    
+    const ux = sx * sx * (3 - 2 * sx);
+    const uy = sy * sy * (3 - 2 * sy);
+    
+    return lerp(lerp(a, b, ux), lerp(c, d, ux), uy);
+}
+
+function fractalNoise(x, y, seed) {
+    let value = 0;
+    let amplitude = 0.5;
+    let frequency = 1;
+    
+    for (let i = 0; i < 4; i++) {
+        value += smoothNoise(x * frequency, y * frequency, seed + i * 17) * amplitude;
+        frequency *= 2;
+        amplitude *= 0.5;
+    }
+    
+    return value;
+}
+
+// ========================================================
+// GAME STATE
+// ========================================================
+
+const GAME = {
+    canvas: null,
+    ctx: null,
+    width: 0,
+    height: 0,
+    dpr: 1,
+    
+    camera: {
+        x: 0,
+        y: 0,
+        zoom: CONFIG.START_ZOOM,
+        targetZoom: CONFIG.START_ZOOM,
+        targetX: 0,
+        targetY: 0,
+    },
+    
+    map: {
+        name: 'FOREST',
+        cols: CONFIG.WORLD_COLS,
+        rows: CONFIG.WORLD_ROWS,
+        tileSize: CONFIG.TILE_SIZE,
+        tiles: [],
+    },
+    
+    resources: {
+        gold: 500,
+        wood: 300,
+        metal: 100,
+        energy: 50,
+    },
+    
+    lastFrameTime: 0,
+    frameCount: 0,
+    fps: 60,
+    deltaTime: 0,
+};
+
+// ========================================================
+// MAP GENERATION
+// ========================================================
+
+function generateMap() {
+    const map = GAME.map;
+    map.tiles = [];
+    
+    const tileData = [];
+    
+    for (let y = 0; y < map.rows; y++) {
+        for (let x = 0; x < map.cols; x++) {
+            const noise = fractalNoise(x * 0.1, y * 0.1, 42);
+            
+            let tileType = 'grass';
+            let color = '#2d5d3a';
+            
+            if (noise < 0.3) {
+                tileType = 'water';
+                color = '#1a4d6d';
+            } else if (noise > 0.7) {
+                tileType = 'mountain';
+                color = '#5a6b7a';
+            }
+            
+            tileData.push({
+                x, y,
+                type: tileType,
+                color: color,
+                noise: noise
+            });
+        }
+    }
+    
+    map.tiles = tileData;
+}
+
+// ========================================================
+// CAMERA SYSTEM
+// ========================================================
+
+function updateCamera(deltaTime) {
+    const camera = GAME.camera;
+    const speed = 200; // pixels per second
+    
+    // Smooth camera movement
+    if (Math.abs(camera.targetX - camera.x) > 1) {
+        camera.x += (camera.targetX - camera.x) * 0.15;
+    } else {
+        camera.x = camera.targetX;
+    }
+    
+    if (Math.abs(camera.targetY - camera.y) > 1) {
+        camera.y += (camera.targetY - camera.y) * 0.15;
+    } else {
+        camera.y = camera.targetY;
+    }
+    
+    // Smooth zoom
+    if (Math.abs(camera.targetZoom - camera.zoom) > 0.01) {
+        camera.zoom += (camera.targetZoom - camera.zoom) * 0.1;
+    } else {
+        camera.zoom = camera.targetZoom;
+    }
+    
+    camera.zoom = clamp(
+        camera.zoom,
+        CONFIG.CAMERA_MIN_ZOOM,
+        CONFIG.CAMERA_MAX_ZOOM
+    );
+}
+
+// ========================================================
+// RENDERER - CRITICAL FIX
+// ========================================================
+
+function render() {
+    const canvas = GAME.canvas;
+    const ctx = GAME.ctx;
+    
+    if (!ctx) {
+        console.error('Context not initialized!');
+        return;
+    }
+    
+    // ✅ CLEAR SCREEN - THIS WAS MISSING!
+    ctx.fillStyle = '#0a0e14';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Setup camera transform
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(GAME.camera.zoom, GAME.camera.zoom);
+    ctx.translate(-GAME.camera.x, -GAME.camera.y);
+    
+    // ✅ RENDER MAP TILES - FIXED
+    renderMapTiles(ctx);
+    
+    ctx.restore();
+    
+    // Update FPS
+    GAME.frameCount++;
+}
+
+function renderMapTiles(ctx) {
+    const map = GAME.map;
+    const tileSize = map.tileSize;
+    
+    for (const tile of map.tiles) {
+        const px = tile.x * tileSize;
+        const py = tile.y * tileSize;
+        
+        // Draw tile
+        ctx.fillStyle = tile.color;
+        ctx.fillRect(px, py, tileSize, tileSize);
+        
+        // Draw border
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(px, py, tileSize, tileSize);
+    }
+}
+
+// ========================================================
+// INITIALIZATION - CRITICAL FIX
+// ========================================================
+
+function initGame() {
+    console.log('🎮 Initializing game...');
+    
+    // ✅ GET CANVAS - THIS WAS MISSING!
+    GAME.canvas = document.getElementById('game');
+    if (!GAME.canvas) {
+        console.error('Canvas element not found!');
+        return;
+    }
+    
+    // ✅ GET CONTEXT - THIS WAS MISSING!
+    GAME.ctx = GAME.canvas.getContext('2d', { alpha: false });
+    if (!GAME.ctx) {
+        console.error('Could not get 2D context!');
+        return;
+    }
+    
+    // Setup canvas size
+    resizeCanvas();
+    
+    // Generate map
+    generateMap();
+    
+    // Center camera on map
+    GAME.camera.x = (GAME.map.cols * GAME.map.tileSize) / 2;
+    GAME.camera.y = (GAME.map.rows * GAME.map.tileSize) / 2;
+    GAME.camera.targetX = GAME.camera.x;
+    GAME.camera.targetY = GAME.camera.y;
+    
+    // Setup input
+    setupInput();
+    
+    // Setup UI
+    updateResourceUI();
+    
+    console.log('✅ Game initialized successfully');
+    
+    // Start game loop
+    requestAnimationFrame(gameLoop);
+}
+
+function resizeCanvas() {
+    const canvas = GAME.canvas;
+    GAME.dpr = Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR);
+    
+    GAME.width = window.innerWidth;
+    GAME.height = window.innerHeight;
+    
+    canvas.width = GAME.width * GAME.dpr;
+    canvas.height = GAME.height * GAME.dpr;
+    
+    canvas.style.width = GAME.width + 'px';
+    canvas.style.height = GAME.height + 'px';
+    
+    if (GAME.ctx) {
+        GAME.ctx.scale(GAME.dpr, GAME.dpr);
+    }
+    
+    console.log(`📏 Canvas resized: ${GAME.width}x${GAME.height} @${GAME.dpr}dpr`);
+}
+
+// ========================================================
+// INPUT
+// ========================================================
+
+function setupInput() {
+    // Keyboard
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    
+    // Touch
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    // Mouse
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    
+    // Buttons
+    document.getElementById('moveButton').addEventListener('click', () => {
+        console.log('Move mode');
+    });
+    
+    document.getElementById('menuButton').addEventListener('click', () => {
+        console.log('Menu clicked');
+    });
+}
+
+function handleKeyDown(e) {
+    const camera = GAME.camera;
+    const speed = 100;
+    
+    switch(e.key.toLowerCase()) {
+        case 'arrowup':
+            camera.targetY -= speed;
+            break;
+        case 'arrowdown':
+            camera.targetY += speed;
+            break;
+        case 'arrowleft':
+            camera.targetX -= speed;
+            break;
+        case 'arrowright':
+            camera.targetX += speed;
+            break;
+    }
+}
+
+function handleKeyUp(e) {}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    console.log('Touch start');
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    console.log('Touch move');
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    console.log('Touch end');
+}
+
+function handleMouseDown(e) {}
+
+function handleMouseMove(e) {}
+
+function handleMouseUp(e) {}
+
+function handleWheel(e) {
+    e.preventDefault();
+    
+    const delta = e.deltaY > 0 ? 1.1 : 0.9;
+    GAME.camera.targetZoom *= delta;
+}
+
+// ========================================================
+// UI
+// ========================================================
+
+function updateResourceUI() {
+    document.getElementById('goldValue').textContent = GAME.resources.gold;
+    document.getElementById('woodValue').textContent = GAME.resources.wood;
+    document.getElementById('metalValue').textContent = GAME.resources.metal;
+    document.getElementById('energyValue').textContent = GAME.resources.energy;
+}
+
+function updateFPS(fps) {
+    document.getElementById('fpsValue').textContent = Math.round(fps);
+}
+
+// ========================================================
+// GAME LOOP
+// ========================================================
+
+let lastTime = 0;
+
+function gameLoop(currentTime) {
+    const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.016);
+    lastTime = currentTime;
+    
+    // Update
+    updateCamera(deltaTime);
+    
+    // Render
+    render();
+    
+    // FPS calculation
+    if (GAME.frameCount % 10 === 0) {
+        GAME.fps = Math.round(1 / deltaTime);
+        updateFPS(GAME.fps);
+    }
+    
+    requestAnimationFrame(gameLoop);
+}
+
+// ========================================================
+// STARTUP
+// ========================================================
+
+window.addEventListener('load', initGame);
+window.addEventListener('resize', resizeCanvas);
+
+// Fallback
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+} else {
+    initGame();
+}
+
+console.log('🚀 Elemental Frontiers v' + CONFIG.VERSION);
+</script>
+
+</body>
+</html>

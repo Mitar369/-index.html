@@ -690,7 +690,20 @@
     // --- Player draw card for UI ---
     function playerDrawCardUI() {
         playerDrawCard();
-    }
+    }<div id="map-container" style="width: 100%; height: 600px; background-color: #111; position: relative;">
+    <!-- Slika mape -->
+    <img id="game-map" src="./mapa.jpg" alt="Mapa Napoleonove Imperije" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="handleImageError(this)">
+</div>
+
+<script>
+function handleImageError(imgElement) {
+    console.error("Greška: Slika mape nije mogla da se učita sa adrese: " + imgElement.src);
+    // Ovdje možeš postaviti alternativnu boju ili obaveštenje igraču
+    let container = document.getElementById('map-container');
+    container.innerHTML = '<div style="color: white; text-align: center; padding-top: 50px;">Greška pri učitavanju mape. Proverite putanju do slike na GitHub-u.</div>';
+}
+</script>
+
     window.playerDrawCard = playerDrawCard; // expose to modal
 
     // buyTroop exposure
@@ -706,3 +719,4 @@
     </script>
 </body>
 </html>
+

@@ -1,25 +1,3630 @@
-ELEMENTAL-FRONTIERS/
-│
-├── index.html          ← mapa + osnovni game engine
-├── style.css           ← izgled/UI
-├── game.js             ← glavna logika
-│
-├── systems/
-│   ├── map.js          ← teritorije, džungla, planine, voda
-│   ├── units.js        ← pijuni/jedinice
-│   ├── resources.js    ← drvo, metal, zlato, energija
-│   ├── combat.js       ← borba
-│   ├── territory.js    ← zauzimanje teritorije
-│   ├── shop.js         ← item shop
-│   └── cards.js        ← spell/efekt kartice
-│
-├── data/
-│   ├── factions.js     ← frakcije
-│   ├── items.js        ← itemi
-│   ├── resources.js    ← resursi
-│   └── maps.js         ← 3 tipa mapa
-│
-└── assets/
-    ├── units/
-    ├── items/
-    └── terrain/
+/
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width,
+    initial-scale=1,
+    maximum-scale=1,
+    user-scalable=no,
+    viewport-fit=cover"
+>
+
+<title>Elemental Frontiers</title>
+
+<style>
+/* =========================================================
+   ELEMENTAL FRONTIERS
+   CORE ENGINE
+   MOBILE FIRST / CANVAS / NO EXTERNAL LIBRARIES
+   ========================================================= */
+
+:root {
+    --ui-bg: rgba(8, 12, 18, 0.92);
+    --ui-bg-soft: rgba(15, 22, 32, 0.88);
+    --ui-border: rgba(255, 255, 255, 0.12);
+    --ui-text: #f4f7fb;
+    --ui-muted: #9da8b8;
+    --accent: #69d2ff;
+    --danger: #ff6262;
+    --success: #66e39a;
+    --gold: #ffd166;
+    --energy: #7dd3fc;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #070b10;
+    color: var(--ui-text);
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+body {
+    touch-action: none;
+    user-select: none;
+}
+
+button {
+    border: 0;
+    color: var(--ui-text);
+    background: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#game {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #0b1118;
+}
+
+/* =========================================================
+   TOP HUD
+   ========================================================= */
+
+#topHUD {
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    right: 0;
+    top: 0;
+    min-height: 62px;
+    padding:
+        calc(8px + env(safe-area-inset-top))
+        10px
+        8px
+        10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    pointer-events: none;
+}
+
+.hudPanel {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
+    border-radius: 13px;
+    backdrop-filter: blur(5px);
+}
+
+.resource {
+    min-width: 54px;
+    padding: 5px 7px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.045);
+    text-align: center;
+}
+
+.resourceIcon {
+    display: block;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.resourceValue {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   FPS / MAP LABEL
+   ========================================================= */
+
+#debugHUD {
+    position: fixed;
+    z-index: 11;
+    top: calc(72px + env(safe-area-inset-top));
+    right: 10px;
+
+    padding: 5px 8px;
+    border-radius: 8px;
+
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.35);
+
+    font-size: 10px;
+    pointer-events: none;
+}
+
+#mapName {
+    font-weight: 800;
+}
+
+/* =========================================================
+   BOTTOM CONTROL BAR
+   ========================================================= */
+
+#bottomHUD {
+    position: fixed;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding:
+        7px
+        8px
+        calc(8px + env(safe-area-inset-bottom))
+        8px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 7px;
+
+    pointer-events: none;
+}
+
+.actionGroup {
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.actionButton {
+    width: 57px;
+    height: 57px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--ui-border);
+    border-radius: 13px;
+
+    background: var(--ui-bg);
+    color: white;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    backdrop-filter: blur(5px);
+}
+
+.actionButton .bigIcon {
+    font-size: 19px;
+    line-height: 20px;
+    margin-bottom: 2px;
+}
+
+.actionButton.active {
+    border-color: var(--accent);
+    background: rgba(60,140,190,0.25);
+}
+
+.actionButton.danger {
+    border-color: rgba(255,80,80,0.35);
+}
+
+.actionButton:active {
+    transform: scale(0.95);
+}
+
+/* =========================================================
+   SELECTION PANEL
+   ========================================================= */
+
+#selectionPanel {
+    position: fixed;
+    z-index: 18;
+
+    left: 50%;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+
+    transform: translateX(-50%);
+
+    min-width: 210px;
+    max-width: calc(100vw - 20px);
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--ui-border);
+    border-radius: 12px;
+
+    background: var(--ui-bg);
+
+    pointer-events: none;
+    opacity: 0;
+
+    transition: opacity 0.12s linear;
+}
+
+#selectionPanel.visible {
+    opacity: 1;
+}
+
+.selectionTitle {
+    font-weight: 900;
+    font-size: 13px;
+}
+
+.selectionStats {
+    margin-top: 4px;
+    display: flex;
+    gap: 9px;
+    color: var(--ui-muted);
+    font-size: 10px;
+}
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+
+.modal {
+    position: fixed;
+    z-index: 50;
+    inset: 0;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: rgba(0,0,0,0.57);
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modalBox {
+    width: min(560px, 100%);
+    max-height: min(720px, 88vh);
+
+    overflow: auto;
+
+    padding: 16px;
+
+    border: 1px solid var(--ui-border);
+    border-radius: 16px;
+
+    background: #101720;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 13px;
+}
+
+.modalTitle {
+    font-size: 19px;
+    font-weight: 900;
+}
+
+.closeButton {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 9px;
+
+    background: rgba(255,255,255,0.06);
+}
+
+.cardGrid,
+.shopGrid,
+.mapGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+}
+
+.card,
+.shopItem,
+.mapChoice {
+    min-height: 90px;
+
+    padding: 10px;
+
+    border: 1px solid var(--ui-border);
+    border-radius: 11px;
+
+    background: rgba(255,255,255,0.045);
+
+    text-align: left;
+}
+
+.card:active,
+.shopItem:active,
+.mapChoice:active {
+    transform: scale(0.98);
+}
+
+.card.disabled,
+.shopItem.disabled {
+    opacity: 0.42;
+}
+
+.cardName,
+.shopName {
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.cardDescription,
+.shopDescription {
+    margin-top: 5px;
+    color: var(--ui-muted);
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.cardCost,
+.shopCost {
+    margin-top: 7px;
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.mapChoice {
+    min-height: 110px;
+}
+
+.mapChoice strong {
+    display: block;
+    font-size: 14px;
+}
+
+.mapChoice span {
+    display: block;
+    margin-top: 6px;
+    color: var(--ui-muted);
+    font-size: 10px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 500px) {
+
+    .resource {
+        min-width: 43px;
+    }
+
+    .resourceIcon {
+        font-size: 12px;
+    }
+
+    .resourceValue {
+        font-size: 10px;
+    }
+
+    .actionButton {
+        width: 53px;
+        height: 53px;
+    }
+
+    .cardGrid,
+    .shopGrid,
+    .mapGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 800px) {
+
+    .actionButton {
+        width: 66px;
+        height: 60px;
+    }
+
+    .resource {
+        min-width: 66px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- =======================================================
+     TOP HUD
+     ======================================================= -->
+
+<div id="topHUD">
+
+    <div class="hudPanel">
+
+        <div class="resource">
+            <span class="resourceIcon">🪙</span>
+            <span id="goldValue" class="resourceValue">0</span>
+        </div>
+
+        <div class="resource">
+            <span class="resourceIcon">🌲</span>
+            <span id="woodValue" class="resourceValue">0</span>
+        </div>
+
+        <div class="resource">
+            <span class="resourceIcon">⛓️</span>
+            <span id="metalValue" class="resourceValue">0</span>
+        </div>
+
+        <div class="resource">
+            <span class="resourceIcon">⚡</span>
+            <span id="energyValue" class="resourceValue">0</span>
+        </div>
+
+    </div>
+
+    <div class="hudPanel">
+
+        <div
+            id="factionBadge"
+            style="
+                font-size:11px;
+                font-weight:900;
+                padding:4px 7px;
+            "
+        >
+            WATER
+        </div>
+
+    </div>
+
+</div>
+
+<div id="debugHUD">
+    <span id="mapName">FOREST</span>
+    ·
+    <span id="fpsValue">60</span> FPS
+</div>
+
+<!-- =======================================================
+     SELECTION PANEL
+     ======================================================= -->
+
+<div id="selectionPanel">
+
+    <div id="selectionTitle" class="selectionTitle">
+        Nema selekcije
+    </div>
+
+    <div id="selectionStats" class="selectionStats">
+        <span>HP: -</span>
+        <span>ATK: -</span>
+        <span>DEF: -</span>
+    </div>
+
+</div>
+
+<!-- =======================================================
+     BOTTOM HUD
+     ======================================================= -->
+
+<div id="bottomHUD">
+
+    <div class="actionGroup">
+
+        <button
+            id="moveButton"
+            class="actionButton active"
+        >
+            <span class="bigIcon">➤</span>
+            KRETANJE
+        </button>
+
+        <button
+            id="attackButton"
+            class="actionButton danger"
+        >
+            <span class="bigIcon">⚔</span>
+            NAPAD
+        </button>
+
+    </div>
+
+    <div class="actionGroup">
+
+        <button
+            id="cardsButton"
+            class="actionButton"
+        >
+            <span class="bigIcon">✦</span>
+            KARTE
+        </button>
+
+        <button
+            id="shopButton"
+            class="actionButton"
+        >
+            <span class="bigIcon">▣</span>
+            SHOP
+        </button>
+
+        <button
+            id="menuButton"
+            class="actionButton"
+        >
+            <span class="bigIcon">☰</span>
+            MENI
+        </button>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     CARDS MODAL
+     ======================================================= -->
+
+<div id="cardsModal" class="modal">
+
+    <div class="modalBox">
+
+        <div class="modalHeader">
+
+            <div class="modalTitle">
+                Elementalne karte
+            </div>
+
+            <button
+                class="closeButton"
+                data-close="cardsModal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div
+            id="cardGrid"
+            class="cardGrid"
+        ></div>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     SHOP MODAL
+     ======================================================= -->
+
+<div id="shopModal" class="modal">
+
+    <div class="modalBox">
+
+        <div class="modalHeader">
+
+            <div class="modalTitle">
+                Razvoj / Shop
+            </div>
+
+            <button
+                class="closeButton"
+                data-close="shopModal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div
+            id="shopGrid"
+            class="shopGrid"
+        ></div>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     MAP MODAL
+     ======================================================= -->
+
+<div id="mapModal" class="modal">
+
+    <div class="modalBox">
+
+        <div class="modalHeader">
+
+            <div class="modalTitle">
+                Izaberi mapu
+            </div>
+
+            <button
+                class="closeButton"
+                data-close="mapModal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div
+            id="mapGrid"
+            class="mapGrid"
+        ></div>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     MENU MODAL
+     ======================================================= -->
+
+<div id="menuModal" class="modal">
+
+    <div class="modalBox">
+
+        <div class="modalHeader">
+
+            <div class="modalTitle">
+                Elemental Frontiers
+            </div>
+
+            <button
+                class="closeButton"
+                data-close="menuModal"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <button
+            id="restartButton"
+            class="shopItem"
+            style="width:100%; margin-bottom:8px;"
+        >
+            <div class="shopName">
+                ↻ Nova partija
+            </div>
+            <div class="shopDescription">
+                Resetuje mapu, jedinice i resurse.
+            </div>
+        </button>
+
+        <button
+            id="mapButton"
+            class="shopItem"
+            style="width:100%; margin-bottom:8px;"
+        >
+            <div class="shopName">
+                ◈ Promeni mapu
+            </div>
+            <div class="shopDescription">
+                Forest, Ember ili Tidal.
+            </div>
+        </button>
+
+        <button
+            id="pauseButton"
+            class="shopItem"
+            style="width:100%;"
+        >
+            <div class="shopName">
+                II Pauza
+            </div>
+            <div class="shopDescription">
+                Zaustavlja simulaciju.
+            </div>
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   ELEMENTAL FRONTIERS
+   GAME CORE
+   ========================================================= */
+
+/*
+    ARHITEKTURA:
+
+    1. CONFIG
+    2. DATA
+    3. MAP SYSTEM
+    4. RESOURCE SYSTEM
+    5. UNIT SYSTEM
+    6. COMBAT SYSTEM
+    7. TERRITORY SYSTEM
+    8. CARD SYSTEM
+    9. SHOP SYSTEM
+    10. AI
+    11. CAMERA
+    12. INPUT
+    13. RENDERER
+    14. GAME LOOP
+    15. UI
+
+    Ovaj raspored je namerno napravljen tako da kasnije
+    možeš dodavati nove sisteme bez menjanja celog engine-a.
+*/
+
+
+/* =========================================================
+   01. CONFIG
+   ========================================================= */
+
+const CONFIG = {
+
+    VERSION: "0.1.0",
+
+    TARGET_FPS: 60,
+
+    MAX_DPR: 2,
+
+    WORLD_COLS: 64,
+
+    WORLD_ROWS: 40,
+
+    TILE_SIZE: 82,
+
+    CAMERA_MIN_ZOOM: 0.48,
+
+    CAMERA_MAX_ZOOM: 2.15,
+
+    START_ZOOM: 0.82,
+
+    FIXED_STEP: 1000 / 60,
+
+    RESOURCE_TICK: 1000,
+
+    TERRITORY_TICK: 500,
+
+    AI_TICK: 1200,
+
+    COMBAT_TICK: 100,
+
+    EFFECT_LIMIT: 90,
+
+    PARTICLE_LIMIT: 100
+
+};
+
+
+/* =========================================================
+   02. UTILITY
+   ========================================================= */
+
+function clamp(value, min, max) {
+
+    return Math.max(
+        min,
+        Math.min(max, value)
+    );
+
+}
+
+
+function lerp(a, b, t) {
+
+    return a + (b - a) * t;
+
+}
+
+
+function dist(ax, ay, bx, by) {
+
+    const dx = bx - ax;
+    const dy = by - ay;
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+function distanceSquared(ax, ay, bx, by) {
+
+    const dx = bx - ax;
+    const dy = by - ay;
+
+    return dx * dx + dy * dy;
+
+}
+
+
+function randInt(min, max) {
+
+    return Math.floor(
+        Math.random() *
+        (max - min + 1)
+    ) + min;
+
+}
+
+
+function hash2D(x, y, seed) {
+
+    let h =
+        Math.imul(
+            x ^ seed,
+            374761393
+        );
+
+    h =
+        Math.imul(
+            h ^ (y * 668265263),
+            1274126177
+        );
+
+    h ^=
+        h >>> 13;
+
+    h =
+        Math.imul(
+            h,
+            2246822519
+        );
+
+    h ^=
+        h >>> 16;
+
+    return (
+        h >>> 0
+    ) / 4294967295;
+
+}
+
+
+function smoothNoise(x, y, seed) {
+
+    const x0 = Math.floor(x);
+    const y0 = Math.floor(y);
+
+    const x1 = x0 + 1;
+    const y1 = y0 + 1;
+
+    const sx = x - x0;
+    const sy = y - y0;
+
+    const a =
+        hash2D(x0, y0, seed);
+
+    const b =
+        hash2D(x1, y0, seed);
+
+    const c =
+        hash2D(x0, y1, seed);
+
+    const d =
+        hash2D(x1, y1, seed);
+
+    const ux =
+        sx * sx *
+        (3 - 2 * sx);
+
+    const uy =
+        sy * sy *
+        (3 - 2 * sy);
+
+    return lerp(
+        lerp(a, b, ux),
+        lerp(c, d, ux),
+        uy
+    );
+
+}
+
+
+function fractalNoise(x, y, seed) {
+
+    let value = 0;
+    let amplitude = 0.5;
+    let frequency = 1;
+
+    for (let i = 0; i < 4; i++) {
+
+        value +=
+            smoothNoise(
+                x * frequency,
+                y * frequency,
+                seed + i * 17
+            ) * amplitude;
+
+        frequency *= 2;
+        amplitude *= 0.5;
+
+    }
+
+    return value;
+
+}
+
+
+function chooseWeighted(entries) {
+
+    let total = 0;
+
+    for (const item of entries) {
+        total += item.weight;
+    }
+
+    let roll =
+        Math.random() * total;
+
+    for (const item of entries) {
+
+        roll -= item.weight;
+
+        if (roll <= 0) {
+            return item.value;
+        }
+
+    }
+
+    return entries[
+        entries.length - 1
+    ].value;
+
+}
+
+
+/* =========================================================
+   03. DATA
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   RESOURCE TYPES
+
+   ===== EXTENSION POINT: ADD RESOURCE HERE =====
+   --------------------------------------------------------- */
+
+const RESOURCE_TYPES = {
+
+    gold: {
+
+        id: "gold",
+
+        name: "Zlato",
+
+        icon: "🪙",
+
+        baseValue: 5
+
+    },
+
+    wood: {
+
+        id: "wood",
+
+        name: "Drvo",
+
+        icon: "🌲",
+
+        baseValue: 5
+
+    },
+
+    metal: {
+
+        id: "metal",
+
+        name: "Metal",
+
+        icon: "⛓️",
+
+        baseValue: 4
+
+    },
+
+    energy: {
+
+        id: "energy",
+
+        name: "Energija",
+
+        icon: "⚡",
+
+        baseValue: 3
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   TERRAIN TYPES
+
+   ===== EXTENSION POINT: ADD TERRAIN HERE =====
+   --------------------------------------------------------- */
+
+const TERRAIN = {
+
+    WATER: {
+
+        id: "water",
+
+        passable: false,
+
+        movement: 999,
+
+        defense: 0
+
+    },
+
+    PLAIN: {
+
+        id: "plain",
+
+        passable: true,
+
+        movement: 1,
+
+        defense: 0
+
+    },
+
+    FOREST: {
+
+        id: "forest",
+
+        passable: true,
+
+        movement: 1.35,
+
+        defense: 2
+
+    },
+
+    JUNGLE: {
+
+        id: "jungle",
+
+        passable: true,
+
+        movement: 1.6,
+
+        defense: 4
+
+    },
+
+    MOUNTAIN: {
+
+        id: "mountain",
+
+        passable: false,
+
+        movement: 999,
+
+        defense: 6
+
+    },
+
+    RUINS: {
+
+        id: "ruins",
+
+        passable: true,
+
+        movement: 1.15,
+
+        defense: 3
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   MAP THEMES
+   --------------------------------------------------------- */
+
+const MAP_THEMES = {
+
+    forest: {
+
+        id: "forest",
+
+        name: "Forest Frontiers",
+
+        description:
+            "Gusta šuma, džungla, planine i rečni sistemi.",
+
+        colors: {
+
+            water: "#245a70",
+
+            water2: "#347e8f",
+
+            plain: "#667b43",
+
+            plain2: "#829951",
+
+            forest: "#365d39",
+
+            jungle: "#234b35",
+
+            mountain: "#555a52",
+
+            mountain2: "#73776d",
+
+            ruins: "#756c5b",
+
+            grid: "rgba(255,255,255,0.035)",
+
+            territoryPlayer:
+                "rgba(55,180,255,0.14)",
+
+            territoryEnemy:
+                "rgba(255,70,70,0.11)"
+
+        }
+
+    },
+
+    ember: {
+
+        id: "ember",
+
+        name: "Ember Basin",
+
+        description:
+            "Vulkanska mapa sa lavom, pepelom i suvim terenima.",
+
+        colors: {
+
+            water: "#342c3e",
+
+            water2: "#544052",
+
+            plain: "#71513b",
+
+            plain2: "#91633e",
+
+            forest: "#4d4a2c",
+
+            jungle: "#394125",
+
+            mountain: "#403638",
+
+            mountain2: "#6a5550",
+
+            ruins: "#6f5548",
+
+            grid: "rgba(255,230,180,0.035)",
+
+            territoryPlayer:
+                "rgba(255,185,65,0.14)",
+
+            territoryEnemy:
+                "rgba(255,70,70,0.11)"
+
+        }
+
+    },
+
+    tidal: {
+
+        id: "tidal",
+
+        name: "Tidal Expanse",
+
+        description:
+            "Veliki vodeni prostor sa ostrvima i kanalima.",
+
+        colors: {
+
+            water: "#164b67",
+
+            water2: "#236f8d",
+
+            plain: "#587a68",
+
+            plain2: "#71947c",
+
+            forest: "#305b55",
+
+            jungle: "#204b48",
+
+            mountain: "#4e5f61",
+
+            mountain2: "#708084",
+
+            ruins: "#666d67",
+
+            grid: "rgba(210,255,255,0.035)",
+
+            territoryPlayer:
+                "rgba(70,210,255,0.15)",
+
+            territoryEnemy:
+                "rgba(255,80,110,0.11)"
+
+        }
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   FACTIONS
+
+   ===== EXTENSION POINT: ADD FACTION HERE =====
+   --------------------------------------------------------- */
+
+const FACTIONS = {
+
+    water: {
+
+        id: "water",
+
+        name: "Aqua",
+
+        element: "Voda",
+
+        color: "#48c8ff",
+
+        darkColor: "#17698b",
+
+        baseHp: 1400,
+
+        unitColor: "#63d8ff",
+
+        startingResources: {
+
+            gold: 300,
+
+            wood: 240,
+
+            metal: 180,
+
+            energy: 180
+
+        },
+
+        bonuses: {
+
+            movement: 0.08,
+
+            defense: 0,
+
+            resource: 0.1
+
+        },
+
+        cards: [
+
+            "wave",
+
+            "source",
+
+            "flood"
+
+        ]
+
+    },
+
+    fire: {
+
+        id: "fire",
+
+        name: "Ignis",
+
+        element: "Vatra",
+
+        color: "#ff744b",
+
+        darkColor: "#9c3528",
+
+        baseHp: 1250,
+
+        unitColor: "#ff8061",
+
+        startingResources: {
+
+            gold: 300,
+
+            wood: 210,
+
+            metal: 220,
+
+            energy: 180
+
+        },
+
+        bonuses: {
+
+            movement: 0,
+
+            defense: 0,
+
+            resource: 0,
+
+            damage: 0.12
+
+        },
+
+        cards: [
+
+            "flame",
+
+            "overheat",
+
+            "firestorm"
+
+        ]
+
+    },
+
+    earth: {
+
+        id: "earth",
+
+        name: "Terra",
+
+        element: "Zemlja",
+
+        color: "#b9a36c",
+
+        darkColor: "#695a3e",
+
+        baseHp: 1650,
+
+        unitColor: "#c9b27a",
+
+        startingResources: {
+
+            gold: 300,
+
+            wood: 260,
+
+            metal: 300,
+
+            energy: 130
+
+        },
+
+        bonuses: {
+
+            movement: -0.03,
+
+            defense: 0.12,
+
+            resource: 0.05
+
+        },
+
+        cards: [
+
+            "wall",
+
+            "quake",
+
+            "fortress"
+
+        ]
+
+    },
+
+    air: {
+
+        id: "air",
+
+        name: "Aeris",
+
+        element: "Vazduh",
+
+        color: "#d2e9ff",
+
+        darkColor: "#6c8ca8",
+
+        baseHp: 1150,
+
+        unitColor: "#e0f1ff",
+
+        startingResources: {
+
+            gold: 300,
+
+            wood: 220,
+
+            metal: 160,
+
+            energy: 260
+
+        },
+
+        bonuses: {
+
+            movement: 0.18,
+
+            defense: 0,
+
+            resource: 0,
+
+            range: 1
+
+        },
+
+        cards: [
+
+            "gust",
+
+            "swiftwind",
+
+            "storm"
+
+        ]
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   UNIT TYPES
+   --------------------------------------------------------- */
+
+const UNIT_TYPES = {
+
+    scout: {
+
+        id: "scout",
+
+        name: "Izvidnik",
+
+        hp: 90,
+
+        attack: 15,
+
+        defense: 4,
+
+        speed: 4.5,
+
+        range: 145,
+
+        vision: 280,
+
+        capacity: 30,
+
+        cost: {
+
+            gold: 70,
+
+            wood: 30,
+
+            metal: 10
+
+        }
+
+    },
+
+    soldier: {
+
+        id: "soldier",
+
+        name: "Ratnik",
+
+        hp: 150,
+
+        attack: 27,
+
+        defense: 10,
+
+        speed: 3.3,
+
+        range: 110,
+
+        vision: 230,
+
+        capacity: 50,
+
+        cost: {
+
+            gold: 100,
+
+            wood: 45,
+
+            metal: 35
+
+        }
+
+    },
+
+    guardian: {
+
+        id: "guardian",
+
+        name: "Čuvar",
+
+        hp: 240,
+
+        attack: 22,
+
+        defense: 22,
+
+        speed: 2.4,
+
+        range: 100,
+
+        vision: 210,
+
+        capacity: 70,
+
+        cost: {
+
+            gold: 140,
+
+            wood: 60,
+
+            metal: 80
+
+        }
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   ITEMS
+
+   ===== EXTENSION POINT: ADD ITEM HERE =====
+   --------------------------------------------------------- */
+
+const ITEMS = {
+
+    ironBlade: {
+
+        id: "ironBlade",
+
+        name: "Gvozdena oštrica",
+
+        description:
+            "+8 napad",
+
+        cost: {
+
+            gold: 120,
+
+            metal: 80
+
+        },
+
+        stats: {
+
+            attack: 8
+
+        }
+
+    },
+
+    reinforcedArmor: {
+
+        id: "reinforcedArmor",
+
+        name: "Ojačani oklop",
+
+        description:
+            "+8 odbrana",
+
+        cost: {
+
+            gold: 100,
+
+            metal: 100
+
+        },
+
+        stats: {
+
+            defense: 8
+
+        }
+
+    },
+
+    fieldBoots: {
+
+        id: "fieldBoots",
+
+        name: "Terenske čizme",
+
+        description:
+            "+12% brzina",
+
+        cost: {
+
+            gold: 80,
+
+            wood: 40
+
+        },
+
+        stats: {
+
+            speedMultiplier: 0.12
+
+        }
+
+    },
+
+    energyCore: {
+
+        id: "energyCore",
+
+        name: "Energetsko jezgro",
+
+        description:
+            "+25% regeneracija energije",
+
+        cost: {
+
+            gold: 100,
+
+            energy: 80
+
+        },
+
+        stats: {
+
+            energyRegen: 0.25
+
+        }
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   CARDS
+
+   ===== EXTENSION POINT: ADD CARD HERE =====
+   --------------------------------------------------------- */
+
+const CARDS = {
+
+    wave: {
+
+        id: "wave",
+
+        faction: "water",
+
+        name: "Talasa",
+
+        icon: "≈",
+
+        cost: 55,
+
+        cooldown: 12,
+
+        description:
+            "Oštećuje neprijatelje u blizini i odbacuje ih."
+
+    },
+
+    source: {
+
+        id: "source",
+
+        faction: "water",
+
+        name: "Izvor",
+
+        icon: "💧",
+
+        cost: 45,
+
+        cooldown: 18,
+
+        description:
+            "Trenutno povećava zalihe energije i vode."
+
+    },
+
+    flood: {
+
+        id: "flood",
+
+        faction: "water",
+
+        name: "Poplava",
+
+        icon: "≋",
+
+        cost: 75,
+
+        cooldown: 22,
+
+        description:
+            "Velika zona usporavanja."
+
+    },
+
+    flame: {
+
+        id: "flame",
+
+        faction: "fire",
+
+        name: "Plamen",
+
+        icon: "🔥",
+
+        cost: 45,
+
+        cooldown: 8,
+
+        description:
+            "Direktna šteta jednoj neprijateljskoj jedinici."
+
+    },
+
+    overheat: {
+
+        id: "overheat",
+
+        faction: "fire",
+
+        name: "Pregrijavanje",
+
+        icon: "▲",
+
+        cost: 55,
+
+        cooldown: 16,
+
+        description:
+            "Povećava napad selektovane jedinice."
+
+    },
+
+    firestorm: {
+
+        id: "firestorm",
+
+        faction: "fire",
+
+        name: "Vatrena oluja",
+
+        icon: "✹",
+
+        cost: 85,
+
+        cooldown: 25,
+
+        description:
+            "Velika AOE eksplozija štete."
+
+    },
+
+    wall: {
+
+        id: "wall",
+
+        faction: "earth",
+
+        name: "Kameni zid",
+
+        icon: "▰",
+
+        cost: 50,
+
+        cooldown: 15,
+
+        description:
+            "Postavlja privremenu odbrambenu prepreku."
+
+    },
+
+    quake: {
+
+        id: "quake",
+
+        faction: "earth",
+
+        name: "Potres",
+
+        icon: "⌁",
+
+        cost: 70,
+
+        cooldown: 20,
+
+        description:
+            "Oštećuje sve neprijatelje u zoni."
+
+    },
+
+    fortress: {
+
+        id: "fortress",
+
+        faction: "earth",
+
+        name: "Tvrđava",
+
+        icon: "▣",
+
+        cost: 90,
+
+        cooldown: 28,
+
+        description:
+            "Veliki bonus odbrane jedinicama u zoni."
+
+    },
+
+    gust: {
+
+        id: "gust",
+
+        faction: "air",
+
+        name: "Udar vetra",
+
+        icon: "➹",
+
+        cost: 40,
+
+        cooldown: 8,
+
+        description:
+            "Odbacuje najbližeg neprijatelja."
+
+    },
+
+    swiftwind: {
+
+        id: "swiftwind",
+
+        faction: "air",
+
+        name: "Brzi vetar",
+
+        icon: "≫",
+
+        cost: 50,
+
+        cooldown: 14,
+
+        description:
+            "Privremeno povećava brzinu."
+
+    },
+
+    storm: {
+
+        id: "storm",
+
+        faction: "air",
+
+        name: "Oluja",
+
+        icon: "⚡",
+
+        cost: 90,
+
+        cooldown: 24,
+
+        description:
+            "Dalekometna AOE šteta."
+
+    }
+
+};
+
+
+/* ---------------------------------------------------------
+   JUNGLE DATA
+
+   ===== EXTENSION POINT: ADD JUNGLE OBJECT HERE =====
+   --------------------------------------------------------- */
+
+const JUNGLE_OBJECTS = {
+
+    treeCluster: {
+
+        id: "treeCluster",
+
+        name: "Gustiš",
+
+        defenseBonus: 4,
+
+        movementMultiplier: 1.25,
+
+        stealth: 0.15,
+
+        resourceBonus: {
+
+            wood: 2
+
+        }
+
+    },
+
+    ancientGrove: {
+
+        id: "ancientGrove",
+
+        name: "Drevni gaj",
+
+        defenseBonus: 8,
+
+        movementMultiplier: 1.35,
+
+        stealth: 0.3,
+
+        resourceBonus: {
+
+            wood: 4,
+
+            energy: 1
+
+        }
+
+    },
+
+    hiddenCamp: {
+
+        id: "hiddenCamp",
+
+        name: "Skriveni kamp",
+
+        defenseBonus: 5,
+
+        movementMultiplier: 1.15,
+
+        stealth: 0.5,
+
+        resourceBonus: {
+
+            gold: 3
+
+        }
+
+    }
+
+};
+
+
+/* =========================================================
+   04. GAME STATE
+   ========================================================= */
+
+const game = {
+
+    running: true,
+
+    paused: false,
+
+    mapId: "forest",
+
+    seed: Math.floor(
+        Math.random() * 999999
+    ),
+
+    time: 0,
+
+    lastTime: 0,
+
+    accumulator: 0,
+
+    resources: {
+
+        gold: 300,
+
+        wood: 240,
+
+        metal: 180,
+
+        energy: 180
+
+    },
+
+    selectedUnit: null,
+
+    selectedEnemy: null,
+
+    commandMode: "move",
+
+    units: [],
+
+    bases: [],
+
+    effects: [],
+
+    particles: [],
+
+    resourceNodes: [],
+
+    obstacles: [],
+
+    walls: [],
+
+    territory: [],
+
+    cardCooldowns: {},
+
+    playerFaction: "water",
+
+    aiFactions: [
+
+        "fire",
+        "earth",
+        "air"
+    ]
+
+};
+
+
+/* =========================================================
+   05. CANVAS
+   ========================================================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d", {
+        alpha: false,
+        desynchronized: true
+    });
+
+
+let screenWidth = 1;
+let screenHeight = 1;
+let dpr = 1;
+
+
+function resizeCanvas() {
+
+    screenWidth =
+        window.innerWidth;
+
+    screenHeight =
+        window.innerHeight;
+
+    dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            CONFIG.MAX_DPR
+        );
+
+    canvas.width =
+        Math.floor(
+            screenWidth * dpr
+        );
+
+    canvas.height =
+        Math.floor(
+            screenHeight * dpr
+        );
+
+    canvas.style.width =
+        screenWidth + "px";
+
+    canvas.style.height =
+        screenHeight + "px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas,
+    {
+        passive: true
+    }
+);
+
+resizeCanvas();
+
+
+/* =========================================================
+   06. CAMERA
+   ========================================================= */
+
+const camera = {
+
+    x: 0,
+
+    y: 0,
+
+    zoom: CONFIG.START_ZOOM,
+
+    targetX: 0,
+
+    targetY: 0,
+
+    targetZoom: CONFIG.START_ZOOM,
+
+    shake: 0
+
+};
+
+
+function worldWidth() {
+
+    return (
+        CONFIG.WORLD_COLS *
+        CONFIG.TILE_SIZE
+    );
+
+}
+
+
+function worldHeight() {
+
+    return (
+        CONFIG.WORLD_ROWS *
+        CONFIG.TILE_SIZE
+    );
+
+}
+
+
+function screenToWorld(
+    sx,
+    sy
+) {
+
+    return {
+
+        x:
+            camera.x +
+            (
+                sx -
+                screenWidth / 2
+            ) /
+            camera.zoom,
+
+        y:
+            camera.y +
+            (
+                sy -
+                screenHeight / 2
+            ) /
+            camera.zoom
+
+    };
+
+}
+
+
+function worldToScreen(
+    wx,
+    wy
+) {
+
+    return {
+
+        x:
+            (
+                wx -
+                camera.x
+            ) *
+            camera.zoom +
+            screenWidth / 2,
+
+        y:
+            (
+                wy -
+                camera.y
+            ) *
+            camera.zoom +
+            screenHeight / 2
+
+    };
+
+}
+
+
+function clampCamera() {
+
+    const halfW =
+        screenWidth /
+        camera.zoom /
+        2;
+
+    const halfH =
+        screenHeight /
+        camera.zoom /
+        2;
+
+    camera.targetX =
+        clamp(
+            camera.targetX,
+            halfW,
+            worldWidth() - halfW
+        );
+
+    camera.targetY =
+        clamp(
+            camera.targetY,
+            halfH,
+            worldHeight() - halfH
+        );
+
+}
+
+
+function updateCamera(dt) {
+
+    clampCamera();
+
+    camera.x =
+        lerp(
+            camera.x,
+            camera.targetX,
+            Math.min(
+                1,
+                dt * 8
+            )
+        );
+
+    camera.y =
+        lerp(
+            camera.y,
+            camera.targetY,
+            Math.min(
+                1,
+                dt * 8
+            )
+        );
+
+    camera.zoom =
+        lerp(
+            camera.zoom,
+            camera.targetZoom,
+            Math.min(
+                1,
+                dt * 9
+            )
+        );
+
+    if (camera.shake > 0) {
+        camera.shake =
+            Math.max(
+                0,
+                camera.shake -
+                dt
+            );
+    }
+
+}
+
+
+/* =========================================================
+   07. MAP GENERATION
+   ========================================================= */
+
+function createTile(
+    col,
+    row,
+    terrain
+) {
+
+    return {
+
+        col,
+
+        row,
+
+        x:
+            col *
+            CONFIG.TILE_SIZE,
+
+        y:
+            row *
+            CONFIG.TILE_SIZE,
+
+        terrain,
+
+        owner: null,
+
+        resource: null,
+
+        jungle: null,
+
+        discovered: true,
+
+        blocked: false
+
+    };
+
+}
+
+
+function generateMap() {
+
+    game.tiles = [];
+
+    game.resourceNodes = [];
+
+    game.obstacles = [];
+
+    const seed =
+        game.seed;
+
+    for (
+        let row = 0;
+        row < CONFIG.WORLD_ROWS;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < CONFIG.WORLD_COLS;
+            col++
+        ) {
+
+            const n =
+                fractalNoise(
+                    col / 10,
+                    row / 10,
+                    seed
+                );
+
+            const detail =
+                fractalNoise(
+                    col / 4,
+                    row / 4,
+                    seed + 77
+                );
+
+            let terrain =
+                TERRAIN.PLAIN;
+
+            if (n < 0.23) {
+
+                terrain =
+                    TERRAIN.WATER;
+
+            }
+            else if (n > 0.82) {
+
+                terrain =
+                    TERRAIN.MOUNTAIN;
+
+            }
+            else if (detail > 0.68) {
+
+                terrain =
+                    TERRAIN.JUNGLE;
+
+            }
+            else if (detail > 0.53) {
+
+                terrain =
+                    TERRAIN.FOREST;
+
+            }
+            else if (
+                detail < 0.14 &&
+                n > 0.35
+            ) {
+
+                terrain =
+                    TERRAIN.RUINS;
+
+            }
+
+            const tile =
+                createTile(
+                    col,
+                    row,
+                    terrain
+                );
+
+            if (
+                terrain === TERRAIN.JUNGLE &&
+                hash2D(
+                    col,
+                    row,
+                    seed + 400
+                ) > 0.68
+            ) {
+
+                tile.jungle =
+                    chooseWeighted([
+
+                        {
+                            value:
+                                JUNGLE_OBJECTS.treeCluster,
+                            weight: 65
+                        },
+
+                        {
+                            value:
+                                JUNGLE_OBJECTS.ancientGrove,
+                            weight: 20
+                        },
+
+                        {
+                            value:
+                                JUNGLE_OBJECTS.hiddenCamp,
+                            weight: 15
+                        }
+
+                    ]);
+
+            }
+
+            game.tiles.push(tile);
+
+        }
+
+    }
+
+    createResourceNodes();
+
+    repairBaseAreas();
+
+}
+
+
+function tileAt(
+    col,
+    row
+) {
+
+    if (
+        col < 0 ||
+        row < 0 ||
+        col >= CONFIG.WORLD_COLS ||
+        row >= CONFIG.WORLD_ROWS
+    ) {
+
+        return null;
+
+    }
+
+    return game.tiles[
+        row *
+        CONFIG.WORLD_COLS +
+        col
+    ];
+
+}
+
+
+function worldToTile(
+    x,
+    y
+) {
+
+    const col =
+        Math.floor(
+            x /
+            CONFIG.TILE_SIZE
+        );
+
+    const row =
+        Math.floor(
+            y /
+            CONFIG.TILE_SIZE
+        );
+
+    return tileAt(
+        col,
+        row
+    );
+
+}
+
+
+function repairBaseAreas() {
+
+    const spots = [
+
+        {
+            col: 6,
+            row: 6
+        },
+
+        {
+            col:
+                CONFIG.WORLD_COLS - 7,
+            row: 6
+        },
+
+        {
+            col: 6,
+            row:
+                CONFIG.WORLD_ROWS - 7
+        },
+
+        {
+            col:
+                CONFIG.WORLD_COLS - 7,
+            row:
+                CONFIG.WORLD_ROWS - 7
+        }
+
+    ];
+
+    for (const spot of spots) {
+
+        for (
+            let y = -3;
+            y <= 3;
+            y++
+        ) {
+
+            for (
+                let x = -3;
+                x <= 3;
+                x++
+            ) {
+
+                const tile =
+                    tileAt(
+                        spot.col + x,
+                        spot.row + y
+                    );
+
+                if (!tile) {
+                    continue;
+                }
+
+                if (
+                    tile.terrain ===
+                    TERRAIN.WATER ||
+                    tile.terrain ===
+                    TERRAIN.MOUNTAIN
+                ) {
+
+                    tile.terrain =
+                        TERRAIN.PLAIN;
+
+                    tile.jungle =
+                        null;
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+function createResourceNodes() {
+
+    const types = [
+
+        "gold",
+        "wood",
+        "metal",
+        "energy"
+
+    ];
+
+    for (
+        let i = 0;
+        i < 65;
+        i++
+    ) {
+
+        const col =
+            randInt(
+                2,
+                CONFIG.WORLD_COLS - 3
+            );
+
+        const row =
+            randInt(
+                2,
+                CONFIG.WORLD_ROWS - 3
+            );
+
+        const tile =
+            tileAt(
+                col,
+                row
+            );
+
+        if (
+            !tile ||
+            !tile.terrain.passable ||
+            tile.resource
+        ) {
+
+            continue;
+
+        }
+
+        const type =
+            types[
+                randInt(
+                    0,
+                    types.length - 1
+                )
+            ];
+
+        tile.resource = {
+
+            type,
+
+            amount:
+                randInt(150, 450),
+
+            rate:
+                RESOURCE_TYPES[
+                    type
+                ].baseValue
+
+        };
+
+        game.resourceNodes.push(
+            tile
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   08. BASE SYSTEM
+   ========================================================= */
+
+class Base {
+
+    constructor(
+        id,
+        faction,
+        col,
+        row
+    ) {
+
+        this.id = id;
+
+        this.faction =
+            faction;
+
+        this.col = col;
+
+        this.row = row;
+
+        this.x =
+            col *
+            CONFIG.TILE_SIZE +
+            CONFIG.TILE_SIZE / 2;
+
+        this.y =
+            row *
+            CONFIG.TILE_SIZE +
+            CONFIG.TILE_SIZE / 2;
+
+        this.maxHp =
+            FACTIONS[
+                faction
+            ].baseHp;
+
+        this.hp =
+            this.maxHp;
+
+        this.level = 1;
+
+        this.production = 1;
+
+        this.radius =
+            CONFIG.TILE_SIZE *
+            2.6;
+
+        this.captureRadius =
+            CONFIG.TILE_SIZE *
+            4.5;
+
+    }
+
+}
+
+
+function createBases() {
+
+    game.bases = [];
+
+    const locations = [
+
+        {
+            faction: "water",
+            col: 6,
+            row: 6
+        },
+
+        {
+            faction: "fire",
+            col:
+                CONFIG.WORLD_COLS - 7,
+            row: 6
+        },
+
+        {
+            faction: "earth",
+            col: 6,
+            row:
+                CONFIG.WORLD_ROWS - 7
+        },
+
+        {
+            faction: "air",
+            col:
+                CONFIG.WORLD_COLS - 7,
+            row:
+                CONFIG.WORLD_ROWS - 7
+        }
+
+    ];
+
+    locations.forEach(
+        (location, index) => {
+
+            game.bases.push(
+                new Base(
+                    index,
+                    location.faction,
+                    location.col,
+                    location.row
+                )
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   09. UNIT SYSTEM
+   ========================================================= */
+
+let nextUnitId = 1;
+
+
+class Unit {
+
+    constructor(
+        faction,
+        type,
+        x,
+        y,
+        isPlayer = false
+    ) {
+
+        const data =
+            UNIT_TYPES[type];
+
+        const factionData =
+            FACTIONS[faction];
+
+        this.id =
+            nextUnitId++;
+
+        this.faction =
+            faction;
+
+        this.type =
+            type;
+
+        this.name =
+            data.name;
+
+        this.x = x;
+
+        this.y = y;
+
+        this.targetX = x;
+
+        this.targetY = y;
+
+        this.path = [];
+
+        this.pathIndex = 0;
+
+        this.isPlayer =
+            isPlayer;
+
+        this.maxHp =
+            data.hp;
+
+        this.hp =
+            data.hp;
+
+        this.attack =
+            data.attack;
+
+        this.defense =
+            data.defense;
+
+        this.speed =
+            data.speed *
+            (
+                1 +
+                (
+                    factionData.bonuses.movement ||
+                    0
+                )
+            );
+
+        this.range =
+            data.range +
+            (
+                factionData.bonuses.range ||
+                0
+            );
+
+        this.vision =
+            data.vision;
+
+        this.capacity =
+            data.capacity;
+
+        this.cooldown = 0;
+
+        this.selected = false;
+
+        this.items = [];
+
+        this.buffs = {
+
+            attack: 0,
+
+            defense: 0,
+
+            speed: 0,
+
+            slow: 0,
+
+            damageMultiplier: 0,
+
+            energyRegen: 0
+
+        };
+
+        this.order = "idle";
+
+        this.alive = true;
+
+        this.lastHitTime = 0;
+
+        this.resourceCarry = {
+
+            gold: 0,
+
+            wood: 0,
+
+            metal: 0,
+
+            energy: 0
+
+        };
+
+    }
+
+
+    get effectiveAttack() {
+
+        return (
+            this.attack +
+            this.buffs.attack
+        ) *
+        (
+            1 +
+            this.buffs.damageMultiplier
+        );
+
+    }
+
+
+    get effectiveDefense() {
+
+        return (
+            this.defense +
+            this.buffs.defense
+        );
+
+    }
+
+
+    get effectiveSpeed() {
+
+        return (
+            this.speed +
+            this.buffs.speed
+        ) *
+        (
+            1 -
+            clamp(
+                this.buffs.slow,
+                0,
+                0.8
+            )
+        );
+
+    }
+
+
+    moveTo(
+        x,
+        y
+    ) {
+
+        this.targetX =
+            clamp(
+                x,
+                0,
+                worldWidth()
+            );
+
+        this.targetY =
+            clamp(
+                y,
+                0,
+                worldHeight()
+            );
+
+        this.order =
+            "move";
+
+        this.path =
+            findPath(
+                this.x,
+                this.y,
+                this.targetX,
+                this.targetY
+            );
+
+        this.pathIndex = 0;
+
+    }
+
+
+    stop() {
+
+        this.order =
+            "idle";
+
+        this.path = [];
+
+    }
+
+
+    update(dt) {
+
+        if (!this.alive) {
+            return;
+        }
+
+        this.cooldown =
+            Math.max(
+                0,
+                this.cooldown - dt
+            );
+
+        this.buffs.slow =
+            Math.max(
+                0,
+                this.buffs.slow - dt * 0.05
+            );
+
+        this.buffs.attack =
+            Math.max(
+                0,
+                this.buffs.attack - dt * 2
+            );
+
+        this.buffs.defense =
+            Math.max(
+                0,
+                this.buffs.defense - dt * 2
+            );
+
+        this.buffs.speed =
+            Math.max(
+                0,
+                this.buffs.speed - dt * 0.5
+            );
+
+        if (
+            this.order === "move"
+        ) {
+
+            this.updateMovement(
+                dt
+            );
+
+        }
+
+    }
+
+
+    updateMovement(dt) {
+
+        if (
+            this.path.length === 0 ||
+            this.pathIndex >=
+            this.path.length
+        ) {
+
+            const distanceToTarget =
+                dist(
+                    this.x,
+                    this.y,
+                    this.targetX,
+                    this.targetY
+                );
+
+            if (
+                distanceToTarget > 5
+            ) {
+
+                this.moveDirectly(
+                    dt
+                );
+
+            }
+            else {
+
+                this.stop();
+
+            }
+
+            return;
+
+        }
+
+        const node =
+            this.path[
+                this.pathIndex
+            ];
+
+        const targetX =
+            node.x;
+
+        const targetY =
+            node.y;
+
+        const d =
+            dist(
+                this.x,
+                this.y,
+                targetX,
+                targetY
+            );
+
+        if (d < 5) {
+
+            this.pathIndex++;
+
+            return;
+
+        }
+
+        const speed =
+            this.effectiveSpeed *
+            25;
+
+        this.x +=
+            (
+                targetX -
+                this.x
+            ) /
+            d *
+            speed *
+            dt;
+
+        this.y +=
+            (
+                targetY -
+                this.y
+            ) /
+            d *
+            speed *
+            dt;
+
+    }
+
+
+    moveDirectly(dt) {
+
+        const d =
+            dist(
+                this.x,
+                this.y,
+                this.targetX,
+                this.targetY
+            );
+
+        if (d < 3) {
+
+            this.stop();
+
+            return;
+
+        }
+
+        const speed =
+            this.effectiveSpeed *
+            25;
+
+        this.x +=
+            (
+                this.targetX -
+                this.x
+            ) /
+            d *
+            speed *
+            dt;
+
+        this.y +=
+            (
+                this.targetY -
+                this.y
+            ) /
+            d *
+            speed *
+            dt;
+
+    }
+
+
+    attackUnit(target) {
+
+        if (
+            !target ||
+            !target.alive ||
+            target.faction ===
+            this.faction
+        ) {
+
+            return false;
+
+        }
+
+        if (
+            this.cooldown > 0
+        ) {
+
+            return false;
+
+        }
+
+        const d =
+            dist(
+                this.x,
+                this.y,
+                target.x,
+                target.y
+            );
+
+        if (
+            d > this.range
+        ) {
+
+            return false;
+
+        }
+
+        let terrainDefense = 0;
+
+        const tile =
+            worldToTile(
+                target.x,
+                target.y
+            );
+
+        if (tile) {
+
+            terrainDefense =
+                tile.terrain.defense;
+
+            if (tile.jungle) {
+
+                terrainDefense +=
+                    tile.jungle.defenseBonus;
+
+            }
+
+        }
+
+        const damage =
+            Math.max(
+                1,
+                Math.round(
+                    this.effectiveAttack -
+                    target.effectiveDefense * 0.55 -
+                    terrainDefense * 0.35
+                )
+            );
+
+        target.takeDamage(
+            damage,
+            this
+        );
+
+        this.cooldown =
+            1.15;
+
+        createHitEffect(
+            target.x,
+            target.y,
+            damage
+        );
+
+        return true;
+
+    }
+
+
+    takeDamage(
+        damage,
+        attacker
+    ) {
+
+        if (!this.alive) {
+            return;
+        }
+
+        this.hp =
+            Math.max(
+                0,
+                this.hp -
+                damage
+            );
+
+        this.lastHitTime =
+            game.time;
+
+        if (
+            this.hp <= 0
+        ) {
+
+            this.die();
+
+            if (
+                attacker &&
+                attacker.isPlayer
+            ) {
+
+                game.resources.gold +=
+                    35;
+
+            }
+
+        }
+
+    }
+
+
+    die() {
+
+        this.alive =
+            false;
+
+        this.hp = 0;
+
+        createDeathEffect(
+            this.x,
+            this.y
+        );
+
+        if (
+            game.selectedUnit ===
+            this
+        ) {
+
+            game.selectedUnit =
+                null;
+
+            updateSelectionUI();
+
+        }
+
+    }
+
+
+    addItem(
+        itemId
+    ) {
+
+        const item =
+            ITEMS[itemId];
+
+        if (!item) {
+            return false;
+        }
+
+        if (
+            this.items.includes(
+                itemId
+            )
+        ) {
+
+            return false;
+
+        }
+
+        this.items.push(
+            itemId
+        );
+
+        if (
+            item.stats.attack
+        ) {
+
+            this.attack +=
+                item.stats.attack;
+
+        }
+
+        if (
+            item.stats.defense
+        ) {
+
+            this.defense +=
+                item.stats.defense;
+
+        }
+
+        if (
+            item.stats.speedMultiplier
+        ) {
+
+            this.speed *=
+                1 +
+                item.stats.speedMultiplier;
+
+        }
+
+        if (
+            item.stats.energyRegen
+        ) {
+
+            this.buffs.energyRegen +=
+                item.stats.energyRegen;
+
+        }
+
+        return true;
+
+    }
+
+}
+
+
+/* =========================================================
+   10. PATHFINDING
+   ========================================================= */
+
+function findPath(
+    startX,
+    startY,
+    endX,
+    endY
+) {
+
+    const start =
+        worldToTile(
+            startX,
+            startY
+        );
+
+    const end =
+        worldToTile(
+            endX,
+            endY
+        );
+
+    if (
+        !start ||
+        !end ||
+        !end.terrain.passable
+    ) {
+
+        return [];
+
+    }
+
+    const startKey =
+        start.col +
+        ":" +
+        start.row;
+
+    const endKey =
+        end.col +
+        ":" +
+        end.row;
+
+    const open = [];
+
+    const cameFrom =
+        new Map();
+
+    const gScore =
+        new Map();
+
+    const fScore =
+        new Map();
+
+    gScore.set(
+        startKey,
+        0
+    );
+
+    fScore.set(
+        startKey,
+        heuristic(
+            start.col,
+            start.row,
+            end.col,
+            end.row
+        )
+    );
+
+    open.push({
+        tile: start,
+        key: startKey
+    });
+
+    const visited =
+        new Set();
+
+    let iterations = 0;
+
+    while (
+        open.length &&
+        iterations < 450
+    ) {
+
+        iterations++;
+
+        open.sort(
+            (
+                a,
+                b
+            ) =>
+                (
+                    fScore.get(a.key) || Infinity
+                ) -
+                (
+                    fScore.get(b.key) || Infinity
+                )
+        );
+
+        const current =
+            open.shift();
+
+        if (
+            current.key ===
+            endKey
+        ) {
+
+            return reconstructPath(
+                cameFrom,
+                current.tile
+            );
+
+        }
+
+        visited.add(
+            current.key
+        );
+
+        const neighbors =
+            getNeighbors(
+                current.tile
+            );
+
+        for (
+            const neighbor of neighbors
+        ) {
+
+            if (
+                !neighbor ||
+                !neighbor.terrain.passable
+            ) {
+
+                continue;
+
+            }
+
+            const key =
+                neighbor.col +
+                ":" +
+                neighbor.row;
+
+            if (
+                visited.has(key)
+            ) {
+
+                continue;
+
+            }
+
+            const moveCost =
+                neighbor.terrain.movement;
+
+            const tentative =
+                (
+                    gScore.get(
+                        current.key
+                    ) || Infinity
+                ) +
+                moveCost;
+
+            if (
+                tentative <
+                (
+                    gScore.get(key) ||
+                    Infinity
+                )
+            ) {
+
+                cameFrom.set(
+                    key,
+                    current.tile
+                );
+
+                gScore.set(
+                    key,
+                    tentative
+                );
+
+                fScore.set(
+                    key,
+                    tentative +
+                    heuristic(
+                        neighbor.col,
+                        neighbor.row,
+                        end.col,
+                        end.row
+                    )
+                );
+
+                if (
